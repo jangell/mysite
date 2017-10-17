@@ -4,11 +4,15 @@ from __future__ import unicode_literals
 from django.shortcuts import render
 from django.template import loader
 from django.http import HttpResponse
+from django.utils.timezone import datetime #important if using timezones
 
-from .models import User
+from .models import User,Album
 
 def index(request):
-	return render(request,'albumaday/index.html')
+	today = Album.objects.get(day__date = datetime.today())
+	history = Album.objects.filter(day__date__lt = datetime.today())
+	context = {'today':today,'history':history}
+	return render(request,'albumaday/index.html',context)
 
 def checkname(request):
 	name = request.POST.get('name')

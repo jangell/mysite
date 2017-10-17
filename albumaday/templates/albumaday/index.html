@@ -24,6 +24,21 @@ body{
 .center{
 	text-align:center;
 }
+#today{
+	width:80%;
+	display:block;
+	margin:auto;
+}
+.album{
+	width:100%;
+}
+.cover{
+	width:300px;
+	height:300px;
+}
+#content{
+	display:none;
+}
 
 </style>
 
@@ -31,11 +46,30 @@ body{
 
 <body>
 
+<img src="{{today.cover.url}}" alt="{{today.album}}"/>
+
 	<h3 class="center">This is the album a day project.</h3>
 	<h4 id="subtitle" class="center">Who are you?</h4>
 	<form id="name" class="center">
 		<input id="nameinput"/>
 	</form>
+
+	<div id="content">
+		<div id="today">
+			<h4>Here's what we've got queued up today</h4>
+			<div class="album">
+				<div class="cover"><img src="{{today.cover.url}}" alt="{{today.album}}"/></div>
+				<div class="details">
+					<p>{{ today.album }}</p>
+					<p>{{ today.artist }}</p>
+					<p>{{ today.description }}</p>
+				</div>
+			</div>
+		</div>
+		<div id="history">
+			<h4>Need to catch up?</h4>
+		</div>
+	</div>
 
 </body>
 
@@ -55,7 +89,7 @@ $("#name").submit(function(){
 					else{
 						$('#subtitle').html('nah');
 					}
-					$('#subtitle').animate({'opacity':1},1500);
+					$('#subtitle').animate({'opacity':1},1500,function(){$('#content').fadeIn()});
 				});
 			}
 	});

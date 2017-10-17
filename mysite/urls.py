@@ -19,4 +19,6 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^albumaday/',include('albumaday.urls')),
+    # default to home
+    url(r'^', include('home.urls')),
 ]

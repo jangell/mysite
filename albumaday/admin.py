@@ -9,3 +9,4 @@ from .models import *
 admin.site.register(User)
 admin.site.register(Album)
 admin.site.register(Review)
+admin.site.register(Day)
