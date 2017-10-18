@@ -4,6 +4,17 @@
 <html lang="en">
 
 <head>
+
+	<!-- meta -->
+	<title>JA | Web Dev &amp; More </title>
+	<!-- favicon -->
+	<link rel="apple-touch-icon" sizes="180x180" href="{% static 'home/apple-touch-icon.png' %}">
+	<link rel="icon" type="image/png" sizes="32x32" href="{% static 'home/favicon-32x32.png' %}">
+	<link rel="icon" type="image/png" sizes="16x16" href="{% static 'home/favicon-16x16.png' %}">
+	<link rel="manifest" href="{% static 'home/manifest.json'%}">
+	<link rel="mask-icon" href="{% static 'home/safari-pinned-tab.svg' %}" color="#5bbad5">
+	<meta name="theme-color" content="#ffffff">
+
 	<!-- jQuery -->
 	<script
 	  src="https://code.jquery.com/jquery-3.2.1.min.js"
@@ -12,61 +23,10 @@
 	<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css"></link>
 
+	<!-- fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Asap|Ubuntu" rel="stylesheet">
+
 	<style>
-	/*
-		body {
-	        font: 24px Helvetica;
-	        background: #999999;
-	    }
-
-	    #main {
-	        min-height: 800px;
-	        margin: 0;
-	        padding: 0;
-	        display: flex;
-	        flex-flow: row;
-	    }
-	 
-	    #main > article {
-	        margin: 4px;
-	        padding: 5px;
-	        border: 1px solid #cccc33;
-	        border-radius: 7pt;
-	        background: #dddd88;
-	        flex: 3 1 60%;
-	        order: 2;
-	    }
-
-	    #main > nav {
-	        margin: 4px;
-	        padding: 5px;
-	        border: 1px solid #8888bb;
-	        border-radius: 7pt;
-	        background: #ccccff;
-	        flex: 1 6 20%;
-	        order: 1;
-	    }
-	  
-	    #main > aside {
-	        margin: 4px;
-	        padding: 5px;
-	        border: 1px solid #8888bb;
-	        border-radius: 7pt;
-	        background: #ccccff;
-	        flex: 1 6 20%;
-	        order: 3;
-	    }
-	 
-	    header, footer {
-	        display: block;
-	        margin: 4px;
-	        padding: 5px;
-	        min-height: 100px;
-	        border: 1px solid #eebb55;
-	        border-radius: 7pt;
-	        background: #ffeebb;
-	    }
-	    */
 	 
 	    /* Too narrow to support three columns */
 	    @media all and (max-width: 640px) {
@@ -86,6 +46,11 @@
 	    }
 
 	    /* this is where my css starts */
+
+	    /* general */
+	    body{
+	    	font-family: 'Ubuntu',sans-serif;
+	    }
 	    #full-site-container{
 	    	width:100%;
 	    	height:100%;
@@ -94,13 +59,175 @@
 	    	margin:0;
 	    	padding:0;
 	    }
-	    #faceplate{
+	    .section{
+	    	width:100vw;
+	    	background-color:#bbb;
+	    }
+	    .section-title{
+	    	margin:0;
+	    	padding:10px;
+	    	padding-left:10vw;
+	    	font-family: 'Asap', sans-serif;
+	    	font-size:3rem;
+	    	background-color:#ddd;
+	    	border-bottom:1px solid #888;
+	    	/* do i wanna have different parallax images for each of these? */
+	    }
+	    .section-content{
+	    	margin:10px 7vw;
+	    }
+	    .section-splitter{
+	    	width:90vw;
+	    	margin:0;
+	    	border-top:none;
+	    	border-bottom:1px solid #888;
+	    }
+	    .inline-link{
+	    	color:#444;
+	    	text-decoration:none;
+	    }
+	    .inline-link:hover{
+	    	color:#888;
+	    }
+	    /* don't modify text inside a div block link */
+	    .link-div{
+	    	text-decoration:none;
+	    }
+
+	    /* top splash page */
+	    #faceplate-background{
 			height:100vh;
 			width:100vw;
-			background-image: url("{% static 'home/bay_bridge.jpg' %}");
+			background-image: url("{% static 'home/topo.jpg' %}");
+			background-size:cover;
+			background-repeat:no-repeat;
+			background-attachment:fixed;
 	    }
+	    #faceplate{
+	    	position:absolute;
+	    	width:100%;
+	    	height:100%;
+	    	background-color:rgba(200,200,200,.6);
+	    	display:flex;
+			justify-content:center;
+			align-items:center;
+	    }
+	    #logo-wrapper{
+	    	width:50vw;
+	    	text-align:center;
+	    }
+	    #center-content{
+	    	display:flex;
+	    	flex-flow:column;
+	    	align-items:center;
+	    }
+	    #center-logo{
+	    	max-height:20vh;
+	    	margin:.8rem;
+	    }
+	    #split-center{
+	    	width:50vw;
+	    	border-bottom:1px solid #444;
+	    	border-top: none;
+	    }
+	    #center-subtitle{
+	    	font-family: 'Asap', sans-serif;
+	    	font-size:1.3rem;
+	    	margin:.8rem;
+	    	text-align:center;
+	    	max-width:50vw;
+	    }
+
+	    /* about */
+	    .about-content{
+	    	margin:0;
+	    	padding:10px 7vw;
+	    	font-size:1.3rem;
+	    }
+
+	    /* portfolio */
+	    .portfolio-link{
+	    	position:relative;
+	    	margin:5vh 5vw;
+	    	border-radius:5px;
+	    	height:50vh;
+	    }
+	    .portfolio-cover{
+	    	position:absolute;
+	    	margin:0;
+	    	padding:0;
+	    	width:100%;
+	    	height:100%;
+	    	background: rgba(50,50,50,.5);
+	    	border-radius:5px;
+	    	display:flex;
+	    	flex-direction:row;
+	    	align-items:center;
+	    	justify-content:center;
+
+	    	/* animations */
+	    	transition: background .25s ease;
+	    	-moz-transition: background .25s ease;
+			-webkit-transition: background .25s ease;
+	    }
+	    .portfolio-cover:hover{
+	    	background: rgba(0,0,0,.6);
+	    	content:none;
+	    }
+	    .portfolio-logo{
+	    	position:absolute;
+	    	max-height:50%;
+	    	max-width:25%;
+	    	transition: opacity .25s ease;
+	    	-moz-transition: opacity .25s ease;
+			-webkit-transition: opacity .25s ease;
+	    }
+	    .portfolio-cover:hover .portfolio-logo{
+	    	opacity:0;
+	    }
+	    .portfolio-text{
+	    	position:absolute;
+	    	width:80%;
+	    	margin:auto;
+	    	text-align:center;
+	    	font-size:2rem;
+	    	color:#aaa;
+	    	opacity:0;
+	    	transition: opacity .25s ease;
+	    }
+	    .portfolio-cover:hover .portfolio-text{
+	    	opacity:1;
+	    }
+	    .ptext-title{
+	    	font-family:'Asap',sans-serif;
+	    	font-size:3rem;
+	    	margin:10px;
+	    }
+	    .ptext-text{
+	    	margin:10px;
+	    }
+	    
+	    {% for p in portfolio %}
+	    #portfolio-{{p}}{
+	    	background-image: url("{{p.fullImage.url}}");
+	    	background-repeat: no-repeat;
+	    	background-position: center;
+	    	background-size: cover;
+	    }
+	    {% endfor %}
+
+	    .inline-list{
+	    	color:#222;
+	    	font-size:1.7rem;
+	    	list-style:none;
+	    	padding:5px 10px;
+	    }
+	    .inline-list li{
+	    	display:inline;
+	    }
+
+	    /* desktop stuff (site is designed mobile-first */
 	    @media all and (min-width: 640px){
-	    	/* do desktop stuff */
 	    }
 	</style>
 
@@ -108,21 +235,133 @@
 
 <body id="full-site-container">
 	<!-- initials / logo, catchphrase. full screen -->
-	<div id="faceplate">
+	<div id="faceplate-background" class="parallax">
+		<div id="faceplate">
+			<div id="center-content">
+				<img id="center-logo" src="{% static 'home/transparent_logo.png' %}"/>
+				<hr id="split-center">
+				<h4 id="center-subtitle">Programmer, cartographer, <span style="white-space:nowrap;">web developer</span></h4>
+			</div>
+		</div>
+	</div>
+	<div id="about" class="section">
+		<h3 class="section-title">About</h3>
+		<div class="section-content about-content">
+			<p>
+				Hi! I'm Jason. I'm a researcher at the SETI Institute and a freelance web developer.
+			</p>
+			<p>
+				I've worked on projects ranging from spectroscopy and biosignature detection, to planetary mapping, to full-stack web development. A few of them are listed below, in my <a class="inline-link" href="#portfolio">portfolio</a>.
+			</p>
+			<p>
 
+		</div>
 	</div>
 	<!-- portfolio -->
-	<div id="portfolio">
-
+	<div name="portfolio" id="portfolio" class="section">
+		<h3 class="section-title">Portfolio</h3>
+		<div class="portfolio-content">
+			{% for p in portfolio %}
+			<a class="link-div" href="{{p.url}}">
+				<div class="portfolio-link" id="portfolio-{{p}}">
+					<div class="portfolio-cover">
+						<img src="{{p.miniImage.url}}" class="portfolio-logo"/>
+						<div class="portfolio-text">
+							<h3 class="ptext-title">{{p.name}}</h3>
+							<hr>
+							<p class="ptext-text">{{p.description}}</p>
+						</div>
+					</div>
+				</div>
+			</a>
+			{% endfor %}
+		</div>
 	</div>
-	<!-- skills -->
 
-	<!-- about -->
+	<!-- skills -->
+	<div name="skills" id="skills" class="section">
+		<h3 class="section-title">Skills</h3>
+		<div class="section-content">
+			<ul class="inline-list">
+				{% for s in skills %}
+				{% if forloop.counter0 != 0 %}|{% endif %}
+				{% if s.link %}<a class="inline-link" href="{{s.link}}">{% endif %}
+				<li>{{s.name}}</li>
+				{% if s.link %}</a>{% endif %}
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
 
 	<!-- interests / cool stuff -->
+	<div name="interests" id="interests" class="section">
+		<h3 class="section-title">Interests</h3>
+		<div class="section-content">
+			<ul class="inline-list">
+				{% for i in interests %}
+				<!-- insert "|" (separator) if not first interest -->
+				{% if forloop.counter0 != 0 %}|{% endif %}
+				{% if i.link %}<a class="inline-link" href="{{i.link}}">{% endif %}
+				<li>{{i.name}}</li>
+				{% if i.link %}</a>{% endif %}
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+<style>
+.footer{
+	position:relative;
+	width:100vw;
+	margin:0;
+	background-image: url("{% static 'home/topo.jpg' %}");
+	background-size:cover;
+	background-position:center;
+	background-repeat:no-repeat;
+	background-attachment:fixed;
+	display:flex;
+	flex-flow:column;
+	align-items:center;
+	justify-content:center;
+}
+.footer p{
+	z-index:2;
+	font-size:1.5rem;
+}
+.footer-plate{
+	background:rgba(200,200,200,.6);
+	position:absolute;
+	width:100%;
+	height:100%;
+	z-index:1;
+}
+</style>
+	<div class="footer">
+		<p>Contact: <a class="inline-link" href="mailto:jpa322@nyu.edu">jpa322@nyu.edu</a></p>
+		<div class="footer-plate"></div>
+	</div>
 
 </body>
 
+<script>
+	(function scroll(){
+
+	  var parallax = document.querySelectorAll(".parallax"),
+	      speed = 0.5;
+
+	  window.onscroll = function(){
+	    [].slice.call(parallax).forEach(function(el,i){
+
+	      var windowYOffset = window.pageYOffset,
+	          elBackgrounPos = "50% " + (windowYOffset * speed * -1) + "px";
+
+	      el.style.backgroundPosition = elBackgrounPos;
+
+	    });
+	  };
+
+	})();
+	scroll();
+</script>
 
 
 
