@@ -99,7 +99,7 @@
 			background-attachment:fixed;*/
 	    }
 	    body figure{
-	    	animation: imageAnimation 15s linear infinite 0s;
+	    	animation: imageAnimation 20s linear infinite 0s;
 	    	backface-visibility: hidden;
 	    	background-size:cover;
 	    	color: transparent;
@@ -123,6 +123,10 @@
 	    body figure:nth-child(3){
 	    	animation-delay:10s;
 	    	background-image: url("{% static 'home/azores.jpg' %}");
+	    }
+	    body figure:nth-child(4){
+	    	animation-delay:15s;
+	    	background-image: url("{% static 'home/sats.jpg' %}");
 	    }
 
 	    @keyframes
@@ -379,6 +383,7 @@
 
 <body>
 	<!-- initials / logo, catchphrase. full screen -->
+	<figure class="parallax"></figure>
 	<figure class="parallax"></figure>
 	<figure class="parallax"></figure>
 	<figure class="parallax"></figure>
