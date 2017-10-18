@@ -94,11 +94,58 @@
 	    #faceplate-background{
 			height:100vh;
 			width:100vw;
-			background-image: url("{% static 'home/topo.jpg' %}");
-			background-size:cover;
+			/*background-size:cover;
 			background-repeat:no-repeat;
-			background-attachment:fixed;
+			background-attachment:fixed;*/
 	    }
+	    body figure{
+	    	animation: imageAnimation 15s linear infinite 0s;
+	    	backface-visibility: hidden;
+	    	background-size:cover;
+	    	color: transparent;
+	    	height:100%;
+	    	opacity:0;
+	    	position:absolute;
+	    	width:100%;
+	    	margin:0;
+	    }
+
+	    /* background fade animation */
+
+	    body figure:nth-child(1){
+	    	animation-delay:0s;
+	    	background-image: url("{% static 'home/topo.jpg' %}");
+	    }
+	    body figure:nth-child(2){
+	    	animation-delay:5s;
+	    	background-image: url("{% static 'home/mars.jpg' %}");
+	    }
+	    body figure:nth-child(3){
+	    	animation-delay:10s;
+	    	background-image: url("{% static 'home/azores.jpg' %}");
+	    }
+
+	    @keyframes
+	    imageAnimation{
+	    	0%{
+	    		animation-timing-function: ease-in;
+	    		opacity: 0;
+	    	}
+	    	5%{
+	    		animation-timing-function:ease-out;
+	    		opacity:1;
+	    	}
+	    	33%{
+	    		opacity:1;
+	    	}
+	    	37%{
+	    		opacity:0;
+	    	}
+	    	100%{
+	    		opacity: 0;
+	    	}
+	    }
+
 	    #faceplate{
 	    	display: -webkit-box;   /* OLD - iOS 6-, Safari 3.1-6, BB7 */
 	    	display: -ms-flexbox;  /* TWEENER - IE 10 */
@@ -119,6 +166,7 @@
 			justify-content:center;
 			align-items:center;
 	    }
+
 	    #logo-wrapper{
 	    	width:50vw;
 	    	text-align:center;
@@ -268,6 +316,7 @@
 	    }
 	    .inline-list li{
 	    	display:inline;
+	    	white-space:nowrap;
 	    }
 	    .footer{
 	    	display: -webkit-box;   /* OLD - iOS 6-, Safari 3.1-6, BB7 */
@@ -320,6 +369,7 @@
 	    	left:0;
 	    	z-index:1;
 	    }
+
 	    /* desktop stuff (site is designed mobile-first */
 	    @media all and (min-width: 640px){
 	    }
@@ -329,12 +379,15 @@
 
 <body>
 	<!-- initials / logo, catchphrase. full screen -->
+	<figure class="parallax"></figure>
+	<figure class="parallax"></figure>
+	<figure class="parallax"></figure>
 	<div id="faceplate-background" class="parallax">
 		<div id="faceplate">
 			<div id="center-content">
 				<img id="center-logo" src="{% static 'home/transparent_logo.png' %}"/>
 				<hr id="split-center">
-				<h4 id="center-subtitle">Programmer, cartographer, <span style="white-space:nowrap;">web developer</span></h4>
+				<h4 id="center-subtitle"><span style="white-space:nowrap;">Planetary researcher, cartographer, <span style="white-space:nowrap;">web developer</span></h4>
 			</div>
 		</div>
 	</div>
