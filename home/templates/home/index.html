@@ -118,15 +118,15 @@
 	    }
 	    body figure:nth-child(2){
 	    	animation-delay:5s;
-	    	background-image: url("{% static 'home/mars.jpg' %}");
+	    	/*background-image: url("{% static 'home/mars.jpg' %}");*/
 	    }
 	    body figure:nth-child(3){
 	    	animation-delay:10s;
-	    	background-image: url("{% static 'home/azores.jpg' %}");
+	    	/*background-image: url("{% static 'home/azores.jpg' %}");*/
 	    }
 	    body figure:nth-child(4){
 	    	animation-delay:15s;
-	    	background-image: url("{% static 'home/sats.jpg' %}");
+	    	/*background-image: url("{% static 'home/sats.jpg' %}");*/
 	    }
 
 	    @keyframes
@@ -163,7 +163,7 @@
     	    -ms-flex-direction: row;
     	    flex-direction: row;
 
-	    	position:absolute;
+	    	position:relative;
 	    	width:100vw;
 	    	height:100vh;
 	    	background-color:rgba(200,200,200,.6);
@@ -389,6 +389,9 @@
 	<figure class="parallax"></figure>
 	<div id="faceplate-background" class="parallax">
 		<div id="faceplate">
+			<div id="top-right-contact">
+
+			</div>
 			<div id="center-content">
 				<img id="center-logo" src="{% static 'home/transparent_logo.png' %}"/>
 				<hr id="split-center">
@@ -486,7 +489,22 @@
 	  };
 
 	})();
-	scroll();
+
+	// sequential loading for background images
+	var ims = ["{static 'home/topo.jpg' %}","{static 'home/mars.jpg' %}","{static 'home/azores.jpg' %}","{static 'home/sats.jpg' %}"];
+	// image 0 (topo) loads automatically. So we'll start with the second.
+	window.onload = function () {
+
+		// load the other background images, one after the other!
+		$('body figure:nth-child(2)').css("background-image", "url('{% static 'home/mars.jpg' %}')");
+		setTimeout(function(){
+			$('body figure:nth-child(3)').css("background-image", "url('{% static 'home/azores.jpg' %}')");
+		}, 3000);
+		setTimeout(function(){
+			$('body figure:nth-child(4)').css("background-image", "url('{% static 'home/sats.jpg' %}')");
+		}, 6000);
+
+	};
 </script>
 
 
