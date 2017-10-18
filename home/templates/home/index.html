@@ -208,7 +208,7 @@
 	    }
 	    
 	    {% for p in portfolio %}
-	    #portfolio-{{p}}{
+	    #portfolio-{{forloop.counter0}}{
 	    	background-image: url("{{p.fullImage.url}}");
 	    	background-repeat: no-repeat;
 	    	background-position: center;
@@ -287,7 +287,7 @@
 		<div class="portfolio-content">
 			{% for p in portfolio %}
 			<a class="link-div" href="{{p.url}}">
-				<div class="portfolio-link" id="portfolio-{{p}}">
+				<div class="portfolio-link" id="portfolio-{{forloop.counter0}}">
 					<div class="portfolio-cover">
 						<img src="{{p.miniImage.url}}" class="portfolio-logo"/>
 						<div class="portfolio-text">
@@ -340,6 +340,7 @@
 </body>
 
 <script>
+	// parallax scrolling
 	(function scroll(){
 
 	  var parallax = document.querySelectorAll(".parallax"),
