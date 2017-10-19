@@ -103,13 +103,16 @@
 			background-attachment:fixed;*/
 	    }
 	    body figure{
+	    	position:absolute;
+	    	-webkit-transform: translate3d(0, 0, 0);
+	    	-webkit-backface-visibility: hidden;
+	    	-webkit-perspective: 1000;
 	    	animation: imageAnimation 20s linear infinite 0s;
 	    	backface-visibility: hidden;
 	    	background-size:cover;
 	    	color: transparent;
 	    	height:100%;
 	    	opacity:0;
-	    	position:absolute;
 	    	width:100%;
 	    	margin:0;
 	    }
@@ -167,7 +170,7 @@
     	    -ms-flex-direction: row;
     	    flex-direction: row;
 
-	    	position:relative;
+	    	position:absolute;
 	    	width:100vw;
 	    	height:100vh;
 	    	background-color:rgba(200,200,200,.6);
@@ -176,6 +179,7 @@
 	    }
 
 	    #logo-wrapper{
+	    	position:absolute;
 	    	width:50vw;
 	    	text-align:center;
 	    }
@@ -200,7 +204,7 @@
 	    }
 	    #center-subtitle{
 	    	font-weight:500;
-	    	font-size:1.3rem;
+	    	font-size:1.5rem;
 	    	margin:.8rem;
 	    	text-align:center;
 	    	max-width:50vw;
@@ -210,7 +214,7 @@
 	    .about-content{
 	    	margin:0;
 	    	padding:10px 7vw;
-	    	font-size:1.3rem;
+	    	font-size:1.4rem;
 	    }
 
 	    /* portfolio */
@@ -267,7 +271,6 @@
 	    	-moz-transition: opacity .25s ease;
 			-webkit-transition: opacity .25s ease;
 			outline:1px solid transparent; /* ridiculous chrome image aliasing bug */
-
 	    }
 	    .portfolio-splitter{
 	    	border:none;
@@ -378,6 +381,67 @@
 	    	z-index:1;
 	    }
 
+	    #top-right-contact{
+	    	position:absolute;
+	    	top:5vh;
+	    	right:7vw;
+	    }
+	    #top-right-trigger{
+	    	position:relative;
+	    	font-size:1.5rem;
+	    	color:#222;
+	    	opacity:.75;
+	    	cursor:pointer;
+	    	transition: opacity .4s ease;
+	    	-moz-transition: opacity .4s ease;
+	    	-webkit-transition: opacity .4s ease;
+	    	/* with contact -> email */
+	    	text-decoration:none;
+	    	border-bottom:2px solid;
+	    	border-color:rgba(0,0,0,0);
+	    	transition: border-color .4s ease;
+	    	-moz-transition: border-color .4s ease;
+	    	-webkit-transition: border-color .4s ease;
+	    }
+	    #top-right-trigger:hover{
+	    	opacity:1;
+	    	border-color:#222;
+	    }
+	    #contact-list{
+	    	position:relative;
+	    	opacity:0;
+	    	list-style:none;
+	    	padding:0;
+	    	margin-top:0;
+	    	transition: opacity .3s ease;
+	    }
+	    #contact-list li{
+	    	padding-top:10px;
+	    	margin-left:10px;
+	    }
+	    .contact-item{
+	    	text-decoration:none;
+	    	font-size:1.5rem;
+	    	color:#222;
+	    	opacity:.8;
+	    	cursor:pointer;
+	    	border-bottom:2px solid;
+	    	border-color:rgba(0,0,0,0);
+	    	transition: opacity .4s ease;
+	    	-moz-transition: opacity .4s ease;
+	    	-webkit-transition: opacity .4s ease;
+	    	transition: border-color .4 ease;
+	    	-moz-transition: border-color .4s ease;
+	    	-webkit-transition: border-color .4s ease;
+	    }
+	    .contact-item:hover{
+	    	opacity:1;
+	    	border-color:rgba(40,40,40,1);
+	    }
+	    #top-right-contact:hover #contact-list{
+	    	opacity:1;
+	    }
+
 	    /* desktop stuff (site is designed mobile-first */
 	    @media all and (min-width: 640px){
 	    }
@@ -394,6 +458,13 @@
 	<div id="faceplate-background" class="parallax">
 		<div id="faceplate">
 			<div id="top-right-contact">
+				<a id="top-right-trigger" href="mailto:jpa322@nyu.edu">Contact</a>
+				<!--
+				<ul id="contact-list">
+					<li><a class="contact-item" href="mailto:jpa322@nyu.edu">Email</a></li>
+					<li><a class="contact-item" href="https://www.linkedin.com/in/jason-angell-32b20370/">LinkedIn</a></li>
+				</ul>
+				-->
 
 			</div>
 			<div id="center-content">
@@ -467,20 +538,38 @@
 			</ul>
 		</div>
 	</div>
+
+	<!-- contact -->
+	<!--
+	<div name="contact" id="contact" class="section">
+		<h3 class="section-title">Contact</h3>
+		<div class="section-content">
+			<ul class="contact-list">
+				<li><a class="contact-item" href="mailto:jpa322@nyu.edu">Email</a></li>
+				<li><a class="contact-item" href="https://www.linkedin.com/in/jason-angell-32b20370/">LinkedIn</a></li>
+			</ul>
+		</div>
+	</div>
+	-->
+
+	<!-- footer -->
 	<div class="footer parallax">
 		<p>Contact: <a class="inline-link" href="mailto:jpa322@nyu.edu">jpa322@nyu.edu</a></p>
 		<div class="footer-plate"></div>
 	</div>
 
+
 </body>
 
 <script>
+
 	// parallax scrolling
 	(function scroll(){
 
 	  var parallax = document.querySelectorAll(".parallax"),
-	      speed = 0.5;
+	      speed = 0.4;
 
+	  // don't scroll parallax in osx safari
 	  window.onscroll = function(){
 	    [].slice.call(parallax).forEach(function(el,i){
 
