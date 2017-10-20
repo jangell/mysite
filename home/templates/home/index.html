@@ -6,7 +6,8 @@
 <head>
 
 	<!-- meta -->
-	<title>JA | Web Dev &amp; More </title>
+	<title>JA | Web Dev, Researcher, Cartographer</title>
+	<meta name="description" content="Jason Angell | Web developer, software engineer, cartographer, and planetary scientist. ">
 	<!-- favicon -->
 	<link rel="apple-touch-icon" sizes="180x180" href="{% static 'home/apple-touch-icon.png' %}">
 	<link rel="icon" type="image/png" sizes="32x32" href="{% static 'home/favicon-32x32.png' %}">
@@ -123,19 +124,19 @@
 
 	    body figure:nth-child(1){
 	    	animation-delay:0s;
-	    	background-image: url("{% static 'home/topo2.jpg' %}");
+	    	background-image: url("{% static 'home/mars.jpg' %}");
 	    }
 	    body figure:nth-child(2){
 	    	animation-delay:5s;
-	    	background-image: url("{% static 'home/mars.jpg' %}");
+	    	background-image: url("{% static 'home/azores.jpg' %}");
 	    }
 	    body figure:nth-child(3){
 	    	animation-delay:10s;
-	    	/*background-image: url("{% static 'home/azores.jpg' %}");*/
+	    	/*background-image: url("{% static 'home/sats.jpg' %}");*/
 	    }
 	    body figure:nth-child(4){
 	    	animation-delay:15s;
-	    	/*background-image: url("{% static 'home/sats.jpg' %}");*/
+	    	/*background-image: url("{% static 'home/topo2.jpg' %}");*/
 	    }
 
 	    @keyframes
@@ -385,25 +386,25 @@
 
 	    #top-right-contact{
 	    	position:absolute;
-	    	top:5vh;
-	    	right:7vw;
+	    	top:3vh;
+	    	right:3vw;
 	    }
 	    #top-right-trigger{
 	    	position:relative;
+	    	font-family: "Asap", sans-serif;
+	    	font-weight:bold;
 	    	font-size:1.5rem;
+	    	font-weight:100;
 	    	color:#222;
-	    	opacity:.75;
+	    	opacity:.85;
 	    	cursor:pointer;
-	    	transition: opacity .4s ease;
-	    	-moz-transition: opacity .4s ease;
-	    	-webkit-transition: opacity .4s ease;
+	    	transition: opacity .4s ease, border-color .4s ease;
+	    	-moz-transition: opacity .4s ease, border-color .4s ease;
+	    	-webkit-transition: opacity .4s ease, border-color .4s ease;
 	    	/* with contact -> email */
 	    	text-decoration:none;
 	    	border-bottom:2px solid;
 	    	border-color:rgba(0,0,0,0);
-	    	transition: border-color .4s ease;
-	    	-moz-transition: border-color .4s ease;
-	    	-webkit-transition: border-color .4s ease;
 	    }
 	    #top-right-trigger:hover{
 	    	opacity:1;
@@ -592,10 +593,10 @@
 
 		// load the other background images, one after the other!
 		setTimeout(function(){
-			$('body figure:nth-child(3)').css("background-image", "url('{% static 'home/azores.jpg' %}')");
+			$('body figure:nth-child(3)').css("background-image", "url('{% static 'home/sats.jpg' %}')");
 		}, 000);
 		setTimeout(function(){
-			$('body figure:nth-child(4)').css("background-image", "url('{% static 'home/sats.jpg' %}')");
+			$('body figure:nth-child(4)').css("background-image", "url('{% static 'home/topo2.jpg' %}')");
 		}, 5000);
 
 	};
