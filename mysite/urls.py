@@ -20,7 +20,8 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^albumaday/',include('albumaday.urls')),
+    url(r'^albumaday/',include('albumaday.urls')),      # album a day
+    url(r'^vamos_en_un_viaje/',include('trips.urls')),  # trips
     # default to home
     url(r'^', include('home.urls')),
 ]
