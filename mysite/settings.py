@@ -129,7 +129,6 @@ USE_TZ = True
 #PIWIK_DOMAIN_PATH = 'piwik.jangell.org/'
 #PIWIK_SITE_ID = '1'
 GOOGLE_ANALYTICS_PROPERTY_ID = "UA-108482653-1"
-INTERNAL_IPS = ['173.239.220.*']
 
 
 # Static files (CSS, JavaScript, Images)
