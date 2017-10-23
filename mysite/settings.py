@@ -30,8 +30,10 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'analytical',
     'albumaday.apps.AlbumadayConfig',
     'home.apps.HomeConfig',
+    'trips.apps.TripsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -58,7 +60,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR,'albumaday/templates/'),
-            os.path.join(BASE_DIR,'home/templates/')
+            os.path.join(BASE_DIR,'home/templates/'),
+            os.path.join(BASE_DIR,'trips/templates/')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -122,7 +125,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-# templates
+# analytics
+#PIWIK_DOMAIN_PATH = 'piwik.jangell.org/'
+#PIWIK_SITE_ID = '1'
+GOOGLE_ANALYTICS_PROPERTY_ID = "UA-108482653-1"
+INTERNAL_IPS = ['173.239.220.*']
 
 
 # Static files (CSS, JavaScript, Images)
