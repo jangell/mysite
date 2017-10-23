@@ -30,7 +30,7 @@ ALLOWED_HOSTS = ['localhost','127.0.0.1','www.jangell.org']
 # Application definition
 
 INSTALLED_APPS = [
-#    'analytical',
+    'analytical',
     'albumaday.apps.AlbumadayConfig',
     'home.apps.HomeConfig',
     'trips.apps.TripsConfig',
