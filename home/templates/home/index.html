@@ -1,10 +1,11 @@
 {% load static %}
+{% load analytical %}
 
 <!doctype html>
 <html lang="en">
 
 <head>
-
+{% analytical_head_top %}
 <!-- analytical head top -->
 
 
@@ -455,11 +456,12 @@
 	</style>
 
 <!-- analytical head bottom -->
-
+{% analytical_head_bottom %}
 </head>
 
 <body>
 <!-- analytical body top -->
+{% analytical_body_top %}
 	<!-- initials / logo, catchphrase. full screen -->
 	<figure class="parallax"></figure>
 	<figure class="parallax"></figure>
@@ -567,7 +569,7 @@
 	</div>
 
 <!-- analytical body bottom -->
-
+{% analytical_body_bottom %}
 </body>
 
 <!-- general-purpose script for different site functions -->
