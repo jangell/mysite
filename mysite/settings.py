@@ -24,7 +24,7 @@ SECRET_KEY = 'm1pjcu5+341796v+o738rkc!a)!_ml99=lhh!t2)%-efb_^$g^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost','127.0.0.1','www.jangell.org']
 
 
 # Application definition
