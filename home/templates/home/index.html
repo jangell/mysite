@@ -454,45 +454,6 @@
 	    }
 	</style>
 
-	<!-- general-purpose script for different site functions -->
-	<script>
-
-		// parallax scrolling
-		(function scroll(){
-
-		  var parallax = document.querySelectorAll(".parallax"),
-		      speed = 0.4;
-
-		  // don't scroll parallax in osx safari
-		  window.onscroll = function(){
-		    [].slice.call(parallax).forEach(function(el,i){
-
-		      var windowYOffset = window.pageYOffset,
-		          elBackgrounPos = "50% " + (windowYOffset * speed * -1) + "px";
-
-		      el.style.backgroundPosition = elBackgrounPos;
-
-		    });
-		  };
-
-		})();
-
-		// sequential loading for background images
-		var ims = ["{static 'home/topo.jpg' %}","{static 'home/mars.jpg' %}","{static 'home/azores.jpg' %}","{static 'home/sats.jpg' %}"];
-		// image 0 (topo) loads automatically. So we'll start with the second.
-		window.onload = function () {
-
-			// load the other background images, one after the other!
-			setTimeout(function(){
-				$('body figure:nth-child(3)').css("background-image", "url('{% static 'home/sats.jpg' %}')");
-			}, 000);
-			setTimeout(function(){
-				$('body figure:nth-child(4)').css("background-image", "url('{% static 'home/topo2.jpg' %}')");
-			}, 5000);
-
-		};
-	</script>
-
 <!-- analytical head bottom -->
 
 </head>
@@ -608,6 +569,45 @@
 <!-- analytical body bottom -->
 
 </body>
+
+<!-- general-purpose script for different site functions -->
+<script>
+
+	// parallax scrolling
+	(function scroll(){
+
+	  var parallax = document.querySelectorAll(".parallax"),
+	      speed = 0.4;
+
+	  // don't scroll parallax in osx safari
+	  window.onscroll = function(){
+	    [].slice.call(parallax).forEach(function(el,i){
+
+	      var windowYOffset = window.pageYOffset,
+	          elBackgrounPos = "50% " + (windowYOffset * speed * -1) + "px";
+
+	      el.style.backgroundPosition = elBackgrounPos;
+
+	    });
+	  };
+
+	})();
+
+	// sequential loading for background images
+	var ims = ["{static 'home/topo.jpg' %}","{static 'home/mars.jpg' %}","{static 'home/azores.jpg' %}","{static 'home/sats.jpg' %}"];
+	// image 0 (topo) loads automatically. So we'll start with the second.
+	window.onload = function () {
+
+		// load the other background images, one after the other!
+		setTimeout(function(){
+			$('body figure:nth-child(3)').css("background-image", "url('{% static 'home/sats.jpg' %}')");
+		}, 000);
+		setTimeout(function(){
+			$('body figure:nth-child(4)').css("background-image", "url('{% static 'home/topo2.jpg' %}')");
+		}, 5000);
+
+	};
+</script>
 
 </html>
 
