@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import *
 
 # Create your views here.
@@ -11,8 +11,11 @@ def index(request):
 	context = {'time':'literally now','message':lm}
 	return render(request,'checkin/index.html',context)
 
-@login_required
 def submit(request):
 	if request.user.is_superuser:
 		return render(request,'checkin/submit.html')
+	else:
+		return redirect('nope')
 	
+def nope(request):
+	return render(request,'checkin/nope.html')
