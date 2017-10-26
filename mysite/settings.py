@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'analytical',
     'albumaday.apps.AlbumadayConfig',
     'home.apps.HomeConfig',
+    'checkin.apps.CheckinConfig',
     'trips.apps.TripsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
