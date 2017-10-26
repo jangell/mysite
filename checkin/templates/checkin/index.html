@@ -1,0 +1,77 @@
+{% load static %}
+{% load analytical %}
+
+<!doctype html>
+<html lang="en">
+
+<head>
+{% analytical_head_top %}
+<!-- analytical head top -->
+
+
+	<!-- meta -->
+	<title>Don't worry mom, i'm okay!</title>
+	<link rel="apple-touch-icon" sizes="180x180" href="{% static 'home/apple-touch-icon.png' %}">
+	<link rel="icon" type="image/png" sizes="32x32" href="{% static 'home/favicon-32x32.png' %}">
+	<link rel="icon" type="image/png" sizes="16x16" href="{% static 'home/favicon-16x16.png' %}">
+	<link rel="manifest" href="{% static 'home/manifest.json'%}">
+	<link rel="mask-icon" href="{% static 'home/safari-pinned-tab.svg' %}" color="#5bbad5">
+	<meta name="theme-color" content="#ffffff">
+
+	<!-- jQuery -->
+	<!--
+	<script
+	  src="https://code.jquery.com/jquery-3.2.1.min.js"
+	  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+	  crossorigin="anonymous"></script>
+	-->
+
+<style>
+body{
+	background:#aabbdd;
+	font-family:"Open Sans", sans-serif;
+}
+.flex_wrapper{
+	display:flex;
+	flex-flow:column;
+	justify-content:center;
+	align-items:center;
+	min-height:80vh;
+}
+.content{
+	padding:20px;
+	background-color:#222;
+	color:#ccd;
+	border-radius:5px;
+	box-shadow:0 0 10px black;
+	max-width:40vw;
+}
+.timestamp{
+	text-align:center;
+	font-weight:500;
+	font-size:1.5rem;
+}
+.message{}
+</style>
+{% analytical_head_bottom %}
+</head>
+
+<body>
+{% analytical_body_top %}
+	<div class="flex_wrapper">
+		<div class="content">
+			<h4 class="timestamp">Hi! Last checkin: {{time}}</h4>
+			<div class="message_holder">
+				<p class="message">
+					{% if message %}
+					{{message}}
+					{% else %}
+					No message this time
+					{% endif %}
+				</p>
+			</div>
+		</div>
+	</div>
+{% analytical_body_bottom %}
+</body>
+</html>
