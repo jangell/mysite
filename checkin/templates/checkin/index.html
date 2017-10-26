@@ -47,9 +47,11 @@ body{
 	max-width:40vw;
 }
 .timestamp{
+	margin-top:10px;
+	margin-bottom:20px;
 	text-align:center;
 	font-weight:500;
-	font-size:1.5rem;
+	font-size:1.3rem;
 }
 .message{}
 </style>
@@ -62,13 +64,18 @@ body{
 		<div class="content">
 			<h4 class="timestamp">Hi! Last checkin: {{time}}</h4>
 			<div class="message_holder">
+				{% if location %}
+				<hr style="border-top:none;border-color:#888;width:75%">
 				<p class="message">
-					{% if message %}
-					{{message}}
-					{% else %}
-					No message this time
-					{% endif %}
+					{{location}}
 				</p>
+				{% endif %}
+				{% if message %}
+				<hr style="border-top:none;border-color:#888;width:75%">
+				<p class="message">
+					{{message}}
+				</p>
+				{% endif %}
 			</div>
 		</div>
 	</div>

@@ -1,1 +1,46 @@
-Hi {{user}}.
+<html>
+<head>
+
+<style>
+body{
+	background:#ddd;
+	color:#333;
+	font-family:"Open Sans", sans-serif;
+	padding:10px;
+}
+p{
+	display:block;
+	margin:auto;
+}
+label{
+	display:block;
+}
+#send_button{
+	width:50%;
+	height:50%;
+	font-size:5rem;
+	font-weight:300;
+	background-color:#8f8;
+	border-radius:5px;
+	border:1px solid #888;
+	cursor:pointer;
+	text-align:center;
+}
+#send_button:hover{
+	background-color:#4d4;
+	font-size:7rem;
+}
+</style>
+
+</head>
+
+<body>
+	<form role="form" action="" method="POST">
+		{% csrf_token %}
+		<p>
+			{{ form.as_p }}
+			<button id="send_button" type="submit">cooooool</button>
+		</p>
+	</form>
+</body>
+</html>
