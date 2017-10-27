@@ -3,12 +3,12 @@ from django import forms
 class CheckinForm(forms.Form):
     location = forms.CharField(
     	required=False,
-    	label="location",
+    	label="",
     	widget=forms.TextInput(attrs={'placeholder':'where u @','class':'form_input'})
     )
     message = forms.CharField(
         required=False,
-        label="message",
+        label="",
         widget=forms.Textarea(attrs={'placeholder': 'sup'})
     )
 # no images for now

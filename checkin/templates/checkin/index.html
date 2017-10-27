@@ -48,12 +48,19 @@ body{
 }
 .timestamp{
 	margin-top:10px;
-	margin-bottom:20px;
+	margin-bottom:10px;
 	text-align:center;
 	font-weight:500;
 	font-size:1.3rem;
 }
 .message{}
+.context{
+	margin-top:0px;
+	margin-bottom:20px;
+	text-align:center;
+	font-size:.8rem;
+	font-weight:500;
+}
 </style>
 {% analytical_head_bottom %}
 </head>
@@ -63,6 +70,8 @@ body{
 	<div class="flex_wrapper">
 		<div class="content">
 			<h4 class="timestamp">Hi! Last checkin: {{time}}</h4>
+			<!--<h6 class="context">(right now it's {{curTime}}{% if sD == False %}, {{curDate}}{% endif %})</h6>-->
+			<h6 class="context">({{timeAgo}})</h6>
 			<div class="message_holder">
 				{% if location %}
 				<hr style="border-top:none;border-color:#888;width:75%">

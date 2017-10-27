@@ -2,16 +2,21 @@
 from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+import datetime
 from .models import *
 from .forms import CheckinForm
-# form submission class
+
+# get a nicely formatted version of the time
+def getTime():
+	return datetime.datetime.strftime(datetime.datetime.now(),'%k:%M %p')
+def getDate():
+	return datetime.datetime.strftime(datetime.datetime.now(),'%h %dth')
 
 # Create your views here.
-lm = "on a plane to seattle. window seat. hella good views. let's try a much lemmmmmmgthier message and see how that goes. hey hey hella hella hella hella hella hella hella hella hella hella  goes. hey hey hella hella hella hella hella hella hella hella hella hella"
-sm = "on a plane to seattle"
 def index(request):
 	latest = Checkin.objects.latest('timestamp')
-	context = {'time':latest.getTime(),'message':latest.message,'location':latest.location}
+	sD = latest.getDate() == datetime.datetime.now().date()
+	context = {'curTime':getTime(),'curDate':getDate(),'sameDate':sD,'time':latest.getTime(),'message':latest.message,'location':latest.location,'timeAgo':latest.timeAgo()}
 	return render(request,'checkin/index.html',context)
 
 def nope(request):
@@ -25,8 +30,9 @@ def submit(request):
 		    if form.is_valid():
 		        location = request.POST.get('location', '')
 		        message = request.POST.get('message', '')
-		        image = request.POST.get('image', '')
-		        print image
+		        new_checkin = Checkin(timestamp = datetime.datetime.now(),location=location,message=message)
+		        new_checkin.save()
+
 		        # so now this is where we submit all this to the database
 		return render(request,'checkin/submit.html',{'form':form_class})
 	else:
