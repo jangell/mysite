@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render
+from django.conf import settings
 from django import http
 from .models import *
 
@@ -24,8 +25,14 @@ def make_plot(request):
 	for a in floats:
 		args[a] = args[a] if args[a] else defaults[a]
 
-	# now, plot the image, and save it as a (small-ish) png, and then return the image url
-	# we're gonna start with a fake one
-	
+	# I need to rework this to accept an arbitrary number of spectra
 
-	return http.HttpResponse('hello',content_type='application/json')
+	# create a Plot object and one or more SpecConfig objects, then plot the Plot object
+
+	# then, return the url to that Plot object's image
+
+	# we're gonna start with an example Plot (just the first image in the db), that's already been "plotted"
+	test_plot = Plot.objects.get()
+	test_url = test_plot.image.url
+	
+	return http.JsonResponse({'img_url':test_url})
