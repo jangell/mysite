@@ -9,9 +9,12 @@ from django.utils.timezone import datetime #important if using timezones
 from .models import User,Album
 
 def index(request):
-	today = Album.objects.get(day__date = datetime.today())
-	history = Album.objects.filter(day__date__lt = datetime.today())
-	context = {'today':today,'history':history}
+	albums = Album.objects.get()
+	print albums
+	#today = Album.objects.get(day__date = datetime.today())
+	#history = Album.objects.filter(day__date__lt = datetime.today())
+	#context = {'today':today,'history':history}
+	context = {'albums':albums}
 	return render(request,'albumaday/index.html',context)
 
 def checkname(request):

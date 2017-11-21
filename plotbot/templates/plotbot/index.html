@@ -1,0 +1,363 @@
+{% extends "plotbot/layout.html" %}
+
+{% block head_bottom %}
+<style>
+/*
+this is all for desktop - trying mobile first, first
+
+#plot_and_tools{
+	display:flex;
+	flex-direction:column;
+	position:absolute;
+	height:100%;
+	width:100%;
+}
+#plot_tools_row{
+	flex:1;
+	display:flex;
+	flex-direction:row;
+}
+#plot{
+	flex:1;
+	border:1px solid #88f;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+}
+#vert_tools{
+	border:1px solid #888;
+	border-radius:5px;
+	width:20rem;
+	margin-left:5px;
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+	justify-content:center;
+}
+#horz_tools_row{
+	margin-top:5px;
+	border:1px solid #888;
+	border-radius:5px;
+	height:8rem;
+	display:flex;
+	flex-direction:row;
+	align-items:center;
+	justify-content:center;
+}
+*/
+
+/* mobile first */
+
+.toolset_title{
+	font-family: 'Saira Extra Condensed', sans-serif;
+	text-align:center;
+	margin:0;
+	background-color:#bbb;
+	border-bottom:2px solid #aaa;
+}
+.toolset_content{
+	margin:0;
+	background-color:#ddd;
+}
+.tools{
+	width:100%;
+	border-collapse:collapse;
+}
+.tool{
+	border-bottom:1px solid #aaa;
+}
+.tool_label{
+	padding-left:20px;
+}
+.tool_action{
+	display:inline-block;
+	float:right;
+	padding-right:20px;
+}
+
+
+.spec_table_holder{
+	margin-top:none;
+	margin:20px;
+	border:1px solid #888;
+	border-radius:5px;
+	overflow:hidden;
+}
+.spec_table{
+	width:100%;
+	border-collapse:collapse;
+	background:white;
+}
+
+
+.spectra_buttons{
+	display:flex;
+	flex-direction:row;
+}
+.spec_button{
+	flex:1;
+	font-family: 'Open Sans',sans-serif;
+	font-size:2rem;
+	border:1px solid #888;
+	border-radius:5px;
+	margin:5px;
+	cursor:pointer;
+}
+.spec_button:focus{
+	outline:none;
+}
+#add_spec{
+	background-color:#87e588;
+}
+#add_spec:hover{
+	background-color:#4dd653;
+}
+#remove_spec{
+	background-color:#e06b6b;
+}
+#remove_spec:hover{
+	background-color:#e05c5c;
+}
+
+
+#make_plot{
+	font-family: 'Saira Extra Condensed', sans-serif;
+	font-size:2rem;
+	width:calc(100% - 20px);
+	margin:10px;
+	border-radius:3px;
+	background-color:#2c579e;
+	color:#eee;
+}
+#make_plot:focus{
+	outline:none;
+}
+#make_plot:hover{
+	background-color:#1f4077;
+}
+
+</style>
+{% endblock %}
+
+{% block body %}
+<form id="plot_form">
+	<div class="toolset" id="global_tools">
+		<h2 class="toolset_title">Global Tools</h2>
+		<div class="toolset_content">
+			<table class="tools">
+				<tr class="tool" id="show_title">
+					<td class="tool_label">Show title</td>
+					<td class="tool_action">
+						<input type=checkbox name="show_title">
+					</td>
+				</tr>
+				<tr class="tool" id="title">
+					<td class="tool_label">Title</td>
+					<td class="tool_action">
+						<input name="title">
+					</td>
+				</tr>
+				<tr class="tool" id="show_xlabel">
+					<td class="tool_label">Show x-axis label</td>
+					<td class="tool_action">
+						<input type=checkbox name="show_xlabel">
+					</td>
+				</tr>
+				<tr class="tool" id="xlabel">
+					<td class="tool_label">X-axis label</td>
+					<td class="tool_action">
+						<input name="xlabel">
+					</td>
+				</tr>
+				<tr class="tool" id="show_ylabel">
+					<td class="tool_label">Show y-axis label</td>
+					<td class="tool_action">
+						<input type=checkbox name="show_ylabel">
+					</td>
+				</tr>
+				<tr class="tool" id="ylabel">
+					<td class="tool_label">Y-axis label</td>
+					<td class="tool_action">
+						<input name="ylabel">
+					</td>
+				</tr>
+				<tr class="tool" id="xmin">
+					<td class="tool_label">
+						x<sub>min</sub>
+					</td>
+					<td class="tool_action">
+						<input name="xmin" type=number step="any">
+					</td>
+				</tr>
+				<tr class="tool" id="xmax">
+					<td class="tool_label">
+						x<sub>max</sub>
+					</td>
+					<td class="tool_action">
+						<input name="xmax" type=number step="any">
+					</td>
+				</tr>
+				<tr class="tool" id="ymin">
+					<td class="tool_label">
+						y<sub>min</sub>
+					</td>
+					<td class="tool_action">
+						<input name="ymin" type=number step="any">
+					</td>
+				</tr>
+				<tr class="tool" id="ymax">
+					<td class="tool_label">
+						y<sub>max</sub>
+					</td>
+					<td class="tool_action">
+						<input name="ymax" type=number step="any">
+					</td>
+				</tr>
+				<tr class="tool" id="show_legend">
+					<td class="tool_label">Show legend</td>
+					<td class="tool_action">
+						<input type=checkbox name="show_legend">
+					</td>
+				</tr>
+				<tr class="tool" id="legend_location">
+					<td class="tool_label">Legend location</td>
+					<td class="tool_action">
+						<select name="legend_location">
+							<option name="top_left">Top left</option>
+							<option name="top_right">Top right</option>
+							<option name="bottom_left">Bottom left</option>
+							<option name="bottom_right">Bottom right</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div class="toolset" id="spectra_tools">
+		<h2 class="toolset_title">Spectra Tools</h2>
+		<div class="toolset_content">
+			<!-- list of current spectra -->
+			<div class="spec_table_holder">
+				<table class="spec_table">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Color</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- buttons (add / remove) -->
+			<div class="spectra_buttons">
+				<button class="spec_button" id="add_spec">Add</button>
+				<button class="spec_button" id="remove_spec">Remove</button>
+			</div>
+
+			<!-- tools associated with currently-selected spectrum -->
+			<table class="tools">
+				<tr class="tool" id="include_in_plot">
+					<td class="tool_label">Show</td>
+					<td class="tool_action">
+						<input name="include_in_plot" type=checkbox>
+					</td>
+				</tr>
+				<tr class="tool" id="include_in_legend">
+					<td class="tool_label">Include in legend</td>
+					<td class="tool_action">
+						<input name="include_in_legend" type=checkbox>
+					</td>
+				</tr>
+				<tr class="tool" id="legend_name">
+					<td class="tool_label">Legend name</td>
+					<td class="tool_action">
+						<input name="legend_name">
+					</td>
+				</tr>
+				<tr class="tool" id="line_width">
+					<td class="tool_label">Line width</td>
+					<td class="tool_action">
+						<input name="line_width" type=number min="0" step="any">
+					</td>
+				</tr>
+				<tr class="tool" id="color">
+					<td class="tool_label">Color</td>
+					<td class="tool_action">
+						<input name="color" type=color value="#7ac7ff">
+					</td>
+				</tr>
+				<tr class="tool" id="opacity">
+					<td class="tool_label">Opacity</td>
+					<td class="tool_action">
+						<input name="opacity" type=number min="0" max="1" step="any">
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<button id="make_plot">Plot me up, Scotty!</button>
+</form>
+
+<!-- image / plot window (height is set by javascript on update) -->
+<style>
+#plot_holder{
+	border: 5px solid #888;
+	height:50vh; /* default */
+	display:flex;
+	flex-direction:column;
+	justify-content:center;
+}
+#plot_placeholder{
+	text-align:center;
+	font-family: 'Open Sans',sans-serif;
+	font-size:2rem;
+}
+</style>
+<div id="plot_holder">
+	<div id="plot_placeholder"><p>Nothing yet =(</p></div>
+</div>
+
+<script>
+// pass form data as json
+$(function() {
+  $('#plot_form').submit(function() {
+	var form_data = $('#plot_form').serializeArray();
+	to_json = {};
+	for(var i = 0; i < form_data.length; i++)
+		to_json[form_data[i]['name']] = form_data[i]['value'];
+	string_data = JSON.stringify(to_json);
+	// ajax the stringified data
+
+	// TODO: "loading" gif while waiting for plot to process
+
+	$.get({
+		url:'make_plot',
+		data:to_json,
+	});
+
+	// now show the plot in the window
+
+    return false;
+  });
+});
+</script>
+<!-- 
+this was the beginning of a desktop implementation
+<div id="plot_and_tools">
+	<div id="plot_tools_row">
+		<div id="plot">
+			<p>plot</p>
+		</div>
+		<div id="vert_tools">
+			<p>local tools</p>
+		</div>
+	</div>
+	<div id="horz_tools_row">
+		<p>global tools</p>
+	</div>
+</div>
+-->
+
+{% endblock %}

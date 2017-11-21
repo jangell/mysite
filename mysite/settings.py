@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'home.apps.HomeConfig',
     'checkin.apps.CheckinConfig',
     'trips.apps.TripsConfig',
+    'plotbot.apps.PlotbotConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
