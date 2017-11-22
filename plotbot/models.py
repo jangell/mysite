@@ -10,7 +10,26 @@ from django.contrib.sessions.models import Session
 class Spec(models.Model):
 	spec_id = models.AutoField(primary_key=True)
 	owner = models.ForeignKey(Session)	# id referring to the session (will be modified in the future to refer to a user, once accounts are implemented)
-	# how are we gonna store the data for these?
+	name = models.CharField(max_length=1000)
+	hash_val = models.CharField(max_length=1000)		# hash value to determine if an identical spectrum has already been uploaded
+	# the actual data gets stored in a CSV
+	spec_file = models.FileField(upload_to='spec/csv')
+
+	# returns a list of points corresponding to the spectrum
+	def getPoints():
+		# get all points from querying the Point table, ordered by index
+		return []
+
+	def __str__(self):
+		return 'Spectrum {}: {}'.format(self.spec_id,self.name)
+
+
+# a single point in a spectrum
+#class Point(models.Model):
+#	spec = models.ForeignKey(Spec)
+#	index = models.IntegerField()	# index by which to order the points of a particular spectrum
+#	wavenumber = models.FloatField()
+#	intensity = models.FloatField()
 
 
 # model for a single plot (configuration and resulting image)
@@ -41,7 +60,7 @@ class Plot(models.Model):
 		# if there's already a plot image, return its url. if not, plot the thing, save an image, then return that url.
 		return
 
-	def hires_plot(self):
+	def hiResPlot(self):
 		# like plot(), but higher res (this is for downloads)
 		return
 

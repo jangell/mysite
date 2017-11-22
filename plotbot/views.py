@@ -36,3 +36,9 @@ def make_plot(request):
 	test_url = test_plot.image.url
 	
 	return http.JsonResponse({'img_url':test_url})
+
+def upload_spec(request):
+	file_keys = request.FILES.keys()
+	print request.FILES[file_keys[0]]
+
+	return http.HttpResponse('hello!');

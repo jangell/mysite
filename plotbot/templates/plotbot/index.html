@@ -2,54 +2,12 @@
 
 {% block head_bottom %}
 <style>
-/*
-this is all for desktop - trying mobile first, first
-
-#plot_and_tools{
-	display:flex;
-	flex-direction:column;
-	position:absolute;
-	height:100%;
-	width:100%;
-}
-#plot_tools_row{
-	flex:1;
-	display:flex;
-	flex-direction:row;
-}
-#plot{
-	flex:1;
-	border:1px solid #88f;
-	display:flex;
-	align-items:center;
-	justify-content:center;
-}
-#vert_tools{
-	border:1px solid #888;
-	border-radius:5px;
-	width:20rem;
-	margin-left:5px;
-	display:flex;
-	flex-direction:column;
-	align-items:center;
-	justify-content:center;
-}
-#horz_tools_row{
-	margin-top:5px;
-	border:1px solid #888;
-	border-radius:5px;
-	height:8rem;
-	display:flex;
-	flex-direction:row;
-	align-items:center;
-	justify-content:center;
-}
-*/
 
 /* mobile first */
 
 .toolset_title{
-	font-family: 'Saira Extra Condensed', sans-serif;
+	font-family: 'Dosis', sans-serif;
+	font-size:1.8rem;
 	text-align:center;
 	margin:0;
 	background-color:#bbb;
@@ -68,6 +26,7 @@ this is all for desktop - trying mobile first, first
 }
 .tool_label{
 	padding-left:20px;
+	font-weight:bold;
 }
 .tool_action{
 	display:inline-block;
@@ -96,21 +55,16 @@ this is all for desktop - trying mobile first, first
 }
 .spec_button{
 	flex:1;
-	font-family: 'Open Sans',sans-serif;
 	font-size:2rem;
 	border:1px solid #888;
 	border-radius:5px;
 	margin:5px;
+	font-family: 'Open Sans', sans-serif;
 	cursor:pointer;
+	text-align:center;
 }
 .spec_button:focus{
 	outline:none;
-}
-#add_spec{
-	background-color:#87e588;
-}
-#add_spec:hover{
-	background-color:#4dd653;
 }
 #remove_spec{
 	background-color:#e06b6b;
@@ -119,9 +73,8 @@ this is all for desktop - trying mobile first, first
 	background-color:#e05c5c;
 }
 
-
 #make_plot{
-	font-family: 'Saira Extra Condensed', sans-serif;
+	font-family: 'Dosis', sans-serif;
 	font-size:2rem;
 	width:calc(100% - 20px);
 	margin:10px;
@@ -138,30 +91,26 @@ this is all for desktop - trying mobile first, first
 }
 
 </style>
+<link href="https://fonts.googleapis.com/css?family=Montserrat|Spectral+SC" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
+{% csrf_token %}
 <form id="plot_form">
 	<div class="toolset" id="global_tools">
 		<h2 class="toolset_title">Global Tools</h2>
 		<div class="toolset_content">
 			<table class="tools">
-				<tr class="tool" id="show_title">
-					<td class="tool_label">Show title</td>
-					<td class="tool_action">
-						<input type=checkbox name="show_title">
-					</td>
-				</tr>
 				<tr class="tool" id="title">
 					<td class="tool_label">Title</td>
 					<td class="tool_action">
 						<input name="title">
 					</td>
 				</tr>
-				<tr class="tool" id="show_xlabel">
-					<td class="tool_label">Show x-axis label</td>
+				<tr class="tool" id="show_title">
+					<td class="tool_label">Show title</td>
 					<td class="tool_action">
-						<input type=checkbox name="show_xlabel">
+						<input type=checkbox name="show_title">
 					</td>
 				</tr>
 				<tr class="tool" id="xlabel">
@@ -170,16 +119,22 @@ this is all for desktop - trying mobile first, first
 						<input name="xlabel">
 					</td>
 				</tr>
-				<tr class="tool" id="show_ylabel">
-					<td class="tool_label">Show y-axis label</td>
+				<tr class="tool" id="show_xlabel">
+					<td class="tool_label">Show x-axis label</td>
 					<td class="tool_action">
-						<input type=checkbox name="show_ylabel">
+						<input type=checkbox name="show_xlabel">
 					</td>
 				</tr>
 				<tr class="tool" id="ylabel">
 					<td class="tool_label">Y-axis label</td>
 					<td class="tool_action">
 						<input name="ylabel">
+					</td>
+				</tr>
+				<tr class="tool" id="show_ylabel">
+					<td class="tool_label">Show y-axis label</td>
+					<td class="tool_action">
+						<input type=checkbox name="show_ylabel">
 					</td>
 				</tr>
 				<tr class="tool" id="xmin">
@@ -252,8 +207,36 @@ this is all for desktop - trying mobile first, first
 			</div>
 
 			<!-- buttons (add / remove) -->
+			<style>
+			.fileContainer {
+			    overflow: hidden;
+			    position: relative;
+			}
+			.fileContainer [type=file] {
+			    cursor: inherit;
+			    display: block;
+			    opacity:0;
+			    min-height: 100%;
+			    min-width: 100%;
+			    opacity: 0;
+			    position: absolute;
+			    right: 0;
+			    text-align: right;
+			    top: 0;
+			}
+			#add_spec{
+				background-color:#87e588;
+			}
+			#add_spec:hover{
+				background-color:#4dd653;
+			}
+			</style>
 			<div class="spectra_buttons">
-				<button class="spec_button" id="add_spec">Add</button>
+				<label class="fileContainer spec_button" id="add_spec">
+				    Add
+				    <input type="file" multiple/>
+				</label>
+
 				<button class="spec_button" id="remove_spec">Remove</button>
 			</div>
 
@@ -315,7 +298,6 @@ this is all for desktop - trying mobile first, first
 }
 #plot_placeholder{
 	text-align:center;
-	font-family: 'Open Sans',sans-serif;
 	font-size:2rem;
 }
 </style>
@@ -324,36 +306,75 @@ this is all for desktop - trying mobile first, first
 </div>
 
 <script>
+
+// This 
+
+
 // pass form data as json
 $(function() {
-  $('#plot_form').submit(function() {
-	var form_data = $('#plot_form').serializeArray();
-	to_json = {};
-	for(var i = 0; i < form_data.length; i++)
-		to_json[form_data[i]['name']] = form_data[i]['value'];
-	string_data = JSON.stringify(to_json);
-	// ajax the stringified data
 
-	// TODO: "loading" gif while waiting for plot to process
-	console.log('running GET');
-	$.get({
-		url:'make_plot',
-		data:to_json,
-		success:function(response){
-			$('#plot_holder').html("");
-			$('#plot_holder').css('background-image', 'url('+response['img_url']+')');
-			fitPlotDiv();
-		}
+	// This takes all settings and passes it over to the server, and then updates the plot holder with the image url returned by the server
+	$('#plot_form').submit(function() {
+		var form_data = $('#plot_form').serializeArray();
+		to_json = {};
+		for(var i = 0; i < form_data.length; i++)
+			to_json[form_data[i]['name']] = form_data[i]['value'];
+			string_data = JSON.stringify(to_json);
+			// ajax the stringified data
+
+			// TODO: "loading" gif while waiting for plot to process
+
+			$.get({
+				url:'make_plot',
+				data:to_json,
+				success:function(response){
+					$('#plot_holder').html('');
+					$('#plot_holder').css('background-image', 'url('+response['img_url']+')');
+					fitPlotDiv();
+				}
+			});
+		return false; // don't reload the page
 	});
 
-	// now show the plot in the window
+	// This handles uploading 1+ new spectra
+	$('#add_spec [type=file]').on('change',function(){
+		// loop through files and add to FormData object
+		// FUTURE: keep a list of hashes of all available spectra, and don't bother re-uploading if the spectra is already in the database (that checking will get build in this time as well, but only server-side; going client-side with hashes will make it faster)
+		var formData = new FormData();
+		for(var i = 0; i < this.files.length; i++){
+			var curFile = this.files[i];
+			formData.append('spectra',curFile);
+		}
+		// set up XMLHttpRequest to transfer files to server
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', 'upload_spec', true);
 
-    return false;
-  });
+		// Set up a handler for when the request finishes.
+		xhr.onload = function () {
+		  if (xhr.status === 200) {
+		    // File(s) uploaded.
+		    console.log('File(s) uploaded!')
+		  } else {
+		    alert('An error occurred =(');
+		  }
+		};
+
+		// Send the Data.
+		xhr.send(formData);
+
+	});
+
+	// This adds a new set of SpecConfig settings (for cleanliness, settings are handled entirely in HTML until it's time to transfer them to the server)
+
+	// This removes a spectrum from the working set, including removing its SpecConfig
+
 });
+// re-fit the plot div when the window is resized
 $(window).on('resize',function(){
 	fitPlotDiv();
 });
+
+// scales the height of the plot div so that it exactly fits the original plot dimensions with a fixed width
 function fitPlotDiv(){
 	var shown_width = $('#plot_holder').width();
 	var img = new Image();
@@ -361,26 +382,10 @@ function fitPlotDiv(){
 	$(img).on('load',function(){
 		var shown_width = $('#plot_holder').width();
 		var to_h = shown_width * img.height / img.width;
-		console.log(to_h);
 		$('#plot_holder').height(to_h);
 	});
 }
 </script>
-<!-- 
-this was the beginning of a desktop implementation
-<div id="plot_and_tools">
-	<div id="plot_tools_row">
-		<div id="plot">
-			<p>plot</p>
-		</div>
-		<div id="vert_tools">
-			<p>local tools</p>
-		</div>
-	</div>
-	<div id="horz_tools_row">
-		<p>global tools</p>
-	</div>
-</div>
--->
 
 {% endblock %}
+
