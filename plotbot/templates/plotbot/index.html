@@ -232,7 +232,7 @@ html{
 								<th>Color</th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody id="working_set_tbody">
 						</tbody>
 					</table>
 				</div>
@@ -288,7 +288,7 @@ html{
 			</div>
 		</div>
 	</div>
-	<button id="make_plot">Plot me up, Scotty!</button>
+	<button id="make_plot">Do the thing!</button>
 </form>
 
 <!-- image / plot window (height is set by javascript on update) -->
@@ -314,7 +314,25 @@ html{
 
 <script>
 
-// This 
+// this is to handle the working set
+var working_set = [];
+
+// spec item is going to be an object with properties, an output-row-html function (to tbody row html), and an output-config-html function (to settings item html)
+
+// add the working set to the table, add local settings for each (hidden except for the one selected)
+function displayWorkingSet(){
+	// clear table and configs
+	/*
+	$('#working_set_tbody').html('');
+	$('#local_configs').html('');
+	*/
+
+	for(var i = 0; i < working_set.length; i++){
+		// append working_set[i].outputRowHtml() to tbody
+		// append working_set[i].outputConfigHtml() to local_configs div
+	}
+}
+
 
 
 // pass form data as json

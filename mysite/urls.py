@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^albumaday/',include('albumaday.urls')),      # album a day
     url(r'^where/',include('checkin.urls')),
     url(r'^plotbot/',include('plotbot.urls')),
-#    url(r'^vamos_en_un_viaje/',include('trips.urls')),  # trips
+    url(r'^vamos_en_un_viaje/',include('trips.urls')),  # trips
     # default to home
     url(r'^', include('home.urls')),
 ]
