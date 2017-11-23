@@ -25,20 +25,28 @@ def make_plot(request):
 	for a in floats:
 		args[a] = args[a] if args[a] else defaults[a]
 
-	# I need to rework this to accept an arbitrary number of spectra
+	# working set = database (ie, no working set)
+	working = Spec.objects.all()
 
-	# create a Plot object and one or more SpecConfig objects, then plot the Plot object
+	# create a Plot object, then one SpecConfig object per spectrum, then plot the Plot object
+	cur_plot = Plot()
+	cur_plot.save()
+	for cur_spec in working:
+		s_config = SpecConfig(plot = cur_plot, spec = cur_spec)
+		s_config.save()
+
+	img_url = cur_plot.getPlot()
 
 	# then, return the url to that Plot object's image
 
 	# we're gonna start with an example Plot (just the first image in the db), that's already been "plotted"
-	test_plot = Plot.objects.get()
-	test_url = test_plot.image.url
+	#test_plot = Plot.objects.get(pk=1)
+	#test_url = test_plot.image.url
 	
-	return http.JsonResponse({'img_url':test_url})
+	return http.JsonResponse({'img_url':img_url})
 
 def upload_spec(request):
 	file_keys = request.FILES.keys()
-	print request.FILES[file_keys[0]]
+	print "lol I don't work yet"
 
 	return http.HttpResponse('hello!');

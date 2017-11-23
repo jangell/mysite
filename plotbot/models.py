@@ -3,17 +3,35 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.sessions.models import Session
+from django.core.exceptions import ValidationError
+from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.core.files.base import ContentFile
+from datetime import datetime
+from io import BytesIO
+import csv
+import numpy as np
 
-# args: opacity, line_width, ymax, title, color, legend_location, legend_name, xlabel, xmax, ylabel, xmin, ymin
+# matplotlib does weird (bad) things
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
+
+# validators
+def validate_specfile_extension(value):
+    if value.file.content_type != 'text/csv':
+        raise ValidationError('Unable to use file with type {} - .csv files only'.format(value.file.content_type))
+
+
+# models
 
 # model for a spectrum
 class Spec(models.Model):
 	spec_id = models.AutoField(primary_key=True)
-	owner = models.ForeignKey(Session)	# id referring to the session (will be modified in the future to refer to a user, once accounts are implemented)
+	#owner = models.ForeignKey(Session, blank=True,null=True)	# id referring to the session (will be modified in the future to refer to a user, once accounts are implemented)
 	name = models.CharField(max_length=1000)
-	hash_val = models.CharField(max_length=1000)		# hash value to determine if an identical spectrum has already been uploaded
+	hash_val = models.CharField(max_length=1000, blank=True,null=True)		# hash value to determine if an identical spectrum has already been uploaded
 	# the actual data gets stored in a CSV
-	spec_file = models.FileField(upload_to='spec/csv')
+	spec_file = models.FileField(upload_to='spec/csv', validators=[validate_specfile_extension])
 
 	# returns a list of points corresponding to the spectrum
 	def getPoints():
@@ -21,7 +39,7 @@ class Spec(models.Model):
 		return []
 
 	def __str__(self):
-		return 'Spectrum {}: {}'.format(self.spec_id,self.name)
+		return self.name
 
 
 # a single point in a spectrum
@@ -37,28 +55,55 @@ class Plot(models.Model):
 	
 	# meta
 	plot_id = models.AutoField(primary_key=True)
-	owner = models.ForeignKey(Session)
-	timestamp = models.DateTimeField()
+	#owner = models.ForeignKey(Session)
+	timestamp = models.DateTimeField(default=datetime.now)
 
 	# configuration (plot-level variables)
-	xmin = models.FloatField()
-	xmax = models.FloatField()
-	ymin = models.FloatField()
-	ymax = models.FloatField()
-	title = models.CharField(max_length=1000)
-	show_title = models.BooleanField()
-	legend_location = models.IntegerField()
-	show_legend = models.BooleanField()
-	xlabel = models.CharField(max_length=1000)
-	ylabel = models.CharField(max_length=1000)
+	xmin = models.FloatField(blank=True,null=True)
+	xmax = models.FloatField(blank=True,null=True)
+	ymin = models.FloatField(blank=True,null=True)
+	ymax = models.FloatField(blank=True,null=True)
+	title = models.CharField(max_length=1000,blank=True,null=True)
+	show_title = models.BooleanField(default=False)
+	legend_location = models.IntegerField(default=0)
+	show_legend = models.BooleanField(default=False)
+	xlabel = models.CharField(max_length=1000,blank=True,null=True)
+	ylabel = models.CharField(max_length=1000,blank=True,null=True)
 
 	# image url
-	image = models.ImageField(upload_to='plots')
+	image = models.ImageField(upload_to='plots',blank=True)
 
 	# core functions
-	def plot(self):
+	def getPlot(self):
 		# if there's already a plot image, return its url. if not, plot the thing, save an image, then return that url.
-		return
+		if not self.image:
+
+			# get each spectrum
+			plt.figure(figsize=(16,6))
+			for sc in SpecConfig.objects.filter(plot__plot_id = self.plot_id):
+				sc.spec.spec_file.open(mode='rb')
+				data_reader = csv.reader(sc.spec.spec_file, delimiter=str(','))
+				wavenumber = []
+				intensity = []
+				for row in data_reader:
+					wavenumber.append(float(row[0]))
+					intensity.append(float(row[1]))
+				# cut off the first and last five and then reverse
+				wavenumber = wavenumber[5:-5][::-1]
+				intensity = intensity[5:-5][::-1]
+				sc.spec.spec_file.close()
+				plt.plot(wavenumber,intensity)
+
+			# save the plot
+			print 'saving...'
+			f = BytesIO()
+			plt.savefig(f)
+			content_file = ContentFile(f.getvalue())
+			self.image.save('plot_{}.png'.format(self.plot_id), content_file)
+			self.save()
+			print 'finished saving'
+		print 'sending url: {}'.format(self.image.url)
+		return self.image.url
 
 	def hiResPlot(self):
 		# like plot(), but higher res (this is for downloads)
@@ -66,11 +111,7 @@ class Plot(models.Model):
 
 	# meta-ish functions
 	def __str__(self):
-		out = 'Plot {}'.format(self.plot_id)
-		if self.title:
-			out += ' {}'.format(self.title)
-		out += ' {}'.format(self.timestamp)
-		return out
+		return 'Plot {} ({})'.format(self.plot_id,datetime.strftime(self.timestamp,'%I:%M %p, %m-%d-%y [%Z]'))
 
 # args: opacity, line_width, ymax, title, color, legend_location, legend_name, xlabel, xmax, ylabel, xmin, ymin
 
@@ -83,17 +124,17 @@ class SpecConfig(models.Model):
 	spec = models.ForeignKey(Spec)
 
 	# configuration (spectrum-level variables: color, opacity, etc)
-	legend_name = models.CharField(max_length=1000)
-	legend_show = models.BooleanField()
-	color = models.CharField(max_length=100)
-	opacity = models.FloatField()
+	legend_name = models.CharField(max_length=1000,blank=True,null=True)
+	legend_show = models.BooleanField(default=False)
+	color = models.CharField(max_length=100,blank=True,null=True)
+	opacity = models.FloatField(default=1.)
 
 	# preprocessing (TODO)
 
 
 	# meta-ish functions
 	def __str__(self):
-		return 'Config for spec file {} in plot {} for user session {}'.format(spec.spec_id, plot.plot_id, plot.owner)
+		return 'Plot {} | Spec {}'.format(self.plot.plot_id, self.spec_id)
 
 
 

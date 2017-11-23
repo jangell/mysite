@@ -336,7 +336,8 @@ $(function() {
 		return false; // don't reload the page
 	});
 
-	// This handles uploading 1+ new spectra
+	// This handles uploading 1+ new spectra. It is also garbage
+	/*
 	$('#add_spec [type=file]').on('change',function(){
 		// loop through files and add to FormData object
 		// FUTURE: keep a list of hashes of all available spectra, and don't bother re-uploading if the spectra is already in the database (that checking will get build in this time as well, but only server-side; going client-side with hashes will make it faster)
@@ -363,6 +364,7 @@ $(function() {
 		xhr.send(formData);
 
 	});
+	*/
 
 	// This adds a new set of SpecConfig settings (for cleanliness, settings are handled entirely in HTML until it's time to transfer them to the server)
 
