@@ -68,7 +68,9 @@ class Plot(models.Model):
 	legend_location = models.IntegerField(default=0)
 	show_legend = models.BooleanField(default=False)
 	xlabel = models.CharField(max_length=1000,blank=True,null=True)
+	show_xlabel = models.BooleanField(default=False)
 	ylabel = models.CharField(max_length=1000,blank=True,null=True)
+	show_ylabel = models.BooleanField(default=False)
 
 	# image url
 	image = models.ImageField(upload_to='plots',blank=True)
@@ -93,6 +95,15 @@ class Plot(models.Model):
 				intensity = intensity[5:-5][::-1]
 				sc.spec.spec_file.close()
 				plt.plot(wavenumber,intensity)
+
+			# do all the settings
+			axes = plt.gca()
+			if self.show_title:	plt.title(self.title)
+			if self.show_xlabel: plt.xlabel(self.xlabel)
+			if self.show_ylabel: plt.ylabel(self.ylabel)
+			axes.set_xlim(left=self.xmin,right=self.xmax)
+			axes.set_ylim(bottom=self.ymin,top=self.ymax)
+			if self.show_legend: plt.legend(self.legend_location)
 
 			# save the plot
 			print 'saving...'

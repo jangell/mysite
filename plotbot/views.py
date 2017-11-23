@@ -15,21 +15,25 @@ def index(request):
 
 # args: opacity, line_width, ymax, title, color, legend_location, legend_name, xlabel, xmax, ylabel, xmin, ymin
 floats = ['opacity','line_width','ymax','ymin','xmax','xmin']
-defaults = {'opacity':1.,'line_width':1.,'ymax':1.,'ymin':0.,'xmax':1.,'xmin':0.}
+defaults = {'opacity':1.,'line_width':1.}
 def make_plot(request):
 	get = request.GET
 	args = {}
 	for g in get:
 		args[g] = get.get(g)
-	# parse non-string args
-	for a in floats:
-		args[a] = args[a] if args[a] else defaults[a]
+
+	for f in floats:
+		if args[f]:
+			args[f] = float(args[f])
 
 	# working set = database (ie, no working set)
 	working = Spec.objects.all()
-
+	leg_loc = 0
+	if args['legend_location'] == 'Top right':leg_loc=1
+	elif args['legend_location'] == 'Bottom right':leg_loc=2
+	elif args['legend_location'] == 'Bottom left':leg_loc=3
 	# create a Plot object, then one SpecConfig object per spectrum, then plot the Plot object
-	cur_plot = Plot()
+	cur_plot = Plot(title=args['title'],show_title=('show_title' in args),xlabel=args['xlabel'],show_xlabel=('show_xlabel' in args),ylabel=args['ylabel'],show_ylabel=('show_ylabel' in args),xmin=args['xmin'] if args['xmin'] else None, xmax = args['xmax'] if args['xmax'] else None, ymin=args['ymin'] if args['ymin'] else None, ymax=args['ymax'] if args['ymax'] else None,show_legend=('show_legend' in args),legend_location=leg_loc)
 	cur_plot.save()
 	for cur_spec in working:
 		s_config = SpecConfig(plot = cur_plot, spec = cur_spec)
