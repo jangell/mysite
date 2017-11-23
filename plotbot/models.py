@@ -21,7 +21,6 @@ def validate_specfile_extension(value):
     if value.file.content_type != 'text/csv':
         raise ValidationError('Unable to use file with type {} - .csv files only'.format(value.file.content_type))
 
-
 # models
 
 # model for a spectrum
@@ -74,27 +73,15 @@ class Plot(models.Model):
 
 	# image url
 	image = models.ImageField(upload_to='plots',blank=True)
-
 	# core functions
 	def getPlot(self):
 		# if there's already a plot image, return its url. if not, plot the thing, save an image, then return that url.
 		if not self.image:
 
 			# get each spectrum
-			plt.figure(figsize=(16,6))
+			plt.figure(figsize=(16,6))	# TODO: move figsize to global options
 			for sc in SpecConfig.objects.filter(plot__plot_id = self.plot_id):
-				sc.spec.spec_file.open(mode='rb')
-				data_reader = csv.reader(sc.spec.spec_file, delimiter=str(','))
-				wavenumber = []
-				intensity = []
-				for row in data_reader:
-					wavenumber.append(float(row[0]))
-					intensity.append(float(row[1]))
-				# cut off the first and last five and then reverse
-				wavenumber = wavenumber[5:-5][::-1]
-				intensity = intensity[5:-5][::-1]
-				sc.spec.spec_file.close()
-				plt.plot(wavenumber,intensity)
+				sc.draw()
 
 			# do all the settings
 			axes = plt.gca()
@@ -103,7 +90,7 @@ class Plot(models.Model):
 			if self.show_ylabel: plt.ylabel(self.ylabel)
 			axes.set_xlim(left=self.xmin,right=self.xmax)
 			axes.set_ylim(bottom=self.ymin,top=self.ymax)
-			if self.show_legend: plt.legend(self.legend_location)
+			if self.show_legend: plt.legend(loc=self.legend_location)
 
 			# save the plot
 			print 'saving...'
@@ -142,6 +129,26 @@ class SpecConfig(models.Model):
 
 	# preprocessing (TODO)
 
+	# core functions
+	# returns the data, as a len(2) array of two parallel arrays: [[wavenumbers], [intensities]]
+	def getData(self):
+		self.spec.spec_file.open(mode='rb')
+		data_reader = csv.reader(self.spec.spec_file,delimiter=str(','))
+		wavs = []
+		counts = []
+		for row in data_reader:
+			wavs.append(float(row[0]))
+			counts.append(float(row[1]))
+		# cut off first and last two and then reverse
+		wavs = wavs[2:-2][::-1]
+		counts = counts[2:-2][::-1]
+		self.spec.spec_file.close()
+		return [wavs,counts]
+
+	# plot this spectrum, with the configuration given, on a given figure
+	def draw(self,fig=plt):
+		data = self.getData()
+		fig.plot(data[0],data[1],label=str(self))
 
 	# meta-ish functions
 	def __str__(self):
