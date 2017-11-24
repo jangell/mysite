@@ -9,6 +9,9 @@ class Place(models.Model):
 	def __str__(self):
 		return self.name
 
+class Section(models.Model):
+	id = models.AutoField(primary_key=True)
+
 class Picture(models.Model):
 	image = models.ImageField(upload_to='trip_photos')
 	thumbnail = models.ImageField(upload_to='trip_photos')

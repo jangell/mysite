@@ -19,9 +19,42 @@
 	-->
 
 	<!-- fonts -->
-	<link href="https://fonts.googleapis.com/css?family=Asap|Ubuntu" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Raleway:500,700" rel="stylesheet">
 
 	<style>
+	body{
+		font-family:'Raleway',sans-serif;
+		margin:0;
+	}
+	.header{
+		background:#444;
+		color:#eed;
+		display:flex;
+		flex-direction:row;
+		align-items:center;
+	}
+	.title{
+		margin:20px;
+	}
+	.vert-sep{
+		border-left:1px solid white;
+		height:100%;
+		margin:10px;
+	}
+	.stretch{
+		flex:1;
+	}
+	.end{
+		text-decoration:none;
+	}
+	.header_link{
+		margin-right:50px;
+		color:#ccb;
+		cursor:pointer;
+	}
+	.header_link:hover{
+		color:#aa9;
+	}
 	/* styles go here */
 	</style>
 	{% block head %}
@@ -30,7 +63,13 @@
 </head>
 
 <body>
-
+	<div class="header">
+		<h2 class="title">Trips!</h2><div class="vert-sep">&nbsp;</div><h5>Pictures from cool places</h5>
+		<div class="stretch"></div>
+		{% for place in places %}
+		<a class="end" href='/vamos_en_un_viaje/where/{{place}}'><h3 class="header_link">{{place}}</h3></a>
+		{% endfor %}
+	</div>
 {% block body %}
 
 {% endblock %}

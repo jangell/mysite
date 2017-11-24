@@ -10,17 +10,23 @@
 .img_prev{
 	height:150px;
 	width:150px;
+	border:1px solid #888;
+	border-radius:5px;
+	margin:5px;
+	box-shadow:3px 3px 3px #444;
+	background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 </style>
 {% endblock %}
 
 {% block body %}
-{{place}}!
 
 <div class="imgs">
 
 	{% for pic in pics %}
-	<a href="/vamos_en_un_viaje/showme/{{pic.id}}"><img class="img_prev" src='{{pic.thumbnail.url}}'/></a>
+	<a href="{{pic.image.url}}"><div class="img_prev" style='background-image:url({{pic.thumbnail.url}})'></div></a>
 	{% endfor %}
 
 </div>
