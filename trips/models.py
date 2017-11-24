@@ -14,7 +14,7 @@ class Section(models.Model):
 
 class Picture(models.Model):
 	image = models.ImageField(upload_to='trip_photos')
-	thumbnail = models.ImageField(upload_to='trip_photos')
+	thumbnail = models.ImageField(upload_to='trip_photos',blank=True,null=True)
 	trip = models.ForeignKey(Place)
 	name = models.CharField(max_length=1000,blank=True,null=True)
 	description = models.TextField(max_length=1000,blank=True,null=True)
