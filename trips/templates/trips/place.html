@@ -1,0 +1,28 @@
+{% extends 'trips/layout.html' %}
+
+{% block head %}
+<style>
+.imgs{
+	display:flex;
+	flex-direction:row;
+	flex-wrap:wrap;
+}
+.img_prev{
+	height:150px;
+	width:150px;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+{{place}}!
+
+<div class="imgs">
+
+	{% for pic in pics %}
+	<a href="/vamos_en_un_viaje/showme/{{pic.id}}"><img class="img_prev" src='{{pic.thumbnail.url}}'/></a>
+	{% endfor %}
+
+</div>
+
+{% endblock %}

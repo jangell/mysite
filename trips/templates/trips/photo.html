@@ -1,0 +1,27 @@
+{% extends 'trips/layout.html' %}
+
+{% block head %}
+
+<style>
+body{
+	background-color:black;
+	margin:0;
+}
+.container{
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+	justify-content:center;
+}
+.main_img{
+	max-width:100vw;
+	max-height:100vh;
+	align-self:middle;
+}
+</style>
+{% endblock %}
+{% block body %}
+<div class="container">
+	<img class="main_img" src="{{pic.image.url}}"/>
+</div>
+{% endblock %}
