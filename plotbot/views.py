@@ -11,7 +11,8 @@ def index(request):
 	# if valid query, return plot
 	# if not, return error to console
 	# if nothing, return blank
-	return render(request,'plotbot/index.html')
+	context = {'spec_list':Spec.objects.all()}
+	return render(request,'plotbot/index.html',context)
 
 # args: opacity, line_width, ymax, title, color, legend_location, legend_name, xlabel, xmax, ylabel, xmin, ymin
 floats = ['opacity','line_width','ymax','ymin','xmax','xmin']

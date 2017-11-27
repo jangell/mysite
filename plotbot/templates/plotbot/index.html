@@ -1,4 +1,5 @@
 {% extends "plotbot/layout.html" %}
+{% load static %}
 
 {% block head_bottom %}
 <style>
@@ -58,6 +59,15 @@ html{
 	border-collapse:collapse;
 	background:white;
 }
+.spec_table_head{
+	border-bottom:1px solid #888;
+}
+.spec_table_show{
+ 	text-align:center;
+}
+.spec_table_row{
+	border-bottom:1px solid #ccc;
+}
 
 
 .spectra_buttons{
@@ -103,6 +113,9 @@ html{
 }
 #make_plot:hover{
 	background-color:#1f4077;
+}
+#make_plot:active{
+	background-color:#002060;
 }
 
 .all_tools{
@@ -226,18 +239,27 @@ html{
 				<!-- list of current spectra -->
 				<div class="spec_table_holder">
 					<table class="spec_table">
-						<thead>
+						<thead class="spec_table_head">
 							<tr>
 								<th>Name</th>
-								<th>Color</th>
+								<th>Show</th>
 							</tr>
 						</thead>
 						<tbody id="working_set_tbody">
+							{% for spec in spec_list %}
+							<tr class="spec_table_row">
+								<td>{{spec.name}}</td>
+								<td class="spec_table_show"><input type=checkbox checked></td>
+							</tr>
+							{% empty %}
+							<tr><td>No spectra found in database</td><td></td><td></td></tr>
+							{% endfor %}
 						</tbody>
 					</table>
 				</div>
 
 				<!-- buttons (add / remove) -->
+				<!--
 				<div class="spectra_buttons">
 					<label class="spec_button" id="add_spec">
 					    Add
@@ -245,6 +267,7 @@ html{
 
 					<button class="spec_button" id="remove_spec">Remove</button>
 				</div>
+			-->
 
 				<!-- tools associated with currently-selected spectrum -->
 				<table class="tools">
@@ -288,7 +311,7 @@ html{
 			</div>
 		</div>
 	</div>
-	<button id="make_plot">Do the thing!</button>
+	<button id="make_plot">Make the plot!</button>
 </form>
 
 <!-- image / plot window (height is set by javascript on update) -->
@@ -307,9 +330,12 @@ html{
 	text-align:center;
 	font-size:2rem;
 }
+.loading_text{
+	margin:0;
+}
 </style>
 <div class="toolset" id="plot_holder">
-	<div id="plot_placeholder"><p>Nothing yet =(</p></div>
+	<div id="plot_placeholder" style="display:none;"><img src={% static "plotbot/loading.gif" %} /><p class="loading_text">Loading...</p></div>
 </div>
 
 <script>
@@ -347,13 +373,13 @@ $(function() {
 			string_data = JSON.stringify(to_json);
 			// ajax the stringified data
 
-			// TODO: "loading" gif while waiting for plot to process
-
+			$('#plot_placeholder').show();
 			$.get({
 				url:'make_plot',
 				data:to_json,
 				success:function(response){
-					$('#plot_holder').html('');
+					$('#plot_placeholder').hide();
+					//$('#plot_holder').html('');
 					$('#plot_holder').css('background-image', 'url('+response['img_url']+')');
 					fitPlotDiv();
 				}
