@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 
 # validators
 def validate_specfile_extension(value):
-    if value.file.content_type != 'text/csv':
+    if value.file and value.file.content_type != 'text/csv':
         raise ValidationError('Unable to use file with type {} - .csv files only'.format(value.file.content_type))
 
 # models
@@ -58,6 +58,9 @@ class Plot(models.Model):
 	timestamp = models.DateTimeField(default=datetime.now)
 
 	# configuration (plot-level variables)
+	# default size is 16x7
+	fig_height = models.FloatField(default=7)
+	fig_width = models.FloatField(default=16)
 	xmin = models.FloatField(blank=True,null=True)
 	xmax = models.FloatField(blank=True,null=True)
 	ymin = models.FloatField(blank=True,null=True)
@@ -79,7 +82,7 @@ class Plot(models.Model):
 		if not self.image:
 
 			# get each spectrum
-			plt.figure(figsize=(16,6))	# TODO: move figsize to global options
+			plt.figure(figsize=(self.fig_width,self.fig_height))	# TODO: move figsize to global options
 			for sc in SpecConfig.objects.filter(plot__plot_id = self.plot_id):
 				sc.draw()
 

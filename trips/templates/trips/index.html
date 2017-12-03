@@ -10,7 +10,7 @@
 
 
 {% for place in places %}
-<a href='/vamos_en_un_viaje/where/{{place}}'><h1>{{place}}</h1></a><br>
+<a href="{% url 'place' place%}"><h1>{{place}}</h1></a><br>
 {% endfor %}
 
 

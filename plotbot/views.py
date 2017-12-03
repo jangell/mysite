@@ -6,16 +6,23 @@ from django.conf import settings
 from django import http
 from .models import *
 
-# Create your views here.
+# default page for plotbot, with tools and plotting button
 def index(request):
-	# if valid query, return plot
-	# if not, return error to console
-	# if nothing, return blank
 	context = {'spec_list':Spec.objects.all()}
 	return render(request,'plotbot/index.html',context)
 
+# spectral browser
+def spectra(request):
+	context = {'spec_list':Spec.objects.all()}
+	return render(request,'plotbot/spec_browser.html',context)
+
+# single spectrum page
+def spectrum(request, spec_id):
+	context = {'spectrum':Spec.objects.get(id=spec_id)}
+	return render(request,'plotbot/single_spectrum.html',context)
+
 # args: opacity, line_width, ymax, title, color, legend_location, legend_name, xlabel, xmax, ylabel, xmin, ymin
-floats = ['opacity','line_width','ymax','ymin','xmax','xmin']
+floats = ['opacity','line_width','ymax','ymin','xmax','xmin','fig_height','fig_width']
 ints = ['legend_location']
 defaults = {'opacity':1.,'line_width':1.}
 def make_plot(request):
