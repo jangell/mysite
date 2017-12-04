@@ -18,7 +18,7 @@ def spectra(request):
 
 # single spectrum page
 def spectrum(request, spec_id):
-	context = {'spectrum':Spec.objects.get(id=spec_id)}
+	context = {'spectrum':Spec.objects.get(spec_id=spec_id)}
 	return render(request,'plotbot/single_spectrum.html',context)
 
 # args: opacity, line_width, ymax, title, color, legend_location, legend_name, xlabel, xmax, ylabel, xmin, ymin

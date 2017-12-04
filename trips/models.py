@@ -4,6 +4,7 @@ from django.db import models
 
 class Place(models.Model):
 	id = models.AutoField(primary_key=True)
+	main_photo = models.ForeignKey('Picture',blank=True,null=True)
 	name = models.CharField(max_length=1000)
 	description = models.TextField(max_length=10000,blank=True,null=True)
 	def __str__(self):
@@ -16,6 +17,7 @@ class Picture(models.Model):
 	image = models.ImageField(upload_to='trip_photos')
 	thumbnail = models.ImageField(upload_to='trip_photos',blank=True,null=True)
 	trip = models.ForeignKey(Place)
+	section = models.ForeignKey(Section,blank=True,null=True)
 	name = models.CharField(max_length=1000,blank=True,null=True)
 	description = models.TextField(max_length=1000,blank=True,null=True)
 
@@ -34,7 +36,7 @@ class Picture(models.Model):
 	    import os
 
 	    # Set our max thumbnail size in a tuple (max width, max height)
-	    THUMBNAIL_SIZE = (150, 150)
+	    THUMBNAIL_SIZE = (160, 160)
 
 	    DJANGO_TYPE = self.image.file.content_type
 

@@ -38,6 +38,18 @@
 			font-family: 'Dosis', sans-serif;
 			border-bottom:5px solid #4488ff;
 		}
+		.spacer{
+			flex:1;
+		}
+		.spec_browser{
+			color:#004;
+			align-self:flex-end;
+			margin: 0px 20px;
+
+		}
+		.spec_browser:hover{
+			color:#00a;
+		}
 		#body_content{
 			flex:1;
 			position:relative;
@@ -73,7 +85,9 @@
 <body>
 	<div class="body_container">
 		<div id="header">
-			<h1 id="site_name">PlotBot.<sub style="font-weight:400;">&alpha;</sub></h4>
+			<h1 id="site_name">PlotBot.<sub style="font-weight:400;">&alpha;</sub></h1>
+			<div class="spacer"></div>
+			<a class="spec_browser" href="{% url 'spectra' %}"><h2>Spectral Browser</h2></a>
 		</div>
 		<div id="body_content">
 			{% block body %}{% endblock %}

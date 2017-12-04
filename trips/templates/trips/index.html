@@ -2,7 +2,50 @@
 
 {% block head %}
 <style>
+.no_link{
+	color:#ccc;
+	text-decoration:none;
+}
+.place_block{
+	position:relative;
+	border-radius:10px;
+	border:1px solid #888;
+	overflow:hidden;
+	background: #bbb;
+	width:90vw;
+	height:30vh;
+	margin:20px auto;
+}
+.transcover{
+	position:absolute;
+	display:flex;
+	flex-direction:row;
+	justify-content:center;
+	align-items:center;
+	width:100%;
+	height:100%;
+	background: rgba(200,200,200,.5);
+	transition: background 300ms ease, color 300ms ease;
+}
+.place_name{
+	font-size:3rem;
+	text-shadow:3px 3px 5px #444;
+}
+.transcover:hover{
+	background: rgba(200,200,200,.3);
+	color:#fff;
+}
 
+{% for place in places %}
+{% if place.main_photo %}
+#{{place.name}}_block{
+	background-image: url({{place.main_photo.image.url}});
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+{% endif %}
+{% endfor %}
 </style>
 {% endblock %}
 
@@ -10,7 +53,13 @@
 
 
 {% for place in places %}
-<a href="{% url 'place' place%}"><h1>{{place}}</h1></a><br>
+<a class="no_link" href="{% url 'place' place%}">
+	<div id="{{place.name}}_block" class="place_block">
+		<div class="transcover">
+			<h2 class="place_name">{{place.name}}</h2>
+		</div>
+	</div>
+</a>
 {% endfor %}
 
 
