@@ -1,0 +1,19 @@
+{% extends "plotbot/layout.html" %}
+
+{% block head_bottom %}
+<style>
+</style>
+{% endblock %}
+
+{% block body %}
+Here's all the spectra:<br>
+{% for spec in spec_list %}
+<a href="{% url 'spectrum' spec.spec_id %}">
+	<div class="spec_link">
+		{{spec}}
+	</div>
+</a>
+{% endfor %}
+<br>That's all of em!
+
+{% endblock %}
