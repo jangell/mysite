@@ -1,8 +1,23 @@
 {% extends "plotbot/layout.html" %}
 
 {% block head_bottom %}
+<style>
+.title_strip{
+	background-color:#aaa;
+	padding:10px;
+	box-shadow:0px 5px 5px #888;
+}
+.spec_title{
+	margin:0;
+	text-align:center;
+}
+</style>
 {% endblock %}
 
 {% block body %}
-
+<div class="title_strip">
+	<h2 class="spec_title">
+		{{spectrum.name}}
+	</h2>
+</div>
 {% endblock %}

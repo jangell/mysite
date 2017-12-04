@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block body %}
-Here's all the spectra:<br>
 {% for spec in spec_list %}
 <a href="{% url 'spectrum' spec.spec_id %}">
 	<div class="spec_link">
@@ -14,6 +13,5 @@ Here's all the spectra:<br>
 	</div>
 </a>
 {% endfor %}
-<br>That's all of em!
 
 {% endblock %}

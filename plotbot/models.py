@@ -29,6 +29,7 @@ class Spec(models.Model):
 	#owner = models.ForeignKey(Session, blank=True,null=True)	# id referring to the session (will be modified in the future to refer to a user, once accounts are implemented)
 	name = models.CharField(max_length=1000)
 	hash_val = models.CharField(max_length=1000, blank=True,null=True)		# hash value to determine if an identical spectrum has already been uploaded
+	timestamp = models.DateTimeField(default=datetime.now)
 	# the actual data gets stored in a CSV
 	spec_file = models.FileField(upload_to='spec/csv', validators=[validate_specfile_extension])
 
