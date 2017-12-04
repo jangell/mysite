@@ -7,3 +7,4 @@ from .models import *
 #admin.site.register(<model>)
 admin.site.register(Place)
 admin.site.register(Picture)
+admin.site.register(Section)
