@@ -72,7 +72,7 @@
 
 <body>
 	<div class="header">
-		<a class="nothing" href="{% url 'index' %}"><h2 class="title">Trips!</h2></a><div class="vert-sep">&nbsp;</div><h5>Pictures from cool places</h5>
+		<a class="nothing" href="/vamos_en_un_viaje/"><h2 class="title">Trips!</h2></a><div class="vert-sep">&nbsp;</div><h5>Pictures from cool places</h5>
 		<div class="stretch"></div>
 		{% for place in places %}
 		<a class="end" href='/vamos_en_un_viaje/where/{{place}}'><h3 class="header_link">{{place}}</h3></a>
