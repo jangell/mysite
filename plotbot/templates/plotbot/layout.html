@@ -38,16 +38,20 @@
 			font-family: 'Dosis', sans-serif;
 			border-bottom:5px solid #4488ff;
 		}
+		.block_link{
+			text-decoration:none;
+			color:inherit;
+		}
 		.spacer{
 			flex:1;
 		}
-		.spec_browser{
+		.header_link{
 			color:#004;
 			align-self:flex-end;
 			margin: 0px 20px;
 
 		}
-		.spec_browser:hover{
+		.header_link:hover{
 			color:#00a;
 		}
 		#body_content{
@@ -71,6 +75,12 @@
 			margin-top:0;
 			margin-bottom:0;
 		}
+		.splitter{
+			width:1px;
+			background-color:rgba(0,0,0,0);
+			border-right:1px solid #888;
+			display:inline-block;
+		}
 
 		/* footer */
 		.bottom_text{
@@ -85,9 +95,10 @@
 <body>
 	<div class="body_container">
 		<div id="header">
-			<h1 id="site_name">PlotBot.<sub style="font-weight:400;">&alpha;</sub></h1>
+			<a href='/plotbot/' class="block_link"><h1 id="site_name">PlotBot.<sub style="font-weight:400;">&alpha;</sub></h1></a>
 			<div class="spacer"></div>
-			<a class="spec_browser" href="{% url 'spectra' %}"><h2>Spectral Browser</h2></a>
+			<a class="header_link" href="/plotbot/"><h2>Plotting Tool</h2></a>
+			<a class="header_link" href="{% url 'spectra' %}"><h2>Spectral Browser</h2></a>
 		</div>
 		<div id="body_content">
 			{% block body %}{% endblock %}
