@@ -2,8 +2,114 @@
 {% load static %}
 
 {% block head_bottom %}
-<style>
 
+<script>
+// TO BE MOVED TO: plot_spec_configs.js
+// Jason Angell
+// SETI Institute / NASA Ames Research Center
+// 9 December 2017
+
+// define javascript classes for PlotConfig and SpecConfig objects
+
+var valid_inputs = ['checkbox','text','number'];
+
+// one field of a config (like figure width, or line color)
+class Field{
+	constructor(ident,label,input,opts){
+		// default input type is text
+		if(valid_inputs.indexOf(input) == -1){input = 'text';}
+		this.identifier = ident;
+		this.label = label;
+		this.input = input;
+	}
+	// generates html to represent this field as a table row
+	toTableRow(){
+		// return the field as a table row
+		var container = $('<tr>');
+		container.addClass('tool');
+		container.attr('id', this.identifier); // identifier is id of row and name of input
+		container.append($('<td>').addClass('tool_label').text(this.label));
+		var inputter = $('<input>').attr('type',this.input).attr('name',this.identifier);
+		// number inputter should have a step of any
+		if(this.input == 'number'){inputter.attr('step','any');}
+		var action = $('<td>').addClass('tool_action').append(inputter);
+		container.append(action);
+		return container;
+	}
+}
+
+
+// SpecConfig (must come first because classes are not hoisted in js)
+class SpecConfig{
+	constructor(){
+		this.fields = {};
+		this.fields['show'] = new Field('show', 'Show', 'checkbox');
+		this.fields['include_in_legend'] = new Field('include_in_legend', 'Include in legend', 'checkbox');
+		this.fields['legend_name'] = new Field('legend_name', 'Legend name', 'text');
+		this.fields['line_width'] = new Field('line_width', 'Line width', 'number');
+		this.fields['color'] = new Field('color', 'Color', 'text');
+		this.fields['opacity'] = new Field('opacity', 'Opacity', 'number');
+	}
+
+	// generates a tools table with config fields as rows
+	toTable(){
+		var table = $('<table>').addClass('tools');
+		for(var field in this.fields){
+			table.append(this.fields[field].toTableRow());
+		}
+		return table;
+	}
+}
+
+// PlotConfig
+class PlotConfig{
+	constructor(){
+		// set values to defaults
+		this.fields = {};
+		this.fields['fig_width'] = new Field('fig_width', 'Width', 'number');
+		this.fields['fig_height'] = new Field('fig_height', 'Height', 'number');
+		this.fields['title'] = new Field('title', 'Title', 'text');
+		this.fields['show_title'] = new Field('show_title', 'Show title', 'checkbox');
+		this.fields['xlabel'] = new Field('xlabel', 'X-axis label', 'text');
+		this.fields['show_xlabel'] = new Field('show_xlabel', 'Show x-axis label', 'checkbox');
+		this.fields['ylabel'] = new Field('ylabel', 'Y-axis label', 'text');
+		this.fields['show_ylabel'] = new Field('show_ylabel', 'Show y-axis label', 'checkbox');
+		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number');
+		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number');
+		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number');
+		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number');
+		this.fields['show_legend'] = new Field('show_legend', 'Show legend', 'checkbox');
+		// TODO: create legend location
+		//this.legend_location = new Field('legend_location', 'Legend location', 'option', {'0':'Top right', '1':'Top left', '2':'Bottom left', '3':'Bottom right'});
+	}
+
+	// convert fields to html table
+	toTable(){
+		var table = $('<table>').addClass('tools');
+		for(var field in this.fields){
+			table.append(this.fields[field].toTableRow());
+		}
+		return table;
+	}
+
+	// plot update function (AJAX transfer and update url on completion)
+	// working_set: list of SpecConfig objects
+	doPlot(working_set){
+
+		// AJAX to pass over variables (and trigger to update plot on completion)
+
+
+	}
+}
+
+var pc = new PlotConfig();
+pc.toTable();
+
+
+
+</script>
+
+<style>
 /* mobile first */
 
 html{
@@ -283,10 +389,10 @@ html{
 
 				<!-- tools associated with currently-selected spectrum -->
 				<table class="tools">
-					<tr class="tool" id="include_in_plot">
+					<tr class="tool" id="show">
 						<td class="tool_label">Show</td>
 						<td class="tool_action">
-							<input name="include_in_plot" type=checkbox>
+							<input name="show" type=checkbox>
 						</td>
 					</tr>
 					<tr class="tool" id="include_in_legend">
@@ -351,25 +457,6 @@ html{
 </div>
 
 <script>
-
-// this is to handle the working set
-var working_set = [];
-
-// spec item is going to be an object with properties, an output-row-html function (to tbody row html), and an output-config-html function (to settings item html)
-
-// add the working set to the table, add local settings for each (hidden except for the one selected)
-function displayWorkingSet(){
-	// clear table and configs
-	/*
-	$('#working_set_tbody').html('');
-	$('#local_configs').html('');
-	*/
-
-	for(var i = 0; i < working_set.length; i++){
-		// append working_set[i].outputRowHtml() to tbody
-		// append working_set[i].outputConfigHtml() to local_configs div
-	}
-}
 
 
 

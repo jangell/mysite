@@ -30,30 +30,17 @@
 .spec_button{
 	margin:5px;
 	padding:5px;
+	background:#ccc;
+	border: 1px solid #aaa;
+	border-radius:5px;
 }
-.spec_title{
-
+.spec_button:hover{
+	background:#bbb;
+	border:1px solid #444;
 }
+.spec_title{}
 .spec_time{
 	float:right;
-}
-
-.grad_button{
-	border:1px solid #888;
-	border-radius:5px;
-	color:#444;
-	/* color; start with grey, then try gradient */
-	--main-bg-color: #b0b0b0;
-	--second-bg-color: #c0c0c0;
-	background:var(--main-bg-color); /* without gradient */
-	background: -webkit-linear-gradient(var(--main-bg-color), var(--second-bg-color)); /* For Safari 5.1 to 6.0 */
-	background: -o-linear-gradient(var(--main-bg-color), var(--second-bg-color)); /* For Opera 11.1 to 12.0 */
-	background: -moz-linear-gradient(var(--main-bg-color), var(--second-bg-color)); /* For Firefox 3.6 to 15 */
-	background: linear-gradient(var(--main-bg-color), var(--second-bg-color)); /* Standard syntax */
-}
-.grad_button:hover{
-	border-color:#444;
-	color:#888;
 }
 
 </style>
@@ -66,7 +53,7 @@
 		<div class="list">
 		{% for spec in spec_list %}
 		<a class="spec_link" href="{% url 'spectrum' spec.spec_id %}">
-			<div class="spec_button grad_button">
+			<div class="spec_button">
 				<span class="spec_title">{{spec}}</span>
 				<span class="spec_time">{{spec.timestamp}}</span>
 			</div>

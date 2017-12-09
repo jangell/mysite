@@ -11,9 +11,9 @@ from io import BytesIO
 import csv
 import numpy as np
 
-# matplotlib does weird (bad) things
+# matplotlib does weird (bad) things so we have to set the backend explicitly
 import matplotlib
-matplotlib.use('TkAgg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 # validators
