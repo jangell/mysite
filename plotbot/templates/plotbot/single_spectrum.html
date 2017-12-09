@@ -56,8 +56,10 @@
 .info_table td{
 	font-size:1.2rem;
 	padding:10px;
-	overflow-wrap: break-word;
-	word-wrap: break-word;
+	overflow-x:wrap;
+}
+td.description{
+	word-break:break-all;
 }
 .right_bar{
 	border-right:1px solid #888;
@@ -94,6 +96,10 @@
 .expand{
 	flex:1;
 }
+.shadow{
+	border:1px solid #888;
+	box-shadow:3px 3px 1px #888;
+}
 
 </style>
 
@@ -108,10 +114,10 @@
 	</h2>
 </div>
 <div class="flex_body">
-	<div class="spec_preview" id="spec_preview">
+	<div class="spec_preview shadow" id="spec_preview">
 		<!-- this is where the spectrum plot will go -->
 	</div>
-	<div class="info_tools_div">
+	<div class="info_tools_div shadow">
 		<table class="info_table">
 			<tr>
 				<td class="right_bar">Name</td>
@@ -127,7 +133,7 @@
 			</tr>
 			<tr>
 				<td class="right_bar">Info</td>
-				<td>{{spectrum.description}}</td>
+				<td class="description">{{spectrum.description}}</td>
 			</tr>
 		</table>
 		<div class="expand"></div>
