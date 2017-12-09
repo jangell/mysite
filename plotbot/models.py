@@ -37,9 +37,20 @@ class Spec(models.Model):
 	spec_file = models.FileField(upload_to='spec/csv', validators=[validate_specfile_extension])
 
 	# returns a list of points corresponding to the spectrum
-	def getPoints():
+	def getPoints(self):
 		# get all points from querying the Point table, ordered by index
-		return []
+		self.spec_file.open(mode='rb')
+		data_reader = csv.reader(self.spec_file,delimiter=str(','))
+		wavs = []
+		counts = []
+		for row in data_reader:
+			wavs.append(float(row[0]))
+			counts.append(float(row[1]))
+		# cut off first and last two (why? (12/9/17))
+		wavs = wavs[2:-2]
+		counts = counts[2:-2]
+		self.spec_file.close()
+		return [wavs,counts]
 
 	def __str__(self):
 		if self.wavelength != -1:
@@ -149,7 +160,7 @@ class SpecConfig(models.Model):
 		for row in data_reader:
 			wavs.append(float(row[0]))
 			counts.append(float(row[1]))
-		# cut off first and last two and then reverse
+		# cut off first and last two and then reverse (why? (12/9/17))
 		wavs = wavs[2:-2][::-1]
 		counts = counts[2:-2][::-1]
 		self.spec.spec_file.close()

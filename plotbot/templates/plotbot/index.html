@@ -39,9 +39,11 @@ class Field{
 }
 
 
-// SpecConfig (must come first because classes are not hoisted in js)
+// SpecConfig (reminder: classes are not hoisted in js)
 class SpecConfig{
-	constructor(){
+	constructor(spec_id){
+		this.spec_id = spec_id;
+		this.spec_name = spec_name;
 		this.fields = {};
 		this.fields['show'] = new Field('show', 'Show', 'checkbox');
 		this.fields['include_in_legend'] = new Field('include_in_legend', 'Include in legend', 'checkbox');
@@ -91,20 +93,24 @@ class PlotConfig{
 		}
 		return table;
 	}
-
-	// plot update function (AJAX transfer and update url on completion)
-	// working_set: list of SpecConfig objects
-	doPlot(working_set){
-
-		// AJAX to pass over variables (and trigger to update plot on completion)
-
-
-	}
 }
 
-var pc = new PlotConfig();
-pc.toTable();
+// handler for plot config and all spec configs for a given page
+class ConfigHandler{
+	constructor(){
+		this.plotConfig = new PlotConfig();
+		this.specConfigList = [];
+	}
 
+	// adds a spectrum to the working set
+	addSpec(spec_id, spec_name){
+
+	}
+
+	// generates a selectable list of spectra in html
+
+
+}
 
 
 </script>
