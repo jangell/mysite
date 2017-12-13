@@ -3,6 +3,7 @@
 
 {% block head_bottom %}
 
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
 // TO BE MOVED TO: plot_spec_configs.js
 // Jason Angell
@@ -11,56 +12,210 @@
 
 // define javascript classes for PlotConfig and SpecConfig objects
 
-var valid_inputs = ['checkbox','text','number'];
+var valid_inputs = ['checkbox','text','number','color'];
+
+function randomHex(){
+	var hexVal = (parseInt(Math.random() * 256)).toString(16);
+	return ('0'+hexVal).slice(-2);
+}
+
+function randomColor(){
+	var r, g, b;
+	r = randomHex();
+	g = randomHex();
+	b = randomHex();
+	return '#'+r+g+b;
+}
 
 // one field of a config (like figure width, or line color)
 class Field{
-	constructor(ident,label,input,opts){
+	constructor(ident,label,input,defaults={}){
 		// default input type is text
 		if(valid_inputs.indexOf(input) == -1){input = 'text';}
 		this.identifier = ident;
 		this.label = label;
 		this.input = input;
+		if(typeof(defaults) === 'undefined'){
+			this.defaults = null;
+		}
+		else{
+			this.defaults = defaults;
+		}
+		this.element = null; // this is where the value in the element gets wired into the field itself (to be accessed by the specconfig via getValue() )
 	}
+	// gets the value from the current element that this field has generated
+	getValue(){
+		if(this.element){
+			if(this.input == 'checkbox')
+				return this.element.is(':checked');
+			return this.element.val();
+		}
+		return null;
+	}
+	
+	//
+	updateValue(){
+		alert('value of '+this.label+'is '+self.getValue());
+	}
+
 	// generates html to represent this field as a table row
 	toTableRow(){
 		// return the field as a table row
 		var container = $('<tr>');
 		container.addClass('tool');
 		container.attr('id', this.identifier); // identifier is id of row and name of input
-		container.append($('<td>').addClass('tool_label').text(this.label));
+		container.append($('<td>').addClass('tool_label').html(this.label));
 		var inputter = $('<input>').attr('type',this.input).attr('name',this.identifier);
+		
+		// wire in the moving parts
+		this.element = inputter;
+		
 		// number inputter should have a step of any
 		if(this.input == 'number'){inputter.attr('step','any');}
+
+		// set the defaults based on the dictionary passed in
+		for(var key in this.defaults){
+			inputter.attr(key,this.defaults[key]);
+		}
+
 		var action = $('<td>').addClass('tool_action').append(inputter);
 		container.append(action);
 		return container;
 	}
 }
 
-
 // SpecConfig (reminder: classes are not hoisted in js)
 class SpecConfig{
-	constructor(spec_id){
-		this.spec_id = spec_id;
+	constructor(spec_id, spec_name, spec_data){
+		this.spec_id = spec_id; // unique identifier to keep track of which spectra are which when we modify things later on
 		this.spec_name = spec_name;
+		this.spec_data = spec_data;
+		this.selected = false; // keep track of which is currently showing (and highlighted)
 		this.fields = {};
-		this.fields['show'] = new Field('show', 'Show', 'checkbox');
-		this.fields['include_in_legend'] = new Field('include_in_legend', 'Include in legend', 'checkbox');
-		this.fields['legend_name'] = new Field('legend_name', 'Legend name', 'text');
-		this.fields['line_width'] = new Field('line_width', 'Line width', 'number');
-		this.fields['color'] = new Field('color', 'Color', 'text');
-		this.fields['opacity'] = new Field('opacity', 'Opacity', 'number');
+		this.fields['show'] = new Field('spec'+this.spec_id+'_show', 'Show', 'checkbox', {'checked':true});
+		this.fields['legend_name'] = new Field('spec'+this.spec_id+'_legend_name', 'Legend label', 'text',{'placeholder':'No label'});
+		this.fields['line_width'] = new Field('spec'+this.spec_id+'_line_width', 'Line width (px)', 'number', {'value':2});
+		this.fields['color'] = new Field('spec'+this.spec_id+'_color', 'Color', 'color', {'value':randomColor()});
+		this.fields['opacity'] = new Field('spec'+this.spec_id+'_opacity', 'Opacity', 'number', {'value':1});
+		// this.last_data = this.spec_data;
+		// this.has_changed = false;
 	}
 
-	// generates a tools table with config fields as rows
-	toTable(){
-		var table = $('<table>').addClass('tools');
-		for(var field in this.fields){
-			table.append(this.fields[field].toTableRow());
-		}
-		return table;
+	valueOf(field){
+		return this.fields[field].getValue();
 	}
+
+	// returns the id to use for the relevant row in the speclist
+	getRowId(){
+		return 'speclist_'+this.spec_id;
+	}
+	// returns the id to use for the relevant div in the specconfig
+	getConfigId(){
+		return 'specconfig_'+this.spec_id;
+	}
+
+	// generates a row with name and show/don't-show checkbox
+	generateSpecListHtml(){
+		var _this = this; // we map the class 'this' to '_this' so that we can reference it in the function below, where 'this' refers to the jquery object
+		// javascript is dumb. jquery is dumb. programming is stupid.
+
+		// create the actual row
+		var row = $('<tr>').addClass('spec_table_row').attr('id',this.getRowId());
+		row.append($('<td>').html(this.spec_name));
+		var show_box = $('<input>').attr('type','checkbox').attr('checked',true).attr('disabled',true);
+		var to_add = $('<td>').addClass('spec_table_show').append(show_box);
+		row.append(to_add);
+
+		// set css based on whether this is selected or not
+		if(this.selected){row.addClass('selected_row');}
+		else{row.addClass('unselected_row');}
+
+		// get the html id of the config table and the speclist row (we need them for the functions)
+		var configId = '#'+this.getConfigId();
+		var rowId = '#'+this.getRowId();
+
+		// function for when this spec is clicked on in the list
+		row.on('click',function(){
+			// hide all
+			$('.showing_config').hide();
+			$('.showing_config').removeClass('showing_config').addClass('hidden_config');
+			// show the one that was clicked
+			$(configId).show();
+			$(configId).removeClass('hidden_config').addClass('showing_config');
+			// unselect all rows
+			$('.selected_row').removeClass('selected_row').addClass('unselected_row');
+			// select this one
+			$(rowId).removeClass('unselected_row').addClass('selected_row');
+		});
+
+		// not allowing 'showing' checkbox to be clickable at the moment (weird bugs)
+		/*
+		// function for when this spec's 'show' checkbox is clicked on
+		show_box.click(function(){
+			var checked = show_box.is(':checked');	// get whether or not it's checked
+			// TODO: show or hide in plot (tbd)
+			_this.fields['show'].element.attr('checked',checked);	// update the show box in the relevant config
+		});
+		*/
+
+		return row;
+	}
+
+	// generates an html table for spec configuration
+	generateSpecConfigHtml(){
+		var _this = this; // see complaint in generateSpecListHtml()
+		// get the html id of the config table and the speclist row (we need them for the functions)
+		var configId = '#'+this.getConfigId();
+		var rowId = '#'+this.getRowId();
+
+		var table = $('<table>').addClass('tools');
+		table.attr('id',this.getConfigId());
+
+		if(this.selected){
+			table.addClass('showing_config');
+		}
+		else{
+			table.addClass('hidden_config');
+		}
+
+		for(var field in this.fields){
+			table.append(this.fields[field].toTableRow(self.spec_id));
+		}
+
+		// function to update the 'show' checkbox in the list based on a change in the one in the spec config table
+		this.fields['show'].element.change(function(){
+			var checked = _this.valueOf('show');
+			$(rowId).find('input').attr('checked',checked);
+		});
+
+		return table;
+
+	}
+
+	// returns a plotly-friendly data object
+	getPlotlyData(){
+		// check here if 'show' is true or not (if not, return null immediately)
+		if(!this.valueOf('show')){return null;}
+		// parse color and opacity into rgba string
+		var r, g, b, a;
+		var hex = this.valueOf('color'); // always gets a hex string (ex., #rrggbb)
+		a = this.valueOf('opacity');
+		r = parseInt(hex.substring(1,3), 16);
+		g = parseInt(hex.substring(3,5), 16);
+		b = parseInt(hex.substring(5,7), 16);
+		var rgba_string = 'rgba('+r+','+g+','+b+','+a+')';
+		return {
+			x: this.spec_data[0],
+			y: this.spec_data[1],
+			name: this.valueOf('legend_name'),
+			showlegend: !(this.valueOf('legend_name') == ''), // only show in legend if field isn't blank
+			line: {
+				color: rgba_string, // color and opacity (convert to rgba)
+				width: this.valueOf('line_width'), // line width in pixels
+			}
+		}
+	}
+
 }
 
 // PlotConfig
@@ -68,14 +223,12 @@ class PlotConfig{
 	constructor(){
 		// set values to defaults
 		this.fields = {};
-		this.fields['fig_width'] = new Field('fig_width', 'Width', 'number');
-		this.fields['fig_height'] = new Field('fig_height', 'Height', 'number');
-		this.fields['title'] = new Field('title', 'Title', 'text');
+		//this.fields['fig_width'] = new Field('fig_width', 'Width', 'number');
+		//this.fields['fig_height'] = new Field('fig_height', 'Height', 'number');
+		this.fields['title'] = new Field('title', 'Title', 'text', {'placeholder':'No title'});
 		this.fields['show_title'] = new Field('show_title', 'Show title', 'checkbox');
-		this.fields['xlabel'] = new Field('xlabel', 'X-axis label', 'text');
-		this.fields['show_xlabel'] = new Field('show_xlabel', 'Show x-axis label', 'checkbox');
-		this.fields['ylabel'] = new Field('ylabel', 'Y-axis label', 'text');
-		this.fields['show_ylabel'] = new Field('show_ylabel', 'Show y-axis label', 'checkbox');
+		this.fields['xlabel'] = new Field('xlabel', 'X-axis label', 'text', {'value': 'Wavenumber'});
+		this.fields['ylabel'] = new Field('ylabel', 'Y-axis label', 'text', {'value': 'Intensity'});
 		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number');
 		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number');
 		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number');
@@ -93,158 +246,265 @@ class PlotConfig{
 		}
 		return table;
 	}
+
+	// returns the value of a field
+	valueOf(field){
+		return this.fields[field].getValue();
+	}
 }
 
 // handler for plot config and all spec configs for a given page
-class ConfigHandler{
-	constructor(){
+class PlotHandler{
+	constructor(plot_config_target,spec_list_target,spec_config_target,plot_target){
+		this.plot_config_target = plot_config_target;
+		this.spec_list_target = spec_list_target;
+		this.spec_config_target = spec_config_target;
+		this.plot_target = plot_target;
+
+		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
 	}
 
-	// adds a spectrum to the working set
-	addSpec(spec_id, spec_name){
-
+	// appends the plot config html to the jquery element <target>
+	insertPlotConfigHtml(){
+		this.plot_config_target.append(this.plotConfig.toTable());
 	}
 
-	// generates a selectable list of spectra in html
+	// inserts the spec list html at the end of the current spec list
+	appendSpecListRow(specConfig){
+		this.spec_list_target.append(specConfig.generateSpecListHtml());
+	}
 
+	appendSpecConfigHtml(specConfig){
+		// show the first one, but hide all the others
+		this.spec_config_target.append(specConfig.generateSpecConfigHtml());
+	}
+
+
+	// adds a spectrum to the working set
+	addSpec(spec_name, spec_data){
+		var sc = new SpecConfig(this.cur_spec_id, spec_name, spec_data);
+		this.cur_spec_id++; // make sure each is unique
+		// append it to spec config list
+		this.specConfigList.push(sc);
+		// if it's the only specconfig, show & select it
+		if(this.specConfigList.length == 1){
+			sc.selected = true;
+		}
+		// add row to speclist
+		this.appendSpecListRow(sc);
+		// add div to specConfigs
+		this.appendSpecConfigHtml(sc);
+	}
+
+	// updates the plot drawing
+	updatePlot(){
+		var id = this.plot_target.attr('id');
+		var plot_div = document.getElementById(id);
+
+		// spectral data -> list of data
+		var data = [];
+		for(var i = 0; i < this.specConfigList.length; i++){
+			var cur_data = this.specConfigList[i].getPlotlyData();
+			// if <show> is false, this will return null, so we'll skip it
+			if(cur_data != null){
+				data.push(cur_data);
+			}
+		}
+
+		// global variables -> layout
+		var layout = {
+			// margin is arbitrary for now
+			margin: {
+				l: 40,
+				r: 20,
+				t: 20,
+				b: 30
+			},
+			// x axis dictionary (expand to advanced features later)
+			xaxis: {
+				title: this.plotConfig.valueOf('xlabel')
+			},
+			yaxis: {
+				title: this.plotConfig.valueOf('ylabel')
+			},
+			showlegend: this.plotConfig.valueOf('show_legend'),
+
+		}
+
+		Plotly.newPlot(plot_div, data, layout);
+
+		// hook in a resize function
+		$(window).on('resize',function(){
+			Plotly.Plots.resize(plot_div);
+		});
+	}
 
 }
-
 
 </script>
 
 <style>
-/* mobile first */
+	/* mobile first */
+	/* TO BE MOVED TO: index.css */
+	html{
+		background:#cce;
+	}
 
-html{
-	background:#cce;
-}
-
-.toolset{
-	background-color:#ddd;
-	margin:5px;
-	min-width:400px;
-	flex:1;
-	border:1px solid #888;
-	box-shadow:3px 3px 1px #888;
-}
-.toolset_title{
-	font-family: 'Dosis', sans-serif;
-	font-size:1.8rem;
-	text-align:center;
-	margin:0;
-	background-color:#bbb;
-	border-bottom:2px solid #aaa;
-}
-.toolset_content{
-	margin:0;
-}
-.tools{
-	width:100%;
-	border-collapse:collapse;
-}
-.tool{
-	border-bottom:1px solid #aaa;
-}
-.tool_label{
-	padding-left:20px;
-	font-weight:bold;
-}
-.tool_action{
-	display:inline-block;
-	float:right;
-	padding-right:20px;
-}
-
-
-.spec_table_holder{
-	margin-top:none;
-	margin:20px;
-	border:1px solid #888;
-	border-radius:5px;
-	overflow:hidden;
-}
-.spec_table{
-	width:100%;
-	border-collapse:collapse;
-	background:white;
-}
-.spec_table_head{
-	border-bottom:1px solid #888;
-}
-.spec_table_show{
- 	text-align:center;
-}
-.spec_table_row{
-	border-bottom:1px solid #ccc;
-}
+	.toolset{
+		background-color:#ddd;
+		margin:5px;
+		min-width:400px;
+		flex:1;
+		border:1px solid #888;
+		box-shadow:3px 3px 1px #888;
+	}
+	.toolset_title{
+		font-family: 'Dosis', sans-serif;
+		font-size:1.8rem;
+		text-align:center;
+		margin:0;
+		background-color:#bbb;
+		border-bottom:2px solid #aaa;
+	}
+	.toolset_content{
+		margin:0;
+	}
+	.tools{
+		width:100%;
+		border-collapse:collapse;
+	}
+	.tool{
+		border-bottom:1px solid #aaa;
+	}
+	.tool_label{
+		padding-left:20px;
+		font-weight:bold;
+	}
+	.tool_action{
+		display:inline-block;
+		float:right;
+		padding-right:20px;
+	}
 
 
-.spectra_buttons{
-	display:flex;
-	flex-direction:row;
-}
-.spec_button{
-	flex:1;
-	font-size:2rem;
-	border:1px solid #888;
-	border-radius:5px;
-	margin:5px;
-	font-family: 'Open Sans', sans-serif;
-	cursor:pointer;
-	text-align:center;
-}
-.spec_button:focus{
-	outline:none;
-}
-#remove_spec{
-	background-color:#e06b6b;
-}
-#remove_spec:hover{
-	background-color:#e05c5c;
-}
+	.spec_table_holder{
+		margin-top:none;
+		margin:20px;
+		border:1px solid #888;
+		border-radius:5px;
+		overflow:hidden;
+	}
+	.spec_table{
+		width:100%;
+		border-collapse:collapse;
+		background:white;
+	}
+	.spec_table_head{
+		border-bottom:1px solid #888;
+	}
+	.spec_table_show{
+	 	text-align:center;
+	}
+	.spec_table_row{
+		border-top:1px solid #ccc;
+	}
 
-/* the big button */
-#make_plot{
-	font-family: 'Dosis', sans-serif;
-	font-size:2rem;
-	width:calc(100% - 40px);
-	margin:10px 20px;
-	border-radius:10px;
-	background-color:#2c579e;
-	color:#eee;
-	cursor:pointer;
-	border:1px solid #888;
-	box-shadow:3px 3px 1px #888;
-	min-width:400px;
-}
-#make_plot:focus{
-	outline:none;
-}
-#make_plot:hover{
-	background-color:#1f4077;
-}
-#make_plot:active{
-	background-color:#002060;
-}
+	.unselected_row:hover{
+		cursor:pointer;
+		background-color:rgba(122,199,255,.5);
+	}
+	.selected_row{
+		background-color:#7ac7ff;
+		font-weight:bold;
+	}
 
-.all_tools{
-	display:flex;
-	flex-direction:row;
-	flex-wrap:wrap;
-}
+	.showing_config{
+
+	}
+	.hidden_config{
+		display:none;
+	}
+
+	.spectra_buttons{
+		display:flex;
+		flex-direction:row;
+	}
+	.spec_button{
+		flex:1;
+		font-size:2rem;
+		border:1px solid #888;
+		border-radius:5px;
+		margin:5px;
+		font-family: 'Open Sans', sans-serif;
+		cursor:pointer;
+		text-align:center;
+	}
+	.spec_button:focus{
+		outline:none;
+	}
+	#remove_spec{
+		background-color:#e06b6b;
+	}
+	#remove_spec:hover{
+		background-color:#e05c5c;
+	}
+
+	/* the big button */
+	#make_plot{
+		font-family: 'Dosis', sans-serif;
+		font-size:2rem;
+		width:calc(100% - 40px);
+		margin:10px 20px;
+		border-radius:10px;
+		background-color:#2c579e;
+		color:#eee;
+		cursor:pointer;
+		border:1px solid #888;
+		box-shadow:3px 3px 1px #888;
+		min-width:400px;
+	}
+	#make_plot:focus{
+		outline:none;
+	}
+	#make_plot:hover{
+		background-color:#1f4077;
+	}
+	#make_plot:active{
+		background-color:#002060;
+	}
+
+	.all_tools{
+		display:flex;
+		flex-direction:row;
+		flex-wrap:wrap;
+	}
 
 
-#add_spec{
-	background-color:#87e588;
-}
-#add_spec:hover{
-	background-color:#4dd653;
-}
-
-
+	#add_spec{
+		background-color:#87e588;
+	}
+	#add_spec:hover{
+		background-color:#4dd653;
+	}
+	#plot_holder{
+		margin:5px;
+		height:50vh; /* default */
+		display:flex;
+		flex-direction:column;
+		justify-content:center;
+		background-position: center;
+	    background-repeat: no-repeat;
+	    background-size: cover;
+	}
+	#plot_placeholder{
+		text-align:center;
+		font-size:2rem;
+	}
+	.loading_text{
+		margin:0;
+	}
 </style>
 <link href="https://fonts.googleapis.com/css?family=Montserrat|Spectral+SC" rel="stylesheet">
 {% endblock %}
@@ -255,107 +515,11 @@ html{
 	<div class="all_tools">
 		<div class="toolset" id="global_tools">
 			<h2 class="toolset_title">Global Tools</h2>
-			<div class="toolset_content">
-				<table class="tools">
-					<tr class="tool" id="fig_width">
-						<td class="tool_label">Width</td>
-						<td class="tool_action">
-							<input name="fig_width" type=number step="any" value=16>
-						</td>
-					</tr>
-					<tr class="tool" id="fig_height">
-						<td class="tool_label">Height</td>
-						<td class="tool_action">
-							<input name="fig_height" type=number step="any" value=7>
-						</td>
-					</tr>
-					<tr class="tool" id="title">
-						<td class="tool_label">Title</td>
-						<td class="tool_action">
-							<input name="title">
-						</td>
-					</tr>
-					<tr class="tool" id="show_title">
-						<td class="tool_label">Show title</td>
-						<td class="tool_action">
-							<input type=checkbox name="show_title">
-						</td>
-					</tr>
-					<tr class="tool" id="xlabel">
-						<td class="tool_label">X-axis label</td>
-						<td class="tool_action">
-							<input name="xlabel">
-						</td>
-					</tr>
-					<tr class="tool" id="show_xlabel">
-						<td class="tool_label">Show x-axis label</td>
-						<td class="tool_action">
-							<input type=checkbox name="show_xlabel">
-						</td>
-					</tr>
-					<tr class="tool" id="ylabel">
-						<td class="tool_label">Y-axis label</td>
-						<td class="tool_action">
-							<input name="ylabel">
-						</td>
-					</tr>
-					<tr class="tool" id="show_ylabel">
-						<td class="tool_label">Show y-axis label</td>
-						<td class="tool_action">
-							<input type=checkbox name="show_ylabel">
-						</td>
-					</tr>
-					<tr class="tool" id="xmin">
-						<td class="tool_label">
-							x<sub>min</sub>
-						</td>
-						<td class="tool_action">
-							<input name="xmin" type=number step="any">
-						</td>
-					</tr>
-					<tr class="tool" id="xmax">
-						<td class="tool_label">
-							x<sub>max</sub>
-						</td>
-						<td class="tool_action">
-							<input name="xmax" type=number step="any">
-						</td>
-					</tr>
-					<tr class="tool" id="ymin">
-						<td class="tool_label">
-							y<sub>min</sub>
-						</td>
-						<td class="tool_action">
-							<input name="ymin" type=number step="any">
-						</td>
-					</tr>
-					<tr class="tool" id="ymax">
-						<td class="tool_label">
-							y<sub>max</sub>
-						</td>
-						<td class="tool_action">
-							<input name="ymax" type=number step="any">
-						</td>
-					</tr>
-					<tr class="tool" id="show_legend">
-						<td class="tool_label">Show legend</td>
-						<td class="tool_action">
-							<input type=checkbox name="show_legend">
-						</td>
-					</tr>
-					<tr class="tool" id="legend_location">
-						<td class="tool_label">Legend location</td>
-						<td class="tool_action">
-							<select name="legend_location">
-								<option value=0>Top right</option>
-								<option value=1>Top left</option>
-								<option value=2>Bottom left</option>
-								<option value=3>Bottom right</option>
-							</select>
-						</td>
-					</tr>
-				</table>
+			
+			<div id="pc_target" class="toolset_content">
+
 			</div>
+
 		</div>
 		<div class="toolset" id="spectra_tools">
 			<h2 class="toolset_title">Spectra Tools</h2>
@@ -366,19 +530,14 @@ html{
 						<thead class="spec_table_head">
 							<tr>
 								<th>Name</th>
-								<th>Show</th>
+								<th>Showing</th>
 							</tr>
 						</thead>
-						<tbody id="working_set_tbody">
-							{% for spec in spec_list %}
-							<tr class="spec_table_row">
-								<td>{{spec}}</td>
-								<td class="spec_table_show"><input type=checkbox checked></td>
-							</tr>
-							{% empty %}
-							<tr><td>No spectra found in database</td><td></td><td></td></tr>
-							{% endfor %}
+
+						<tbody id="sl_target">
+
 						</tbody>
+
 					</table>
 				</div>
 
@@ -394,44 +553,10 @@ html{
 			-->
 
 				<!-- tools associated with currently-selected spectrum -->
-				<table class="tools">
-					<tr class="tool" id="show">
-						<td class="tool_label">Show</td>
-						<td class="tool_action">
-							<input name="show" type=checkbox>
-						</td>
-					</tr>
-					<tr class="tool" id="include_in_legend">
-						<td class="tool_label">Include in legend</td>
-						<td class="tool_action">
-							<input name="include_in_legend" type=checkbox>
-						</td>
-					</tr>
-					<tr class="tool" id="legend_name">
-						<td class="tool_label">Legend name</td>
-						<td class="tool_action">
-							<input name="legend_name">
-						</td>
-					</tr>
-					<tr class="tool" id="line_width">
-						<td class="tool_label">Line width</td>
-						<td class="tool_action">
-							<input name="line_width" type=number min="0" step="any">
-						</td>
-					</tr>
-					<tr class="tool" id="color">
-						<td class="tool_label">Color</td>
-						<td class="tool_action">
-							<input name="color" type=color value="#7ac7ff">
-						</td>
-					</tr>
-					<tr class="tool" id="opacity">
-						<td class="tool_label">Opacity</td>
-						<td class="tool_action">
-							<input name="opacity" type=number min="0" max="1" step="any">
-						</td>
-					</tr>
-				</table>
+				<div id="sc_target">
+				
+				</div>
+
 			</div>
 		</div>
 	</div>
@@ -439,32 +564,32 @@ html{
 </form>
 
 <!-- image / plot window (height is set by javascript on update) -->
-<style>
-#plot_holder{
-	margin:5px;
-	height:50vh; /* default */
-	display:flex;
-	flex-direction:column;
-	justify-content:center;
-	background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-}
-#plot_placeholder{
-	text-align:center;
-	font-size:2rem;
-}
-.loading_text{
-	margin:0;
-}
-</style>
 <div class="toolset" id="plot_holder">
 	<div id="plot_placeholder" style="display:none;"><img src={% static "plotbot/loading.gif" %} /><p class="loading_text">Loading...</p></div>
 </div>
 
 <script>
 
+/* new plot page actions:
+	- generate plot config html and insert into correct point in page
+	- generate spec list html and insert into correct point in page
+	- generate any spec config html and insert into correct point (hide all but one)
+*/
 
+var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plot_holder'));
+ph.insertPlotConfigHtml();
+
+// add spectra
+{% for spec in specs %}
+ph.addSpec('{{spec}}',{{spec.data}});
+{% endfor %}
+
+$('#make_plot').click(function(){
+	ph.updatePlot();
+});
+
+
+// nothing below here matters if we're doing plotly
 
 // pass form data as json
 $(function() {
@@ -478,7 +603,8 @@ $(function() {
 			string_data = JSON.stringify(to_json);
 			// ajax the stringified data
 
-			$('#plot_placeholder').show();
+			//$('#plot_placeholder').show();
+			/*
 			$.get({
 				url:'make_plot',
 				data:to_json,
@@ -489,6 +615,7 @@ $(function() {
 					fitPlotDiv();
 				}
 			});
+			*/
 		return false; // don't reload the page
 	});
 
@@ -528,6 +655,7 @@ $(function() {
 
 });
 // re-fit the plot div when the window is resized
+/*
 $(window).on('resize',function(){
 	fitPlotDiv();
 });
@@ -543,6 +671,7 @@ function fitPlotDiv(){
 		$('#plot_holder').height(to_h);
 	});
 }
+*/
 </script>
 
 {% endblock %}

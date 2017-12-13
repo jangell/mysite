@@ -8,7 +8,11 @@ from .models import *
 
 # default page for plotbot, with tools and plotting button
 def index(request):
-	context = {'spec_list':Spec.objects.all()}
+	specs = Spec.objects.all()
+	data = []
+	for s in specs:
+		s.data = s.getPoints()
+	context = {'specs':specs}
 	return render(request,'plotbot/index.html',context)
 
 # spectral browser
