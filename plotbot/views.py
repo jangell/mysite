@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import json
 
 from django.shortcuts import render
 from django.conf import settings
@@ -10,10 +11,20 @@ from .models import *
 def index(request):
 	specs = Spec.objects.all()
 	data = []
-	for s in specs:
-		s.data = s.getPoints()
+	#for s in specs:
+	#	s.data = s.getPoints()
 	context = {'specs':specs}
 	return render(request,'plotbot/index.html',context)
+
+# AJAX function to return a single spectrum (incl. data) based on its id
+def getSpec(request):
+	get = request.GET
+	sid = get.get('spec_id')
+	spec = Spec.objects.get(pk=sid)
+	spec_dict = {}
+	spec_dict['name'] = str(spec)
+	spec_dict['data'] = spec.getPoints()
+	return http.HttpResponse(json.dumps(spec_dict), content_type='application/json')
 
 # spectral browser
 def spectra(request):

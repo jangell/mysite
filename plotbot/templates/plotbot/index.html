@@ -654,7 +654,7 @@ class PlotHandler{
 		flex-direction:column;
 		align-items:center;
 		justify-content:center;
-		z-index:1;
+		z-index:11000;
 	}
 	.modal{
 		display:flex;
@@ -663,7 +663,7 @@ class PlotHandler{
 		background:#bbb;
 		border-radius:5px;
 		overflow:hidden;
-		min-width:50vw;
+		min-width:70vw;
 	}
 	.modal_title{
 		text-align:center;
@@ -690,6 +690,86 @@ class PlotHandler{
 {% block body %}
 {% csrf_token %}
 
+<style>
+.tab{
+	display:inline-block;
+	border-top-left-radius:5px;
+	border-top-right-radius:5px;
+	border:1px solid #888;
+	border-bottom:none;
+	background:#bbb;
+	cursor:pointer;
+}
+.tab:hover{
+	background:#ccc;
+}
+.selected_tab{
+	font-weight:bold;
+	background:#ddd;
+}
+.selected_tab:hover{
+	background:#ddd;
+	cursor:default;
+}
+.modal_subtitle{
+	margin: 5px;
+}
+.modal_option{
+	background:#ddd;
+	border:1px solid #888;
+	padding:10px;
+}
+/* this one starts hidden */
+#modal_csv{
+	display:none;
+}
+
+.database_table{
+	width:100%;
+	border-collapse:collapse;
+}
+
+#modal_db_thead{
+	display:block;
+	width:100%;
+	background-color:#444;
+	color:#eee;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+}
+#modal_db_tbody{
+/* eventually make this scroll */
+	display:block;
+	width:calc(100% - 2px);
+	max-height:50vh;
+	overflow:auto;
+	border:1px solid #888;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+	border-top:none;
+}
+
+.modal_db_row{
+	display:table;
+	width:100%;
+	cursor:pointer;
+	background:#fff;
+	border-bottom:1px solid #ccc;
+	text-align:center;
+}
+.modal_db_row:hover{
+	background:#ccc;
+}
+.modal_db_id{
+	width:20%;
+}
+.modal_db_name{
+}
+.modal_db_wv{
+	width:20%
+}
+</style>
+
 <!-- modal -->
 <div class="modal_bg">
 	<script>
@@ -699,24 +779,101 @@ class PlotHandler{
 	<div class="modal">
 		<h2 class="modal_title">Add Spectrum</h2>
 		<div class="modal_content">
-			<form id="modal_form">
-				<h3 class="modal_subtitle">Upload from CSV</h3>
-				<hr>
-				<input name=file type=file accept=".csv" id="spec_upload_file">
-				<hr>
-				<table>
-					<tr>
-						<td>Name</td>
-						<td><input id="modal_spec_name" name=name></td>
-					</tr>
+			<div class="tabs">
+				<div class="tab" id="csv_tab">
+					<h3 class="modal_subtitle">Upload from CSV</h3>
+				</div>
+				<div class="tab selected_tab" id="db_tab">
+					<h3 class="modal_subtitle">Add from database</h3>
+				</div>
+			</div>
+			<div class="modal_option" id="modal_csv">
+				<!-- add by uploading csv -->
+				<form id="modal_form">
+					<input name=file type=file accept=".csv" id="spec_upload_file">
+					<hr>
+					<table>
+						<tr>
+							<td>Name</td>
+							<td><input id="modal_spec_name" name=name></td>
+						</tr>
+					</table>
+					<hr>
+					<input type=submit value="Upload">
+					<button id="cancel_modal">Cancel</button>
+				</form>
+			</div>
+			<div class="modal_option" id="modal_db">
+				<!-- adding from database - list all database options (for now, in one list) -->
+				<table class="database_table">
+					<thead id="modal_db_thead">
+						<tr>
+							<th class="modal_db_id">ID</th>
+							<th class="modal_db_name">Name</th>
+							<th class="modal_db_wv">Wavelength</th>
+						</tr>
+					</thead>
+					<tbody id="modal_db_tbody">
+						<!-- database spectra get filled in here -->
+					</tbody>
 				</table>
-				<hr>
-				<input type=submit value="Upload">
-				<button id="cancel_modal">Cancel</button>
-			</form>
+			</div>
 		</div>
 	</div>
 </div>
+
+<script>
+
+// returns a jquery html row, given a name and wavelength
+function modalDbRow(id, name, wv){
+	var wv_str;
+	var row = $('<tr>').addClass('modal_db_row');
+	row.append($('<td>').addClass('modal_db_id').html(id));
+	row.append($('<td>').addClass('modal_db_name').html(name));
+	if(wv != -1){
+		wv_str = wv+'nm';
+	}
+	else{
+		wv_str = 'Unknown';
+	}
+	row.append($('<td>').addClass('modal_db_wv').html(wv_str));
+	return row;
+}
+
+// load database into modal_db_tbody at page load (for now)
+{% for spec in specs %}
+$('#modal_db_tbody').append(modalDbRow('{{spec.spec_id}}', '{{spec.name}}', '{{spec.wavelength}}'));
+{% endfor %}
+
+// this has to go to the end because it's going to tie into plothandler
+$('.modal_db_row').click(function(){
+	var id = $(this).find('.modal_db_id').html();
+	// ajax call to get db spectrum with id in modal_db_id
+	$.get({
+		url:'getSpec',
+		data:{'spec_id':id},
+		success:function(response){
+			ph.addSpec(response['name'],response['data'])
+			$('.modal_bg').hide();
+		}
+	});
+	// add spectrum to plothandler
+});
+
+$('.tab').click(function(){
+	// set this tab class
+	$('.selected_tab').removeClass('selected_tab');
+	$(this).addClass('selected_tab');
+	// set the correct modal_option
+	$('.modal_option').hide();
+	if($(this).attr('id') == 'csv_tab'){
+		$('#modal_csv').show();
+	}
+	else{
+		$('#modal_db').show();
+	}
+});
+</script>
 <!-- end of modal -->
 
 <form id="plot_form">
