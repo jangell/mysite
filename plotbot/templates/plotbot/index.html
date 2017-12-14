@@ -642,14 +642,9 @@ class PlotHandler{
 	.loading_text{
 		margin:0;
 	}
-</style>
-<link href="https://fonts.googleapis.com/css?family=Montserrat|Spectral+SC" rel="stylesheet">
-{% endblock %}
 
-{% block body %}
-{% csrf_token %}
-<style>
-/* modal window */
+
+	/* modal window */
 	.modal_bg{
 		position:absolute;
 		width:100%;
@@ -689,8 +684,18 @@ class PlotHandler{
 	}
 
 </style>
+<link href="https://fonts.googleapis.com/css?family=Montserrat|Spectral+SC" rel="stylesheet">
+{% endblock %}
 
+{% block body %}
+{% csrf_token %}
+
+<!-- modal -->
 <div class="modal_bg">
+	<script>
+	// hide modal on page load (not the long-term solution)
+	$('.modal_bg').hide();
+	</script>
 	<div class="modal">
 		<h2 class="modal_title">Add Spectrum</h2>
 		<div class="modal_content">
@@ -709,92 +714,9 @@ class PlotHandler{
 				<input type=submit value="Upload">
 				<button id="cancel_modal">Cancel</button>
 			</form>
-<script>
-// hide all this on page load (not the long-term solution)
-$('.modal_bg').hide();
-
-// make the 'cancel' button in modal close the modal
-$('#cancel_modal').click(function(){
-	clearModal();
-	$('.modal_bg').hide();
-});
-
-// set the default name to the file name when one is selected
-$('#spec_upload_file').change(function(){
-	var filename = $('#spec_upload_file').val().split('\\').reverse()[0];
-	var specname = filename.slice(0,-4);
-	$('#modal_spec_name').attr('value',specname);
-});
-
-// clear data from modal
-function clearModal(){
-	var modal = $('.modal');
-	modal.find('#modal_spec_name').val('');
-	modal.find('#spec_upload_file').val('');
-}
-
-// handle modal form submission
-// parse csv, including checking that the domain is in output[0] and ordered low to high
-$('#modal_form').submit(function(event){
-	event.preventDefault(); // don't reload the page on form submit
-	// parse the data in a filereader (it's async and it's reeeeal ugly)
-	var wavs, counts;
-	var lista = [];
-	var listb = [];
-	var reader = new FileReader;
-	reader.onload = function(){
-		// parse into lists
-		var data = reader.result.split(/\r|\n/); // this regex is to make sure we don't run into the windows vs mac newline issue
-		for(var i = 0; i < data.length; i++){
-			var points = data[i].split(',');
-			var to_a = parseFloat(points[0]);
-			var to_b = parseFloat(points[1]);
-			if(to_a)
-				lista.push(parseFloat(points[0]));
-			if(to_b)
-				listb.push(parseFloat(points[1]));
-		}
-		// find the one that's going up or down by a consistent amount (assume it's the one where the point in the middle is closest to halfway between the start and end values. there's a very small chance this is wrong. TODO: fix this issue)
-		// span is the difference between the first and last values
-		var lista_span = lista[lista.length - 1] - lista[0]
-		var listb_span = listb[listb.length - 1] - listb[0]
-		// mid is the value in the middle
-		var lista_mid = lista[lista.length / 2]
-		var listb_mid = listb[listb.length / 2]
-		// gap is the difference between the mid and half the span
-		var lista_gap = Math.abs(lista_mid - (lista[0] + (lista_span/2)));
-		var listb_gap = Math.abs(listb_mid - (listb[0] + (listb_span/2)));
-		// the smaller gap is the wavenumbers
-		if(lista_gap < listb_gap){
-			wavs = lista;
-			counts = listb;
-		}
-		else{
-			wavs = listb;
-			counts = lista;
-		}
-		// check if wavs (and therefore both) need reversing
-		if(wavs[1] < wavs[0]){
-			wavs.reverse();
-			counts.reverse();
-		}
-		data = [wavs,counts];
-		// get name input and then send it to the plothandler
-
-		var specname = $('#modal_spec_name').val();
-		ph.addSpec(specname, data);
-		clearModal();
-		$('.modal_bg').hide();
-	}
-	var file = document.querySelector('#spec_upload_file').files[0];
-	reader.readAsText(file);
-});
-</script>
-
 		</div>
 	</div>
 </div>
-
 <!-- end of modal -->
 
 <form id="plot_form">
@@ -875,8 +797,86 @@ ph.addSpec('{{spec}}',{{spec.data}});
 {% endfor %}
 
 
+// modal window
 
-// nothing below here matters if we're doing plotly
+// make the 'cancel' button in modal close the modal
+$('#cancel_modal').click(function(){
+	clearModal();
+	$('.modal_bg').hide();
+});
+
+// set the default name to the file name when one is selected
+$('#spec_upload_file').change(function(){
+	var filename = $('#spec_upload_file').val().split('\\').reverse()[0];
+	var specname = filename.slice(0,-4);
+	$('#modal_spec_name').attr('value',specname);
+});
+
+// clear data from modal
+function clearModal(){
+	var modal = $('.modal');
+	modal.find('#modal_spec_name').val('');
+	modal.find('#spec_upload_file').val('');
+}
+
+// handle modal form submission
+// parse csv, including checking that the domain is in output[0] and ordered low to high
+$('#modal_form').submit(function(event){
+	event.preventDefault(); // don't reload the page on form submit
+	// parse the data in a filereader (it's async and it's reeeeal ugly)
+	var wavs, counts;
+	var lista = [];
+	var listb = [];
+	var reader = new FileReader;
+	reader.onload = function(){
+		// parse into lists
+		var data = reader.result.split(/\r|\n/); // this regex is to make sure we don't run into the windows vs mac newline issue
+		for(var i = 0; i < data.length; i++){
+			var points = data[i].split(',');
+			var to_a = parseFloat(points[0]);
+			var to_b = parseFloat(points[1]);
+			if(to_a)
+				lista.push(parseFloat(points[0]));
+			if(to_b)
+				listb.push(parseFloat(points[1]));
+		}
+		// find the one that's going up or down by a consistent amount (assume it's the one where the point in the middle is closest to halfway between the start and end values. there's a very small chance this is wrong. TODO: fix this issue)
+		// span is the difference between the first and last values
+		var lista_span = lista[lista.length - 1] - lista[0]
+		var listb_span = listb[listb.length - 1] - listb[0]
+		// mid is the value in the middle
+		var lista_mid = lista[lista.length / 2]
+		var listb_mid = listb[listb.length / 2]
+		// gap is the difference between the mid and half the span
+		var lista_gap = Math.abs(lista_mid - (lista[0] + (lista_span/2)));
+		var listb_gap = Math.abs(listb_mid - (listb[0] + (listb_span/2)));
+		// the smaller gap is the wavenumbers
+		if(lista_gap < listb_gap){
+			wavs = lista;
+			counts = listb;
+		}
+		else{
+			wavs = listb;
+			counts = lista;
+		}
+		// check if wavs (and therefore both) need reversing
+		if(wavs[1] < wavs[0]){
+			wavs.reverse();
+			counts.reverse();
+		}
+		data = [wavs,counts];
+		// get name input and then send it to the plothandler
+
+		var specname = $('#modal_spec_name').val();
+		ph.addSpec(specname, data);
+		clearModal();
+		$('.modal_bg').hide();
+	}
+	var file = document.querySelector('#spec_upload_file').files[0];
+	reader.readAsText(file);
+});
+
+// nothing below here matters if we're doing plotly (except for saving state sometime in the future)
 
 // pass form data as json
 $(function() {
