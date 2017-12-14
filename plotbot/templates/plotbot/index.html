@@ -4,6 +4,7 @@
 {% block head_bottom %}
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.3.6/papaparse.min.js"></script> papaparse -->
 <script>
 // TO BE MOVED TO: plot_spec_configs.js
 // Jason Angell
@@ -12,7 +13,7 @@
 
 // define javascript classes for PlotConfig and SpecConfig objects
 
-var valid_inputs = ['checkbox','text','number','color'];
+var valid_inputs = ['checkbox','text','number','color','button'];
 
 function randomHex(){
 	var hexVal = (parseInt(Math.random() * 256)).toString(16);
@@ -93,7 +94,7 @@ class SpecConfig{
 		this.selected = false; // keep track of which is currently showing (and highlighted)
 		this.fields = {};
 		this.fields['show'] = new Field('spec'+this.spec_id+'_show', 'Show', 'checkbox', {'checked':true});
-		this.fields['legend_name'] = new Field('spec'+this.spec_id+'_legend_name', 'Legend label', 'text',{'placeholder':'No label'});
+		this.fields['legend_name'] = new Field('spec'+this.spec_id+'_legend_name', 'Legend label', 'text',{'value':this.spec_name,'placeholder':'No label'});
 		this.fields['line_width'] = new Field('spec'+this.spec_id+'_line_width', 'Line width (px)', 'number', {'value':2});
 		this.fields['color'] = new Field('spec'+this.spec_id+'_color', 'Color', 'color', {'value':randomColor()});
 		this.fields['opacity'] = new Field('spec'+this.spec_id+'_opacity', 'Opacity', 'number', {'value':1});
@@ -109,9 +110,15 @@ class SpecConfig{
 	getRowId(){
 		return 'speclist_'+this.spec_id;
 	}
+	getRowSelector(){
+		return '#'+this.getRowId();
+	}
 	// returns the id to use for the relevant div in the specconfig
 	getConfigId(){
 		return 'specconfig_'+this.spec_id;
+	}
+	getConfigSelector(){
+		return '#'+this.getConfigId();
 	}
 
 	// generates a row with name and show/don't-show checkbox
@@ -121,9 +128,14 @@ class SpecConfig{
 
 		// create the actual row
 		var row = $('<tr>').addClass('spec_table_row').attr('id',this.getRowId());
-		row.append($('<td>').html(this.spec_name));
+		// add entry for spec name
+		row.append($('<td>').addClass('spec_row_name').html(this.spec_name));
+		// add entry for spec color
+		var color_box = $('<td>').addClass('color_box').addClass('spec_row_color');
+		row.append(color_box);
+		// add entry for showing box
 		var show_box = $('<input>').attr('type','checkbox').attr('checked',true).attr('disabled',true);
-		var to_add = $('<td>').addClass('spec_table_show').append(show_box);
+		var to_add = $('<td>').addClass('spec_row_show').append(show_box);
 		row.append(to_add);
 
 		// set css based on whether this is selected or not
@@ -131,8 +143,8 @@ class SpecConfig{
 		else{row.addClass('unselected_row');}
 
 		// get the html id of the config table and the speclist row (we need them for the functions)
-		var configId = '#'+this.getConfigId();
-		var rowId = '#'+this.getRowId();
+		var configId = this.getConfigSelector();
+		var rowId = this.getRowSelector();
 
 		// function for when this spec is clicked on in the list
 		row.on('click',function(){
@@ -161,12 +173,30 @@ class SpecConfig{
 		return row;
 	}
 
+	// get the current color of the spec config as rgba string
+	getColor(){
+		var r, g, b, a;
+		var hex = this.valueOf('color'); // always gets a hex string (ex., #rrggbb)
+		a = this.valueOf('opacity');
+		r = parseInt(hex.substring(1,3), 16);
+		g = parseInt(hex.substring(3,5), 16);
+		b = parseInt(hex.substring(5,7), 16);
+		return 'rgba('+r+','+g+','+b+','+a+')';
+	}
+
+	// update the background color of the spec list based on the color & opacity of the 
+	updateColor(){
+		var _this = this;
+		var rowId = this.getRowSelector();
+		$(rowId).find('.color_box').css('background-color',_this.getColor());
+	}
+
 	// generates an html table for spec configuration
 	generateSpecConfigHtml(){
 		var _this = this; // see complaint in generateSpecListHtml()
 		// get the html id of the config table and the speclist row (we need them for the functions)
-		var configId = '#'+this.getConfigId();
-		var rowId = '#'+this.getRowId();
+		var configId = this.getConfigSelector();
+		var rowId = this.getRowSelector();
 
 		var table = $('<table>').addClass('tools');
 		table.attr('id',this.getConfigId());
@@ -182,12 +212,20 @@ class SpecConfig{
 			table.append(this.fields[field].toTableRow(self.spec_id));
 		}
 
-		// function to update the 'show' checkbox in the list based on a change in the one in the spec config table
+		// function to update the 'show' checkbox in spec list based on a change in the one in the spec config table
 		this.fields['show'].element.change(function(){
 			var checked = _this.valueOf('show');
 			$(rowId).find('input').attr('checked',checked);
 		});
-
+		
+		// function to update the 'color' box in spec list based on a change to color or opacity in spec config
+		this.fields['color'].element.change(function(){
+			_this.updateColor();
+		});
+		this.fields['opacity'].element.change(function(){
+			_this.updateColor();
+		});
+		_this.updateColor();
 		return table;
 
 	}
@@ -196,21 +234,13 @@ class SpecConfig{
 	getPlotlyData(){
 		// check here if 'show' is true or not (if not, return null immediately)
 		if(!this.valueOf('show')){return null;}
-		// parse color and opacity into rgba string
-		var r, g, b, a;
-		var hex = this.valueOf('color'); // always gets a hex string (ex., #rrggbb)
-		a = this.valueOf('opacity');
-		r = parseInt(hex.substring(1,3), 16);
-		g = parseInt(hex.substring(3,5), 16);
-		b = parseInt(hex.substring(5,7), 16);
-		var rgba_string = 'rgba('+r+','+g+','+b+','+a+')';
 		return {
 			x: this.spec_data[0],
 			y: this.spec_data[1],
 			name: this.valueOf('legend_name'),
 			showlegend: !(this.valueOf('legend_name') == ''), // only show in legend if field isn't blank
 			line: {
-				color: rgba_string, // color and opacity (convert to rgba)
+				color: this.getColor(), // color and opacity (convert to rgba)
 				width: this.valueOf('line_width'), // line width in pixels
 			}
 		}
@@ -226,14 +256,16 @@ class PlotConfig{
 		//this.fields['fig_width'] = new Field('fig_width', 'Width', 'number');
 		//this.fields['fig_height'] = new Field('fig_height', 'Height', 'number');
 		this.fields['title'] = new Field('title', 'Title', 'text', {'placeholder':'No title'});
-		this.fields['show_title'] = new Field('show_title', 'Show title', 'checkbox');
+		//this.fields['show_title'] = new Field('show_title', 'Show title', 'checkbox');
 		this.fields['xlabel'] = new Field('xlabel', 'X-axis label', 'text', {'value': 'Wavenumber'});
 		this.fields['ylabel'] = new Field('ylabel', 'Y-axis label', 'text', {'value': 'Intensity'});
-		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number');
-		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number');
-		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number');
-		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number');
-		this.fields['show_legend'] = new Field('show_legend', 'Show legend', 'checkbox');
+		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number', {'placeholder':'Auto'}); // doesn't do anything yet
+		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number', {'placeholder':'Auto'}); // doesn't do anything yet
+		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number', {'placeholder':'Auto'}); // doesn't do anything yet
+		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number', {'placeholder':'Auto'}); // doesn't do anything yet
+		this.fields['show_legend'] = new Field('show_legend', 'Show legend', 'checkbox', {'checked':'true'});
+		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add'});
+		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum (cannot undo!)', 'button', {'value':'Remove'});
 		// TODO: create legend location
 		//this.legend_location = new Field('legend_location', 'Legend location', 'option', {'0':'Top right', '1':'Top left', '2':'Bottom left', '3':'Bottom right'});
 	}
@@ -255,7 +287,7 @@ class PlotConfig{
 
 // handler for plot config and all spec configs for a given page
 class PlotHandler{
-	constructor(plot_config_target,spec_list_target,spec_config_target,plot_target){
+	constructor(plot_config_target, spec_list_target, spec_config_target, plot_target){
 		this.plot_config_target = plot_config_target;
 		this.spec_list_target = spec_list_target;
 		this.spec_config_target = spec_config_target;
@@ -266,7 +298,18 @@ class PlotHandler{
 		this.specConfigList = [];
 	}
 
+	// get the index of a spectrum in specConfigList based on its spec id
+	getSpecIndexById(id){
+		for(var i = 0; i < this.specConfigList.length; i++){
+			if(this.specConfigList[i].spec_id == id){
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	// appends the plot config html to the jquery element <target>
+	// creates a handler for any changes to tools to redraw the plot
 	insertPlotConfigHtml(){
 		this.plot_config_target.append(this.plotConfig.toTable());
 	}
@@ -280,7 +323,6 @@ class PlotHandler{
 		// show the first one, but hide all the others
 		this.spec_config_target.append(specConfig.generateSpecConfigHtml());
 	}
-
 
 	// adds a spectrum to the working set
 	addSpec(spec_name, spec_data){
@@ -296,6 +338,10 @@ class PlotHandler{
 		this.appendSpecListRow(sc);
 		// add div to specConfigs
 		this.appendSpecConfigHtml(sc);
+		// add event listeners to new tools
+		this.addToolListeners();
+		// redraw the plot
+		this.updatePlot();
 	}
 
 	// updates the plot drawing
@@ -317,11 +363,12 @@ class PlotHandler{
 		var layout = {
 			// margin is arbitrary for now
 			margin: {
-				l: 40,
-				r: 20,
-				t: 20,
-				b: 30
+				l: 50,
+				r: 40,
+				t: 40,
+				b: 60
 			},
+			title: this.plotConfig.valueOf('title'),
 			// x axis dictionary (expand to advanced features later)
 			xaxis: {
 				title: this.plotConfig.valueOf('xlabel')
@@ -341,11 +388,88 @@ class PlotHandler{
 		});
 	}
 
+	// adds an event listener to all .tool changes to update the plot
+	addToolListeners(){
+		var _this = this;
+		this.updatePlot();
+		$('.tool').change(function(){
+			_this.updatePlot();
+		});
+	}
+
+	
+	// shows a modal window, handles getting the spectrum from it
+	showAddModal(){
+		$('.modal_bg').show();
+		// add a handler to the escape key to get rid of modal
+		$(document).keyup(function(e){
+			if(e.keyCode == 27){
+				$('.modal_bg').hide();
+			}
+		});
+	}
+
+	
+	// adds event listeners to the add and remove buttons
+	startAddRemove(){
+		var _this = this;
+		// add spectrum
+		_this.plotConfig.fields['add_spec'].element.click(function(){
+			_this.showAddModal();
+		});
+		// remove spectrum
+		_this.plotConfig.fields['remove_spec'].element.click(function(){
+			// get which spectrum is currently selected
+			var selected_spec_id = $('.selected_row').attr('id').split('_')[1];
+			var selected_spec_index = _this.getSpecIndexById(selected_spec_id);
+			// make sure it exists
+			if(selected_spec_index < 0){
+				console.log('attempted to remove spectrum that could not be found');
+				return false;
+			}
+			// get specConfig object
+			var sc = _this.specConfigList[selected_spec_index];
+			// remove html config
+			$(sc.getConfigSelector()).remove();
+			// remove html row
+			$(sc.getRowSelector()).remove();
+			// remove specConfig object
+			if(selected_spec_index > -1){
+				_this.specConfigList.splice(selected_spec_index,1);
+				_this.updatePlot();
+			}
+			// select next spec if it exists (just "click" on its row)
+			// try the index of the list we just deleted
+			if(_this.specConfigList.length > selected_spec_index){
+				$(_this.specConfigList[selected_spec_index].getRowSelector()).click();
+			}
+			// if that fails, try index 0
+			else if(_this.specConfigList.length > 0){
+				$(_this.specConfigList[0].getRowSelector()).click();
+			}
+			// so now we selected something valid the list is empty. ok. cool.
+			return true;
+		});
+	}
+	
+
+	initialize(){
+		// insert plot configuration html
+		this.insertPlotConfigHtml();
+		// add event listeners for plot updates
+		this.addToolListeners();
+		// add event listeners to add & remove spectra
+		this.startAddRemove();
+
+		this.updatePlot();
+	}
+
 }
 
 </script>
 
 <style>
+
 	/* mobile first */
 	/* TO BE MOVED TO: index.css */
 	html{
@@ -403,12 +527,30 @@ class PlotHandler{
 	}
 	.spec_table_head{
 		border-bottom:1px solid #888;
+		display:table;
+		width:100%;
+		table-layout:fixed;
 	}
-	.spec_table_show{
-	 	text-align:center;
+	.spec_table_body{
+		display:block;
+		max-height:100px;
+		overflow-y:auto;
 	}
 	.spec_table_row{
+		display:table;
+		width:100%;
+		table-layout:fixed;
 		border-top:1px solid #ccc;
+	}
+	.spec_row_name{
+		overflow:auto;
+	}
+	.spec_row_color{
+		width:20%;
+	}
+	.spec_row_show{
+		width:20%;
+	 	text-align:center;
 	}
 
 	.unselected_row:hover{
@@ -444,12 +586,14 @@ class PlotHandler{
 	.spec_button:focus{
 		outline:none;
 	}
+	
+	#add_spec{
+		background-color:#77ee77;
+	}
 	#remove_spec{
-		background-color:#e06b6b;
+		background-color:#ffb2b2;
 	}
-	#remove_spec:hover{
-		background-color:#e05c5c;
-	}
+	
 
 	/* the big button */
 	#make_plot{
@@ -481,13 +625,6 @@ class PlotHandler{
 		flex-wrap:wrap;
 	}
 
-
-	#add_spec{
-		background-color:#87e588;
-	}
-	#add_spec:hover{
-		background-color:#4dd653;
-	}
 	#plot_holder{
 		margin:5px;
 		height:50vh; /* default */
@@ -511,6 +648,155 @@ class PlotHandler{
 
 {% block body %}
 {% csrf_token %}
+<style>
+/* modal window */
+	.modal_bg{
+		position:absolute;
+		width:100%;
+		height:100%;
+		background:rgba(0,0,0,.7);
+		display:flex;
+		flex-direction:column;
+		align-items:center;
+		justify-content:center;
+		z-index:1;
+	}
+	.modal{
+		display:flex;
+		flex-direction:column;
+		justify-content:center;
+		background:#bbb;
+		border-radius:5px;
+		overflow:hidden;
+		min-width:50vw;
+	}
+	.modal_title{
+		text-align:center;
+		width:100%;
+		background:#999;
+		padding:5px;
+		margin-top:0;
+		margin-bottom:0;
+	}
+	#modal_spec_name{
+		min-width:15rem;
+	}
+	.modal_content{
+		padding: 20px;
+	}
+	#cancel_modal{
+		float:right;
+	}
+
+</style>
+
+<div class="modal_bg">
+	<div class="modal">
+		<h2 class="modal_title">Add Spectrum</h2>
+		<div class="modal_content">
+			<form id="modal_form">
+				<h3 class="modal_subtitle">Upload from CSV</h3>
+				<hr>
+				<input name=file type=file accept=".csv" id="spec_upload_file">
+				<hr>
+				<table>
+					<tr>
+						<td>Name</td>
+						<td><input id="modal_spec_name" name=name></td>
+					</tr>
+				</table>
+				<hr>
+				<input type=submit value="Upload">
+				<button id="cancel_modal">Cancel</button>
+			</form>
+<script>
+// hide all this on page load (not the long-term solution)
+$('.modal_bg').hide();
+
+// make the 'cancel' button in modal close the modal
+$('#cancel_modal').click(function(){
+	clearModal();
+	$('.modal_bg').hide();
+});
+
+// set the default name to the file name when one is selected
+$('#spec_upload_file').change(function(){
+	var filename = $('#spec_upload_file').val().split('\\').reverse()[0];
+	var specname = filename.slice(0,-4);
+	$('#modal_spec_name').attr('value',specname);
+});
+
+// clear data from modal
+function clearModal(){
+	var modal = $('.modal');
+	modal.find('#modal_spec_name').val('');
+	modal.find('#spec_upload_file').val('');
+}
+
+// handle modal form submission
+// parse csv, including checking that the domain is in output[0] and ordered low to high
+$('#modal_form').submit(function(event){
+	event.preventDefault(); // don't reload the page on form submit
+	// parse the data in a filereader (it's async and it's reeeeal ugly)
+	var wavs, counts;
+	var lista = [];
+	var listb = [];
+	var reader = new FileReader;
+	reader.onload = function(){
+		// parse into lists
+		var data = reader.result.split(/\r|\n/); // this regex is to make sure we don't run into the windows vs mac newline issue
+		for(var i = 0; i < data.length; i++){
+			var points = data[i].split(',');
+			var to_a = parseFloat(points[0]);
+			var to_b = parseFloat(points[1]);
+			if(to_a)
+				lista.push(parseFloat(points[0]));
+			if(to_b)
+				listb.push(parseFloat(points[1]));
+		}
+		// find the one that's going up or down by a consistent amount (assume it's the one where the point in the middle is closest to halfway between the start and end values. there's a very small chance this is wrong. TODO: fix this issue)
+		// span is the difference between the first and last values
+		var lista_span = lista[lista.length - 1] - lista[0]
+		var listb_span = listb[listb.length - 1] - listb[0]
+		// mid is the value in the middle
+		var lista_mid = lista[lista.length / 2]
+		var listb_mid = listb[listb.length / 2]
+		// gap is the difference between the mid and half the span
+		var lista_gap = Math.abs(lista_mid - (lista[0] + (lista_span/2)));
+		var listb_gap = Math.abs(listb_mid - (listb[0] + (listb_span/2)));
+		// the smaller gap is the wavenumbers
+		if(lista_gap < listb_gap){
+			wavs = lista;
+			counts = listb;
+		}
+		else{
+			wavs = listb;
+			counts = lista;
+		}
+		// check if wavs (and therefore both) need reversing
+		if(wavs[1] < wavs[0]){
+			wavs.reverse();
+			counts.reverse();
+		}
+		data = [wavs,counts];
+		// get name input and then send it to the plothandler
+
+		var specname = $('#modal_spec_name').val();
+		ph.addSpec(specname, data);
+		clearModal();
+		$('.modal_bg').hide();
+	}
+	var file = document.querySelector('#spec_upload_file').files[0];
+	reader.readAsText(file);
+});
+</script>
+
+		</div>
+	</div>
+</div>
+
+<!-- end of modal -->
+
 <form id="plot_form">
 	<div class="all_tools">
 		<div class="toolset" id="global_tools">
@@ -529,12 +815,13 @@ class PlotHandler{
 					<table class="spec_table">
 						<thead class="spec_table_head">
 							<tr>
-								<th>Name</th>
-								<th>Showing</th>
+								<th class="spec_row_name">Name</th>
+								<th class="spec_row_color">Color</th>
+								<th class="spec_row_show">Showing</th>
 							</tr>
 						</thead>
 
-						<tbody id="sl_target">
+						<tbody class="spec_table_body" id="sl_target">
 
 						</tbody>
 
@@ -560,7 +847,9 @@ class PlotHandler{
 			</div>
 		</div>
 	</div>
+	<!--
 	<button id="make_plot">Make the plot!</button>
+-->
 </form>
 
 <!-- image / plot window (height is set by javascript on update) -->
@@ -577,16 +866,14 @@ class PlotHandler{
 */
 
 var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plot_holder'));
-ph.insertPlotConfigHtml();
+
+ph.initialize();
 
 // add spectra
 {% for spec in specs %}
 ph.addSpec('{{spec}}',{{spec.data}});
 {% endfor %}
 
-$('#make_plot').click(function(){
-	ph.updatePlot();
-});
 
 
 // nothing below here matters if we're doing plotly
