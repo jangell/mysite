@@ -8,3 +8,4 @@ from models import *
 admin.site.register(Spec)
 admin.site.register(Plot)
 admin.site.register(SpecConfig)
+admin.site.register(Source)

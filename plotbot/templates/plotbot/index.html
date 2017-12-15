@@ -309,6 +309,18 @@ class PlotHandler{
 		return -1;
 	}
 
+	getSelectedSpecIndex(){
+		var _this = this;
+		if($('.selected_row')){
+			var selected_spec_id = $('.selected_row').attr('id').split('_')[1];
+			var ssi = _this.getSpecIndexById(selected_spec_id);
+			return ssi;
+		}
+		else{
+			return null;
+		}
+	}
+
 	// appends the plot config html to the jquery element <target>
 	// creates a handler for any changes to tools to redraw the plot
 	insertPlotConfigHtml(){
@@ -327,6 +339,7 @@ class PlotHandler{
 
 	// adds a spectrum to the working set
 	addSpec(spec_name, spec_data){
+		var _this = this;
 		var sc = new SpecConfig(this.cur_spec_id, spec_name, spec_data);
 		this.cur_spec_id++; // make sure each is unique
 		// append it to spec config list
@@ -341,6 +354,8 @@ class PlotHandler{
 		this.appendSpecConfigHtml(sc);
 		// add event listeners to new tools
 		this.addToolListeners();
+		// select the newly added plot (hint: it's the last one)
+		$(this.specConfigList[this.specConfigList.length-1].getRowSelector()).click();
 		// redraw the plot
 		this.updatePlot();
 	}
@@ -432,7 +447,7 @@ class PlotHandler{
 	showAddModal(){
 		$('.modal_bg').show();
 		// add a handler to the escape key to get rid of modal
-		$(document).keyup(function(e){
+		$(document).keydown(function(e){
 			if(e.keyCode == 27){
 				$('.modal_bg').hide();
 			}
@@ -450,8 +465,7 @@ class PlotHandler{
 		// remove spectrum
 		_this.plotConfig.fields['remove_spec'].element.click(function(){
 			// get which spectrum is currently selected
-			var selected_spec_id = $('.selected_row').attr('id').split('_')[1];
-			var selected_spec_index = _this.getSpecIndexById(selected_spec_id);
+			var selected_spec_index = _this.getSelectedSpecIndex();
 			// make sure it exists
 			if(selected_spec_index < 0){
 				console.log('attempted to remove spectrum that could not be found');
@@ -482,14 +496,36 @@ class PlotHandler{
 		});
 	}
 	
+	// add key commands (up and down arrow) for navigating spec list
+	// up: 38
+	// down: 40
+	startArrowShortcuts(){
+		var _this = this;
+		$(document).keydown(function(e){
+			var ssi = _this.getSelectedSpecIndex();
+			if(e.keyCode == 38){
+				if(ssi != null && ssi > 0){
+					$(ph.specConfigList[ssi-1].getRowSelector()).click();
+					e.preventDefault();
+				}
+			}
+			else if(e.keyCode == 40){
+				if(ssi != null && ssi < (_this.specConfigList.length - 1)){
+					$(ph.specConfigList[ssi+1].getRowSelector()).click();
+					e.preventDefault();
+				}
+			}
+		});
+	}
 
 	initialize(){
 		// insert plot configuration html
 		this.insertPlotConfigHtml();
 		// add event listeners for plot updates
 		this.addToolListeners();
-		// add event listeners to add & remove spectra
+		// add event listeners to add & remove spectra and key commands
 		this.startAddRemove();
+		this.startArrowShortcuts();
 
 		this.updatePlot();
 	}
