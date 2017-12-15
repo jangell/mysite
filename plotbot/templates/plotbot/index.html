@@ -265,7 +265,7 @@ class PlotConfig{
 		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number', {'placeholder':'Auto'}); // doesn't do anything yet
 		this.fields['show_legend'] = new Field('show_legend', 'Show legend', 'checkbox', {'checked':'true'});
 		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add'});
-		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum (cannot undo!)', 'button', {'value':'Remove'});
+		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove'});
 		// TODO: create legend location
 		//this.legend_location = new Field('legend_location', 'Legend location', 'option', {'0':'Top right', '1':'Top left', '2':'Bottom left', '3':'Bottom right'});
 	}
@@ -285,6 +285,7 @@ class PlotConfig{
 	}
 }
 
+var thing;
 // handler for plot config and all spec configs for a given page
 class PlotHandler{
 	constructor(plot_config_target, spec_list_target, spec_config_target, plot_target){
@@ -346,6 +347,7 @@ class PlotHandler{
 
 	// updates the plot drawing
 	updatePlot(){
+		var _this = this;
 		var id = this.plot_target.attr('id');
 		var plot_div = document.getElementById(id);
 
@@ -371,16 +373,44 @@ class PlotHandler{
 			title: this.plotConfig.valueOf('title'),
 			// x axis dictionary (expand to advanced features later)
 			xaxis: {
-				title: this.plotConfig.valueOf('xlabel')
+				title: this.plotConfig.valueOf('xlabel'),
+				range: [parseFloat(this.plotConfig.valueOf('xmin')),parseFloat(this.plotConfig.valueOf('xmax'))]
 			},
 			yaxis: {
-				title: this.plotConfig.valueOf('ylabel')
+				title: this.plotConfig.valueOf('ylabel'),
+				range: [parseFloat(this.plotConfig.valueOf('ymin')),parseFloat(this.plotConfig.valueOf('ymax'))]
 			},
 			showlegend: this.plotConfig.valueOf('show_legend'),
 
 		}
 
-		Plotly.newPlot(plot_div, data, layout);
+		Plotly.newPlot(plot_div, data, layout, {showLink:false});
+
+		// hook in a function to update settings on zoom / pan
+		plot_div.on('plotly_relayout',function(eventdata){
+			var nDigits = 2;
+			// eventdata is either 
+			var pc = _this.plotConfig;
+			if(eventdata['dragmode']){
+				// do nothing
+				return;
+			}
+			// implied <else if>, because if the last one was true, it returns and never gets here
+			// for autorange, reset plotting range in form
+			if(eventdata['xaxis.autorange']){
+				pc.fields['xmin'].element.val('');
+				pc.fields['xmax'].element.val('');
+			}
+			if(eventdata['yaxis.autorange']){
+				pc.fields['ymin'].element.val('');
+				pc.fields['ymax'].element.val('');
+			}
+			// this just gives us the whole range, no questions asked! What a great day!
+			if(eventdata['xaxis.range[0]']){pc.fields['xmin'].element.val(eventdata['xaxis.range[0]'].toFixed(nDigits));} // yes, the whole thing is the key. no, i don't get it either
+			if(eventdata['xaxis.range[1]']){pc.fields['xmax'].element.val(eventdata['xaxis.range[1]'].toFixed(nDigits));}
+			if(eventdata['yaxis.range[0]']){pc.fields['ymin'].element.val(eventdata['yaxis.range[0]'].toFixed(nDigits));}
+			if(eventdata['yaxis.range[1]']){pc.fields['ymax'].element.val(eventdata['yaxis.range[1]'].toFixed(nDigits));}
+		});
 
 		// hook in a resize function
 		$(window).on('resize',function(){
@@ -931,7 +961,6 @@ $('.tab').click(function(){
 -->
 </form>
 
-<!-- image / plot window (height is set by javascript on update) -->
 <div class="toolset" id="plot_holder">
 	<div id="plot_placeholder" style="display:none;"><img src={% static "plotbot/loading.gif" %} /><p class="loading_text">Loading...</p></div>
 </div>
@@ -992,10 +1021,12 @@ $('#modal_form').submit(function(event){
 			var points = data[i].split(',');
 			var to_a = parseFloat(points[0]);
 			var to_b = parseFloat(points[1]);
-			if(to_a)
+			if(to_a){
 				lista.push(parseFloat(points[0]));
-			if(to_b)
+			}
+			if(to_b){
 				listb.push(parseFloat(points[1]));
+			}
 		}
 		// find the one that's going up or down by a consistent amount (assume it's the one where the point in the middle is closest to halfway between the start and end values. there's a very small chance this is wrong. TODO: fix this issue)
 		// span is the difference between the first and last values
