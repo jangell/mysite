@@ -827,12 +827,17 @@ class PlotHandler{
 	background:#ccc;
 }
 .modal_db_id{
-	width:20%;
+	width:10%;
 }
 .modal_db_name{
+	width:50%;
+}
+.modal_db_source{
+	width:20%;
 }
 .modal_db_wv{
-	width:20%
+	width:20%;
+	float:right;
 }
 </style>
 
@@ -876,6 +881,7 @@ class PlotHandler{
 						<tr>
 							<th class="modal_db_id">ID</th>
 							<th class="modal_db_name">Name</th>
+							<th class="modal_db_source">Source</th>
 							<th class="modal_db_wv">Wavelength</th>
 						</tr>
 					</thead>
@@ -891,11 +897,19 @@ class PlotHandler{
 <script>
 
 // returns a jquery html row, given a name and wavelength
-function modalDbRow(id, name, wv){
+function modalDbRow(id, name, source, wv){
 	var wv_str;
+	var src_str;
 	var row = $('<tr>').addClass('modal_db_row');
 	row.append($('<td>').addClass('modal_db_id').html(id));
 	row.append($('<td>').addClass('modal_db_name').html(name));
+	if(source != null){
+		src_str = source;
+	}
+	else{
+		src_str = 'Unknown';
+	}
+	row.append($('<td>').addClass('modal_db_source').html(src_str));
 	if(wv != -1){
 		wv_str = wv+'nm';
 	}
@@ -908,7 +922,7 @@ function modalDbRow(id, name, wv){
 
 // load database into modal_db_tbody at page load (for now)
 {% for spec in specs %}
-$('#modal_db_tbody').append(modalDbRow('{{spec.spec_id}}', '{{spec.name}}', '{{spec.wavelength}}'));
+$('#modal_db_tbody').append(modalDbRow('{{spec.spec_id}}', '{{spec.name}}', '{{spec.source}}', '{{spec.wavelength}}'));
 {% endfor %}
 
 // this has to go to the end because it's going to tie into plothandler
@@ -1054,14 +1068,18 @@ $('#modal_form').submit(function(event){
 		// parse into lists
 		var data = reader.result.split(/\r|\n/); // this regex is to make sure we don't run into the windows vs mac newline issue
 		for(var i = 0; i < data.length; i++){
-			var points = data[i].split(',');
-			var to_a = parseFloat(points[0]);
-			var to_b = parseFloat(points[1]);
-			if(to_a){
-				lista.push(parseFloat(points[0]));
+			try{
+				var points = data[i].split(',');
+				var to_a = parseFloat(points[0]);
+				var to_b = parseFloat(points[1]);
+				if(to_a && to_b){
+					lista.push(to_a);
+					listb.push(to_b);
+				}
 			}
-			if(to_b){
-				listb.push(parseFloat(points[1]));
+			catch(err){
+				console.log(err);
+				console.log('skipped line: '+data[i]);
 			}
 		}
 		// find the one that's going up or down by a consistent amount (assume it's the one where the point in the middle is closest to halfway between the start and end values. there's a very small chance this is wrong. TODO: fix this issue)
@@ -1074,6 +1092,14 @@ $('#modal_form').submit(function(event){
 		// gap is the difference between the mid and half the span
 		var lista_gap = Math.abs(lista_mid - (lista[0] + (lista_span/2)));
 		var listb_gap = Math.abs(listb_mid - (listb[0] + (listb_span/2)));
+		console.log('list a');
+		console.log(lista);
+		console.log(lista_mid);
+		console.log(lista_gap);
+		console.log('list b');
+		console.log(listb)
+		console.log(listb_mid);
+		console.log(listb_gap);
 		// the smaller gap is the wavenumbers
 		if(lista_gap < listb_gap){
 			wavs = lista;
