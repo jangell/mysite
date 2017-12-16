@@ -43,7 +43,7 @@ class Spec(models.Model):
 	description = models.TextField(blank=True,null=True)
 	hash_val = models.CharField(max_length=1000, blank=True,null=True)		# hash value to determine if an identical spectrum has already been uploaded
 	timestamp = models.DateTimeField(default=datetime.now)
-	#example_plot = models.ForeignKey('Plot',blank=True,null=True)
+	# example_plot = models.ForeignKey('Plot',blank=True,null=True)
 	# the actual data gets stored in a CSV
 	spec_file = models.FileField(upload_to='spec/csv')
 

@@ -3,6 +3,7 @@
 
 {% block head_bottom %}
 
+<!-- plotly cdn -->
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.3.6/papaparse.min.js"></script> papaparse -->
 <script>
@@ -311,7 +312,7 @@ class PlotHandler{
 
 	getSelectedSpecIndex(){
 		var _this = this;
-		if($('.selected_row')){
+		if($('.selected_row').length){
 			var selected_spec_id = $('.selected_row').attr('id').split('_')[1];
 			var ssi = _this.getSpecIndexById(selected_spec_id);
 			return ssi;
@@ -380,19 +381,28 @@ class PlotHandler{
 		var layout = {
 			// margin is arbitrary for now
 			margin: {
-				l: 50,
+				l: 70,
 				r: 40,
-				t: 40,
-				b: 60
+				t: 60,
+				b: 80
 			},
 			title: this.plotConfig.valueOf('title'),
+			titlefont: {
+				size: 22,
+			},
 			// x axis dictionary (expand to advanced features later)
 			xaxis: {
 				title: this.plotConfig.valueOf('xlabel'),
+				titlefont: {
+					size: 16,
+				},
 				range: [parseFloat(this.plotConfig.valueOf('xmin')),parseFloat(this.plotConfig.valueOf('xmax'))]
 			},
 			yaxis: {
 				title: this.plotConfig.valueOf('ylabel'),
+				titlefont: {
+					size: 16,
+				},
 				range: [parseFloat(this.plotConfig.valueOf('ymin')),parseFloat(this.plotConfig.valueOf('ymax'))]
 			},
 			showlegend: this.plotConfig.valueOf('show_legend'),
@@ -404,7 +414,7 @@ class PlotHandler{
 		// hook in a function to update settings on zoom / pan
 		plot_div.on('plotly_relayout',function(eventdata){
 			var nDigits = 2;
-			// eventdata is either 
+			// eventdata is either dragmode, autorange, or x-/y-axis ranges
 			var pc = _this.plotConfig;
 			if(eventdata['dragmode']){
 				// do nothing
@@ -815,6 +825,13 @@ class PlotHandler{
 	border-top:none;
 }
 
+.modal_db_headrow{
+	display:table;
+	width:100%;
+	cursor:pointer;
+	border-bottom:1px solid #ccc;
+	text-align:center;
+}
 .modal_db_row{
 	display:table;
 	width:100%;
@@ -830,14 +847,12 @@ class PlotHandler{
 	width:10%;
 }
 .modal_db_name{
-	width:50%;
 }
 .modal_db_source{
 	width:20%;
 }
 .modal_db_wv{
 	width:20%;
-	float:right;
 }
 </style>
 
@@ -878,7 +893,7 @@ class PlotHandler{
 				<!-- adding from database - list all database options (for now, in one list) -->
 				<table class="database_table">
 					<thead id="modal_db_thead">
-						<tr>
+						<tr class="modal_db_headrow">
 							<th class="modal_db_id">ID</th>
 							<th class="modal_db_name">Name</th>
 							<th class="modal_db_source">Source</th>
@@ -893,68 +908,6 @@ class PlotHandler{
 		</div>
 	</div>
 </div>
-
-<script>
-
-// returns a jquery html row, given a name and wavelength
-function modalDbRow(id, name, source, wv){
-	var wv_str;
-	var src_str;
-	var row = $('<tr>').addClass('modal_db_row');
-	row.append($('<td>').addClass('modal_db_id').html(id));
-	row.append($('<td>').addClass('modal_db_name').html(name));
-	if(source != null){
-		src_str = source;
-	}
-	else{
-		src_str = 'Unknown';
-	}
-	row.append($('<td>').addClass('modal_db_source').html(src_str));
-	if(wv != -1){
-		wv_str = wv+'nm';
-	}
-	else{
-		wv_str = 'Unknown';
-	}
-	row.append($('<td>').addClass('modal_db_wv').html(wv_str));
-	return row;
-}
-
-// load database into modal_db_tbody at page load (for now)
-{% for spec in specs %}
-$('#modal_db_tbody').append(modalDbRow('{{spec.spec_id}}', '{{spec.name}}', '{{spec.source}}', '{{spec.wavelength}}'));
-{% endfor %}
-
-// this has to go to the end because it's going to tie into plothandler
-$('.modal_db_row').click(function(){
-	var id = $(this).find('.modal_db_id').html();
-	// ajax call to get db spectrum with id in modal_db_id
-	$.get({
-		url:'getSpec',
-		data:{'spec_id':id},
-		success:function(response){
-			ph.addSpec(response['name'],response['data'])
-			$('.modal_bg').hide();
-		}
-	});
-	// add spectrum to plothandler
-});
-
-$('.tab').click(function(){
-	// set this tab class
-	$('.selected_tab').removeClass('selected_tab');
-	$(this).addClass('selected_tab');
-	// set the correct modal_option
-	$('.modal_option').hide();
-	if($(this).attr('id') == 'csv_tab'){
-		$('#modal_csv').show();
-	}
-	else{
-		$('#modal_db').show();
-	}
-});
-</script>
-<!-- end of modal -->
 
 <form id="plot_form">
 	<div class="all_tools">
@@ -1027,13 +980,14 @@ var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plo
 
 ph.initialize();
 
-// add spectra
-// {% for spec in specs %}
-// ph.addSpec('{{spec}}',{{spec.data}});
-// {% endfor %}
 
 
 // modal window
+
+// load database into modal_db_tbody at page load (for now)
+{% for spec in specs %}
+$('#modal_db_tbody').append(modalDbRow('{{spec.spec_id}}', '{{spec.name}}', '{{spec.source}}', '{{spec.wavelength}}'));
+{% endfor %}
 
 // make the 'cancel' button in modal close the modal
 $('#cancel_modal').click(function(){
@@ -1124,6 +1078,59 @@ $('#modal_form').submit(function(event){
 	}
 	var file = document.querySelector('#spec_upload_file').files[0];
 	reader.readAsText(file);
+});
+
+// returns a jquery html row, given a name and wavelength
+function modalDbRow(id, name, source, wv){
+	var wv_str;
+	var src_str;
+	var row = $('<tr>').addClass('modal_db_row');
+	row.append($('<td>').addClass('modal_db_id').html(id));
+	row.append($('<td>').addClass('modal_db_name').html(name));
+	if(source != null){
+		src_str = source;
+	}
+	else{
+		src_str = 'Unknown';
+	}
+	row.append($('<td>').addClass('modal_db_source').html(src_str));
+	if(wv != -1){
+		wv_str = wv+'nm';
+	}
+	else{
+		wv_str = 'Unknown';
+	}
+	row.append($('<td>').addClass('modal_db_wv').html(wv_str));
+	return row;
+}
+
+// this has to go to the end because it's going to tie into plothandler
+$('.modal_db_row').click(function(){
+	var id = $(this).find('.modal_db_id').html();
+	// ajax call to get db spectrum with id in modal_db_id
+	$.get({
+		url:'getSpec',
+		data:{'spec_id':id},
+		success:function(response){
+			ph.addSpec(response['name'],response['data'])
+			$('.modal_bg').hide();
+		}
+	});
+	// add spectrum to plothandler
+});
+
+$('.tab').click(function(){
+	// set this tab class
+	$('.selected_tab').removeClass('selected_tab');
+	$(this).addClass('selected_tab');
+	// set the correct modal_option
+	$('.modal_option').hide();
+	if($(this).attr('id') == 'csv_tab'){
+		$('#modal_csv').show();
+	}
+	else{
+		$('#modal_db').show();
+	}
 });
 
 // nothing below here matters if we're doing plotly (except for saving state sometime in the future)

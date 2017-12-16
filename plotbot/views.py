@@ -9,7 +9,7 @@ from .models import *
 
 # default page for plotbot, with tools and plotting button
 def index(request):
-	specs = Spec.objects.all()
+	specs = Spec.objects.order_by('name')
 	data = []
 	#for s in specs:
 	#	s.data = s.getPoints()
