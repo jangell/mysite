@@ -5,7 +5,8 @@
 
 <!-- plotly cdn -->
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
- <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script> <!-- for autocomplete -->
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script> <!-- for autocomplete -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> <!-- autocomplete css since I'm too lazy to write it -->
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.3.6/papaparse.min.js"></script> papaparse -->
 <script>
 // TO BE MOVED TO: plot_spec_configs.js
@@ -492,8 +493,9 @@ class PlotHandler{
 		// quick add from db (autofill on quick_add)
 		$(_this.plotConfig.fields['quick_add'].element).autocomplete({
 			source: quick_add_list,
+			minLength: 3,
 			select: function(event, ui){
-				$(_this.plotConfig.fields['quick_add'].element).val(ui.item.label);
+				$(_this.plotConfig.fields['quick_add'].element).val('');
 				var selected = ui.item.value;
 				_this.addSpecByDbId(selected); // oh my god this is so cool and so easy
 				return false;
