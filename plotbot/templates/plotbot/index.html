@@ -5,6 +5,7 @@
 
 <!-- plotly cdn -->
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+ <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script> <!-- for autocomplete -->
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.3.6/papaparse.min.js"></script> papaparse -->
 <script>
 // TO BE MOVED TO: plot_spec_configs.js
@@ -15,6 +16,7 @@
 // define javascript classes for PlotConfig and SpecConfig objects
 
 var valid_inputs = ['checkbox','text','number','color','button'];
+var quick_add_list = [];
 
 function randomHex(){
 	var hexVal = (parseInt(Math.random() * 256)).toString(16);
@@ -265,6 +267,7 @@ class PlotConfig{
 		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number', {'placeholder':'Auto'}); // doesn't do anything yet
 		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number', {'placeholder':'Auto'}); // doesn't do anything yet
 		this.fields['show_legend'] = new Field('show_legend', 'Show legend', 'checkbox', {'checked':'true'});
+		this.fields['quick_add'] = new Field('quick_add', 'Quick add from database', 'text');
 		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add'});
 		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove'});
 		// TODO: create legend location
@@ -286,7 +289,6 @@ class PlotConfig{
 	}
 }
 
-var thing;
 // handler for plot config and all spec configs for a given page
 class PlotHandler{
 	constructor(plot_config_target, spec_list_target, spec_config_target, plot_target){
@@ -336,6 +338,20 @@ class PlotHandler{
 	appendSpecConfigHtml(specConfig){
 		// show the first one, but hide all the others
 		this.spec_config_target.append(specConfig.generateSpecConfigHtml());
+	}
+
+	// adds a spectrum based on its database id
+	addSpecByDbId(id){
+		var _this = this;
+		// ajax call to get db spectrum with id in modal_db_id
+		$.get({
+			url:'getSpec',
+			data:{'spec_id':id},
+			success:function(response){
+				_this.addSpec(response['name'],response['data'])
+				return true;
+			}
+		});
 	}
 
 	// adds a spectrum to the working set
@@ -472,6 +488,18 @@ class PlotHandler{
 		_this.plotConfig.fields['add_spec'].element.click(function(){
 			_this.showAddModal();
 		});
+
+		// quick add from db (autofill on quick_add)
+		$(_this.plotConfig.fields['quick_add'].element).autocomplete({
+			source: quick_add_list,
+			select: function(event, ui){
+				$(_this.plotConfig.fields['quick_add'].element).val(ui.item.label);
+				var selected = ui.item.value;
+				_this.addSpecByDbId(selected); // oh my god this is so cool and so easy
+				return false;
+			}
+		})
+
 		// remove spectrum
 		_this.plotConfig.fields['remove_spec'].element.click(function(){
 			// get which spectrum is currently selected
@@ -796,7 +824,7 @@ class PlotHandler{
 	padding:10px;
 }
 /* this one starts hidden */
-#modal_csv{
+#modal_db{
 	display:none;
 }
 
@@ -866,10 +894,10 @@ class PlotHandler{
 		<h2 class="modal_title">Add Spectrum</h2>
 		<div class="modal_content">
 			<div class="tabs">
-				<div class="tab" id="csv_tab">
+				<div class="tab selected_tab" id="csv_tab">
 					<h3 class="modal_subtitle">Upload from CSV</h3>
 				</div>
-				<div class="tab selected_tab" id="db_tab">
+				<div class="tab" id="db_tab">
 					<h3 class="modal_subtitle">Add from database</h3>
 				</div>
 			</div>
@@ -983,11 +1011,6 @@ ph.initialize();
 
 
 // modal window
-
-// load database into modal_db_tbody at page load (for now)
-{% for spec in specs %}
-$('#modal_db_tbody').append(modalDbRow('{{spec.spec_id}}', '{{spec.name}}', '{{spec.source}}', '{{spec.wavelength}}'));
-{% endfor %}
 
 // make the 'cancel' button in modal close the modal
 $('#cancel_modal').click(function(){
@@ -1104,21 +1127,6 @@ function modalDbRow(id, name, source, wv){
 	return row;
 }
 
-// this has to go to the end because it's going to tie into plothandler
-$('.modal_db_row').click(function(){
-	var id = $(this).find('.modal_db_id').html();
-	// ajax call to get db spectrum with id in modal_db_id
-	$.get({
-		url:'getSpec',
-		data:{'spec_id':id},
-		success:function(response){
-			ph.addSpec(response['name'],response['data'])
-			$('.modal_bg').hide();
-		}
-	});
-	// add spectrum to plothandler
-});
-
 $('.tab').click(function(){
 	// set this tab class
 	$('.selected_tab').removeClass('selected_tab');
@@ -1132,6 +1140,23 @@ $('.tab').click(function(){
 		$('#modal_db').show();
 	}
 });
+
+$(document).ready(function(){
+	// load database into modal_db_tbody at page load (for now)
+	{% for spec in specs %}
+	$('#modal_db_tbody').append(modalDbRow('{{spec.spec_id}}', '{{spec.name}}', '{{spec.source}}', '{{spec.wavelength}}'));
+	quick_add_list.push({'label':'{{spec.name}} - {{spec.wavelength}}nm','value':'{{spec.spec_id}}'});
+	{% endfor %}
+	// this has to go to the end because it's going to tie into plothandler and all those rows
+	$('.modal_db_row').click(function(){
+		var id = $(this).find('.modal_db_id').html();
+		console.log(id);
+		ph.addSpecByDbId(id);
+		$('.modal_bg').hide();
+		// add spectrum to plothandler
+	});
+});
+
 
 // nothing below here matters if we're doing plotly (except for saving state sometime in the future)
 
