@@ -10,10 +10,10 @@ from .models import *
 # default page for plotbot, with tools and plotting button
 def index(request):
 	specs = Spec.objects.order_by('name')
-	data = []
-	#for s in specs:
-	#	s.data = s.getPoints()
-	context = {'specs':specs}
+	# TODO: let's make an option to only load a 'slim' catalog of the most-used spectra
+	# get all unique wavelengths (for filter in db modal)
+	wvs = Spec.objects.values('wavelength').order_by('wavelength').distinct()
+	context = {'specs':specs, 'wavelengths':wvs}
 	return render(request,'plotbot/index.html',context)
 
 # AJAX function to return a single spectrum (incl. data) based on its id

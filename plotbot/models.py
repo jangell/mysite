@@ -47,6 +47,10 @@ class Spec(models.Model):
 	# the actual data gets stored in a CSV
 	spec_file = models.FileField(upload_to='spec/csv')
 
+	# meta options (to order alphabetically in admin)
+	class Meta:
+		ordering = ['name']
+
 	# returns a list of points corresponding to the spectrum
 	def getPoints(self):
 		# get all points from querying the Point table, ordered by index

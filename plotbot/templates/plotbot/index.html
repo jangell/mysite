@@ -89,12 +89,123 @@ class Field{
 	}
 }
 
+// abstract class to be inherited by all Preprocess classes
+// args: a dictionary containing arguments for the preprocess (for sav-gol, window size and exponent, for example)
+// processor: a function that takes in an array ([wavs,counts]) and returns an array of the same dimensions
+
+// I've gotta switch from the class declarations I've been using to a function- / prototype-based approach because I can't figure out how to do it the other way
+Preprocess = function(name, fields, processor){
+	// make sure fields is an object and processor is a function
+	if(typeof fields !== 'object' || typeof processor !== 'function'){throw 'Preprocesses must be instantiated with name (string), args (dictionary), and processor (function)';}
+	this.name = name;
+	this.fields = fields;
+	this.processor = processor;
+	this.run_me = false;
+}
+Preprocess.prototype.generatePreprocessHtml = function(){
+	// generate a table
+	// start with a checkbox field for run_me
+	// add a handler to style running and not running differently and to update the values in the object when things change in the html
+	// add a row for each field, and then add handlers to them to restyle the plot if they change
+}
+Preprocess.prototype.runProcess = function(data){
+	// only run if the run_me flag is true
+	if(this.run_me){
+		return this.processor(data);
+	}
+	// otherwise, don't do anything and just return the data
+	return data;
+}
+
+Normalization = function(){
+	// "parasitic inheritance" sounds like a thrash band
+	that = new Preprocess(
+		// name
+		'Normalization',
+		// fields
+		{
+			'upper': new Field('upper_limit', 'Upper limit', 'number', {'value':1}),
+			'lower': new Field('lower_limit', 'Lower limit', 'number', {'value':0})
+		},
+		// processor
+		function(data){
+			console.log('running normalization');
+			var wavs = data[0];
+			var counts = data[1];
+
+			var my_min = Math.min.apply(null,counts);
+			var my_max = Math.max.apply(null,counts);
+			var pre_range = my_max - my_min;
+
+			// this should come from the 'upper' and 'lower' fields when this is in the page
+			var upper = parseFloat(this.fields['upper']); // parseFloat just in case the field tries to give us an integer
+			var lower = parseFloat(this.fields['lower']);
+			var post_range = upper - lower;
+
+			for(var i = 0; i < counts.length; i++){
+				var temp = counts[i]
+				temp -= my_min; // now it's between 0 and pre_range
+				temp /= pre_range; // now it's between 0 and 1
+				temp *= post_range; // now it's between 0 and post_range
+				temp += lower; // now it's between lower and upper
+				counts[i] = temp;
+			}
+			return [wavs,counts];
+		}
+	);
+
+	return that;
+}
+
+
+// testing preprocess
+var data = [[1.,2.,3.,4.,5.], [7.,8.,7.1,10.2,6.4]];
+
+var n = new Normalization();
+console.log('n = new Normalization() has loaded')
+
+/*
+class Preprocess{
+	constructor(args){
+		// make sure this isn't being instantiated directly (this is an abstract class)
+		if(this.constructor === Preprocess){
+			throw 'Preprocess is an abstract class and cannot be implemented directly';
+		}
+		
+		this.args = args;
+		this.processor = processor;
+		this.usePreprocess = false;
+	}
+
+	setArg(key,val){
+		this.args[key] = val;
+	}
+	getArg(key){
+		if(key in args){
+			return args[key];
+		}
+		throw key+' is not a key in args'
+	}
+
+	preprocess(data){
+		// only preprocess if this flag has been set to true
+		if(this.usePreprocess){
+			return this.processor(data);
+		}
+		// by default, return the same data
+		return data;
+	}
+}*/
+
+
+
 // SpecConfig (reminder: classes are not hoisted in js)
 class SpecConfig{
 	constructor(spec_id, spec_name, spec_data){
 		this.spec_id = spec_id; // unique identifier to keep track of which spectra are which when we modify things later on
 		this.spec_name = spec_name;
 		this.spec_data = spec_data;
+		this.preprocesses = [];
 		this.selected = false; // keep track of which is currently showing (and highlighted)
 		this.fields = {};
 		this.fields['show'] = new Field('spec'+this.spec_id+'_show', 'Show', 'checkbox', {'checked':true});
@@ -786,6 +897,7 @@ class PlotHandler{
 		padding: 20px;
 	}
 	#cancel_modal{
+		margin:5px;
 		float:right;
 	}
 
@@ -823,13 +935,33 @@ class PlotHandler{
 .modal_option{
 	background:#ddd;
 	border:1px solid #888;
+	border-top-right-radius: 5px;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
 	padding:10px;
+	position:relative;
 }
 /* this one starts hidden */
 #modal_db{
 	display:none;
 }
 
+.db_table_holder{
+	position:relative;
+	overflow:hidden;
+	border-radius:5px;
+	border:1px solid #888;
+}
+
+
+#filter_loading{
+	display:none;
+	position:absolute;
+	background:rgba(100,100,100,.5);
+	width:100%;
+	height:100%;
+	text-align:center;
+}
 .database_table{
 	width:100%;
 	border-collapse:collapse;
@@ -840,20 +972,14 @@ class PlotHandler{
 	width:100%;
 	background-color:#444;
 	color:#eee;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
 }
 #modal_db_tbody{
-/* eventually make this scroll */
 	display:block;
 	width:calc(100% - 2px);
 	max-height:50vh;
 	overflow:auto;
-	border:1px solid #888;
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 5px;
-	border-top:none;
 }
+
 
 .modal_db_headrow{
 	display:table;
@@ -884,12 +1010,17 @@ class PlotHandler{
 .modal_db_wv{
 	width:20%;
 }
+
+.filter{
+	margin:5px;
+	display:inline-block;
+}
 </style>
 
 <!-- modal -->
 <div class="modal_bg">
 	<script>
-	// hide modal on page load (not the long-term solution)
+	// hide modal on page load (not the long-term solution) (actually, for now, it is)
 	$('.modal_bg').hide();
 	</script>
 	<div class="modal">
@@ -902,6 +1033,7 @@ class PlotHandler{
 				<div class="tab" id="db_tab">
 					<h3 class="modal_subtitle">Add from database</h3>
 				</div>
+				<button id="cancel_modal">Cancel</button>
 			</div>
 			<div class="modal_option" id="modal_csv">
 				<!-- add by uploading csv -->
@@ -916,25 +1048,47 @@ class PlotHandler{
 					</table>
 					<hr>
 					<input type=submit value="Upload">
-					<button id="cancel_modal">Cancel</button>
 				</form>
 			</div>
 			<div class="modal_option" id="modal_db">
+				<!-- search by name -->
+				<!-- filter by wavelength -->
+				<div class="db_filters">
+					<div class="filter wv_filter">
+						<label for="wv_select">Filter by wavelength</label>
+						<select id="wv_select">
+							<option value="all">All</option>
+							{% for wv in wavelengths %}
+							<option value="{{wv.wavelength}}nm">{{wv.wavelength}}nm</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="filter name_filter">
+						<label for="name_select">Filter by name</label>
+						<input id="name_select">
+					</div>
+				</div>
 				<!-- adding from database - list all database options (for now, in one list) -->
-				<table class="database_table">
-					<thead id="modal_db_thead">
-						<tr class="modal_db_headrow">
-							<th class="modal_db_id">ID</th>
-							<th class="modal_db_name">Name</th>
-							<th class="modal_db_source">Source</th>
-							<th class="modal_db_wv">Wavelength</th>
-						</tr>
-					</thead>
-					<tbody id="modal_db_tbody">
-						<!-- database spectra get filled in here -->
-					</tbody>
-				</table>
+				<div class="db_table_holder">
+					<div id="filter_loading">
+						<img src="{% static 'plotbot/loading.gif' %}">
+					</div>
+					<table class="database_table">
+						<thead id="modal_db_thead">
+							<tr class="modal_db_headrow">
+								<th class="modal_db_id">ID</th>
+								<th class="modal_db_name">Name</th>
+								<th class="modal_db_source">Source</th>
+								<th class="modal_db_wv">Wavelength</th>
+							</tr>
+						</thead>
+						<tbody id="modal_db_tbody">
+							<!-- database spectra get filled in here -->
+						</tbody>
+					</table>
+				</div>
 			</div>
+			<!-- end of options -->
 		</div>
 	</div>
 </div>
@@ -1009,7 +1163,6 @@ class PlotHandler{
 var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plot_holder'));
 
 ph.initialize();
-
 
 
 // modal window
@@ -1157,6 +1310,54 @@ $(document).ready(function(){
 		$('.modal_bg').hide();
 		// add spectrum to plothandler
 	});
+
+	function updateFilters(){
+
+		// show 'loading' gif
+
+		var wv = $('#wv_select').val();
+		var str = $('#name_select').val().toLowerCase();
+
+		if(wv == 'all'){
+			// show all wavelengths
+			$('.modal_db_row').show();
+			// then filter by name
+			$('.modal_db_row').each(function(){
+				if($(this).find('.modal_db_name').html().toLowerCase().match(str)){
+					$(this).show();
+				}
+				else{
+					$(this).hide();
+				}
+			});
+		}
+		else{
+			$('.modal_db_row').each(function(){
+				if($(this).find('.modal_db_wv').html() != wv){
+					$(this).hide();
+				}
+				else{
+					// this is where filter-by-name comes in
+					if($(this).find('.modal_db_name').html().toLowerCase().match(str)){
+						$(this).show();
+					}
+					else{
+						$(this).hide();
+					}
+				}
+			});
+		}
+		// hide 'loading' gif
+
+	}
+	// wavelength filter
+	$('#wv_select').change(function(){
+		updateFilters();
+	});
+	$('#name_select').on('input',function(){
+		updateFilters();
+	});
+
 });
 
 
