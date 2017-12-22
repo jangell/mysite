@@ -28,6 +28,7 @@ html{
 	width:100%;
 	border-collapse:collapse;
 }
+/* applied in javascript-based html generation */
 .tool{
 	border-bottom:1px solid #aaa;
 }
@@ -83,6 +84,10 @@ html{
  	text-align:center;
 }
 
+/* selected vs unselected row actions */
+.unselected_row{
+	transition: background-color .5s ease
+}
 .unselected_row:hover{
 	cursor:pointer;
 	background-color:rgba(122,199,255,.5);
@@ -99,10 +104,6 @@ html{
 	display:none;
 }
 
-.spectra_buttons{
-	display:flex;
-	flex-direction:row;
-}
 .spec_button{
 	flex:1;
 	font-size:2rem;
