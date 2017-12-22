@@ -82,24 +82,38 @@ class Field{
 // processor: a function that takes in an array ([wavs,counts]) and returns an array of the same dimensions
 
 // I've gotta switch from the class declarations I've been using to a function- / prototype-based approach because I can't figure out how to do it the other way
-Preprocess = function(name, fields, processor){
+Preprocess = function(name, fields, processor, specConfig){
+	// TODO: make this actually check for specConfig object
+	if(specConfig === undefined){
+		specConfig = null;
+	}
 	// make sure fields is an object and processor is a function
 	if(typeof fields !== 'object' || typeof processor !== 'function'){throw 'Preprocesses must be instantiated with name (string), args (dictionary), and processor (function)';}
 	this.name = name;
 	this.fields = fields;
 	this.processor = processor;
 	this.run_me = false;	// we're only using this until we get the html rendering up and running
-	this.run_element;
+	this.run_field = new Field('run_'+this.name, 'Run '+this.name, 'checkbox', {'checked':true});
 }
 Preprocess.prototype.generatePreprocessHtml = function(){
+	// label the preprocess
+	var container = $('<div>');
+	container.append($('<h3>').addClass('preproc_name').html(this.name));
 	// generate a table
 	var table = $('<table>').addClass('preproc_table');
 	// start with a checkbox field for run_me
-	var check_row = $('<tr>').addClass('preproc_row');
-	this.run_element = check_row;
+	table.append(this.run_field.toTableRow());
+	// TODO: register element or listener or something
+	// for ... in ... iterates through a list of keys
+	for(f in this.fields){
+		table.append(this.fields[f].toTableRow());
+		// TODO: register listeners
+	}
 
-	// add a handler to style running and not running differently and to update the values in the object when things change in the html
-	// add a row for each field, and then add handlers to them to restyle the plot if they change
+	container.append(table);
+
+	// TODO: add a handler to style running and not running differently and to update the values in the object when things change in the html
+	return container;
 }
 Preprocess.prototype.runProcess = function(data){
 	// only run if the run_me flag is true
@@ -155,7 +169,8 @@ Normalization = function(){
 var data = [[1.,2.,3.,4.,5.], [7.,8.,7.1,10.2,6.4]];
 
 var n = new Normalization();
-console.log('n = new Normalization() has loaded')
+console.log('n = new Normalization() has loaded');
+console.log('try n.generatePreprocessHtml()');
 
 /*
 class Preprocess{

@@ -3,6 +3,8 @@ html{
 	background:#cce;
 }
 
+/* tools */
+
 .toolset{
 	background-color:#ddd;
 	margin:5px;
@@ -39,6 +41,7 @@ html{
 	padding-right:20px;
 }
 
+/* spec list */
 
 .spec_table_holder{
 	margin-top:none;
@@ -112,13 +115,6 @@ html{
 }
 .spec_button:focus{
 	outline:none;
-}
-
-#add_spec{
-	background-color:#77ee77;
-}
-#remove_spec{
-	background-color:#ffb2b2;
 }
 
 

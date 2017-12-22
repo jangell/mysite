@@ -9,7 +9,8 @@ from .models import *
 
 # default page for plotbot, with tools and plotting button
 def index(request):
-	specs = Spec.objects.order_by('name')
+	#specs = Spec.objects.order_by('name')	# production
+	specs = None 							# development
 	# TODO: let's make an option to only load a 'slim' catalog of the most-used spectra
 	# get all unique wavelengths (for filter in db modal)
 	wvs = Spec.objects.values('wavelength').order_by('wavelength').distinct()
