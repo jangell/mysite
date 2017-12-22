@@ -97,9 +97,8 @@ html{
 	font-weight:bold;
 }
 
-.showing_config{
-
-}
+/* spec configs that are showing or hidden (only shows 1 at a time, in the same space) */
+.showing_config{}
 .hidden_config{
 	display:none;
 }

@@ -209,11 +209,12 @@ class Preprocess{
 
 // SpecConfig (reminder: classes are not hoisted in js)
 class SpecConfig{
-	constructor(spec_id, spec_name, spec_data){
+	constructor(spec_id, spec_name, spec_data, preprocs){
+		// TODO: add type checking here!!!
 		this.spec_id = spec_id; // unique identifier to keep track of which spectra are which when we modify things later on
 		this.spec_name = spec_name;
 		this.spec_data = spec_data;
-		this.preprocesses = [];
+		this.preprocesses = preprocs;
 		this.selected = false; // keep track of which is currently showing (and highlighted)
 		this.fields = {};
 		this.fields['show'] = new Field('spec'+this.spec_id+'_show', 'Show', 'checkbox', {'checked':true});
@@ -321,18 +322,22 @@ class SpecConfig{
 		var configId = this.getConfigSelector();
 		var rowId = this.getRowSelector();
 
+
+		// this is the table where all the spec tools go
 		var table = $('<table>').addClass('tools');
 		table.attr('id',this.getConfigId());
 
+		// put all the fields 
+		for(var field in this.fields){
+			table.append(this.fields[field].toTableRow(self.spec_id));
+		}
+
+		// show or hide to start (based, ultimately, whether or not there's one showing already, but here it's just based on a flag)
 		if(this.selected){
 			table.addClass('showing_config');
 		}
 		else{
 			table.addClass('hidden_config');
-		}
-
-		for(var field in this.fields){
-			table.append(this.fields[field].toTableRow(self.spec_id));
 		}
 
 		// function to update the 'show' checkbox in spec list based on a change in the one in the spec config table
@@ -348,8 +353,25 @@ class SpecConfig{
 		this.fields['opacity'].element.change(function(){
 			_this.updateColor();
 		});
+		// go get the color of this spec and set the color well to it to start out correctly
 		_this.updateColor();
-		return table;
+
+
+		// all of the preprocessing divs will go in this
+		var preproc = $('<div>');
+
+		for(var p in this.preprocesses){
+			console.log(p);
+			console.log(this.preprocesses[p]);
+		}
+
+
+		// this is the container for the table and the preprocessing that we're going to return at the end
+		var container = $('<div>');
+		container.append(table);
+		container.append(preproc);
+
+		return container;
 
 	}
 
@@ -411,7 +433,7 @@ class PlotConfig{
 
 // handler for plot config and all spec configs for a given page
 class PlotHandler{
-	constructor(plot_config_target, spec_list_target, spec_config_target, plot_target){
+	constructor(plot_config_target, spec_list_target, spec_config_target, plot_target, preprocesses){
 		this.plot_config_target = plot_config_target;
 		this.spec_list_target = spec_list_target;
 		this.spec_config_target = spec_config_target;
@@ -420,6 +442,7 @@ class PlotHandler{
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
+		this.preprocs = {'Normalization':Normalization}; // register preprocesses here to automatically add them to specconfigs
 	}
 
 	// get the index of a spectrum in specConfigList based on its spec id
@@ -477,8 +500,13 @@ class PlotHandler{
 	// adds a spectrum to the working set
 	addSpec(spec_name, spec_data){
 		var _this = this;
-		var sc = new SpecConfig(this.cur_spec_id, spec_name, spec_data);
-		this.cur_spec_id++; // make sure each is unique
+		// generate set of preprocesses at defaults
+		var pp = [];
+		for(var p in this.preprocs){
+			pp.push(new this.preprocs[p])
+		}
+		var sc = new SpecConfig(this.cur_spec_id, spec_name, spec_data, pp);
+		this.cur_spec_id++; // make sure each is unique (assume we never have over 2 gajillion spectra showing simultaneously)
 		// append it to spec config list
 		this.specConfigList.push(sc);
 		// if it's the only specconfig, show & select it
