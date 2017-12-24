@@ -63,8 +63,8 @@ class Field{
 		// wire in the moving parts
 		this.element = inputter;
 		
-		// number inputter should have a step of any
-		if(this.input == 'number'){inputter.attr('step','any');}
+		// number inputter should default to a step of any
+		if(this.input == 'number' && !('step' in this.defaults)){inputter.attr('step','any');}
 
 		// set the defaults based on the dictionary passed in
 		for(var key in this.defaults){
@@ -82,18 +82,15 @@ class Field{
 // processor: a function that takes in an array ([wavs,counts]) and returns an array of the same dimensions
 
 // I've gotta switch from the class declarations I've been using to a function- / prototype-based approach because I can't figure out how to do it the other way
-Preprocess = function(name, fields, processor, specConfig){
-	// TODO: make this actually check for specConfig object
-	if(specConfig === undefined){
-		specConfig = null;
-	}
+Preprocess = function(name, fields, processor, debug){
 	// make sure fields is an object and processor is a function
 	if(typeof fields !== 'object' || typeof processor !== 'function'){throw 'Preprocesses must be instantiated with name (string), args (dictionary), and processor (function)';}
 	this.name = name;
 	this.fields = fields;
 	this.processor = processor;
-	this.run_me = false;	// we're only using this until we get the html rendering up and running
 	this.run_field = new Field('run_'+this.name, 'Run '+this.name, 'checkbox', {'checked':true});
+	
+	this.debug = debug === undefined ? false : debug;
 }
 Preprocess.prototype.generatePreprocessHtml = function(){
 	// label the preprocess
@@ -117,12 +114,14 @@ Preprocess.prototype.generatePreprocessHtml = function(){
 }
 Preprocess.prototype.runProcess = function(data){
 	// only run if the run_me flag is true
-	if(this.run_field.getValue()){
+	if(this.run_field.getValue() || this.debug){
 		return this.processor(data);
 	}
 	// otherwise, don't do anything and just return the data
 	return data;
 }
+
+// these are the actually preprocesses
 
 Normalization = function(){
 	// "parasitic inheritance" sounds like a thrash band
@@ -131,8 +130,8 @@ Normalization = function(){
 		'Normalization',
 		// fields
 		{
+			'lower': new Field('lower_limit', 'Lower limit', 'number', {'value':0}),
 			'upper': new Field('upper_limit', 'Upper limit', 'number', {'value':1}),
-			'lower': new Field('lower_limit', 'Lower limit', 'number', {'value':0})
 		},
 		// processor
 		function(data){
@@ -163,15 +162,41 @@ Normalization = function(){
 	return that;
 }
 
+MovingAverage = function(){
+	that = new Preprocess(
+		//name
+		'Moving Average Filter',
+		// fields
+		{
+			'window': new Field('window', 'Window size', 'number', {'value':5, 'step':2, 'placeholder':'odd only'}), // odd values only!
+		},
+		function(data){
+			var wavs = data[0];
+			var counts = data[1];
+			var av_counts = [];
+
+			var win_size = parseInt(this.fields['window'].getValue());
+			var half_win = parseInt(win_size / 2); // javascript doesn't floor by default
+
+			for(var i = 0; i < counts.length; i++){
+				var set = counts.slice( Math.max( 0, i-half_win ), Math.min( i+half_win+1, counts.length ) ); // the "+1" and ".length" (instead of ".length-1") is because slice gets up to but not including the second value
+				var avg = parseFloat(set.reduce((a, b) => a + b, 0))/set.length; // yes, this actually takes the average
+				av_counts.push(avg);
+			}
+			return [wavs, av_counts];
+		},
+	);
+
+	return that;
+}
+
 
 // testing preprocess
-var sd;
-/*
 var data = [[1.,2.,3.,4.,5.], [7.,8.,7.1,10.2,6.4]];
-var n = new Normalization();
-console.log('n = new Normalization() has loaded');
-console.log('try n.generatePreprocessHtml()');
-*/
+var ma = new MovingAverage();
+console.log('ma = new MovingAverage() has loaded');
+console.log('try ma.runProcess(data)');
+
 
 /*
 class Preprocess{
@@ -338,20 +363,11 @@ class SpecConfig{
 
 
 		// this is the table where all the spec tools go
-		var table = $('<table>').addClass('tools');
-		table.attr('id',this.getConfigId());
+		var table = $('<table>').addClass('tools_table');
 
 		// add all the fields
 		for(var field in this.fields){
 			table.append(this.fields[field].toTableRow(self.spec_id));
-		}
-
-		// show or hide to start (based, ultimately, whether or not there's one showing already, but here it's just based on a flag)
-		if(this.selected){
-			table.addClass('showing_config');
-		}
-		else{
-			table.addClass('hidden_config');
 		}
 
 		// function to update the 'show' checkbox in spec list based on a change in the one in the spec config table
@@ -380,9 +396,18 @@ class SpecConfig{
 
 
 		// this is the container for the table and the preprocessing that we're going to return at the end
-		var container = $('<div>');
+		var container = $('<div>').addClass('tools').attr('id',this.getConfigId());
 		container.append(table);
 		container.append(preproc);
+
+
+		// show or hide to start (based, ultimately, whether or not there's one showing already, but here it's just based on a flag)
+		if(this.selected){
+			container.addClass('showing_config');
+		}
+		else{
+			container.addClass('hidden_config');
+		}
 
 		return container;
 
@@ -432,7 +457,7 @@ class PlotConfig{
 
 	// convert fields to html table
 	toTable(){
-		var table = $('<table>').addClass('tools');
+		var table = $('<table>').addClass('tools_table');
 		for(var field in this.fields){
 			table.append(this.fields[field].toTableRow());
 		}
@@ -456,7 +481,11 @@ class PlotHandler{
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
-		this.preprocs = {'Normalization':Normalization}; // register preprocesses here to automatically add them to specconfigs
+		// register preprocesses here to automatically add them to specconfigs
+		this.preprocs = {
+			'Normalization':Normalization,
+			'Moving Average':MovingAverage,
+		};
 	}
 
 	// get the index of a spectrum in specConfigList based on its spec id
