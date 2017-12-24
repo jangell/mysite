@@ -327,7 +327,7 @@ class SpecConfig{
 		var table = $('<table>').addClass('tools');
 		table.attr('id',this.getConfigId());
 
-		// put all the fields 
+		// add all the fields
 		for(var field in this.fields){
 			table.append(this.fields[field].toTableRow(self.spec_id));
 		}
@@ -358,10 +358,9 @@ class SpecConfig{
 
 
 		// all of the preprocessing divs will go in this
-		var preproc = $('<div>');
+		var preproc = $('<div>').addClass('spec_conig_preprocs');
 
 		for(var p in this.preprocesses){
-			console.log(p);
 			console.log(this.preprocesses[p]);
 		}
 
@@ -503,7 +502,7 @@ class PlotHandler{
 		// generate set of preprocesses at defaults
 		var pp = [];
 		for(var p in this.preprocs){
-			pp.push(new this.preprocs[p])
+			pp.push(new this.preprocs[p]);
 		}
 		var sc = new SpecConfig(this.cur_spec_id, spec_name, spec_data, pp);
 		this.cur_spec_id++; // make sure each is unique (assume we never have over 2 gajillion spectra showing simultaneously)

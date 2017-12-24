@@ -117,29 +117,12 @@ html{
 	outline:none;
 }
 
-
-/* the big button */
-#make_plot{
-	font-family: 'Dosis', sans-serif;
-	font-size:2rem;
-	width:calc(100% - 40px);
-	margin:10px 20px;
-	border-radius:10px;
-	background-color:#2c579e;
-	color:#eee;
-	cursor:pointer;
-	border:1px solid #888;
-	box-shadow:3px 3px 1px #888;
-	min-width:400px;
+/* add and remove spec rows */
+#add_spec{
+	background-color: #77ee77;
 }
-#make_plot:focus{
-	outline:none;
-}
-#make_plot:hover{
-	background-color:#1f4077;
-}
-#make_plot:active{
-	background-color:#002060;
+#remove_spec{
+	background-color: #ffb2b2;
 }
 
 .all_tools{
