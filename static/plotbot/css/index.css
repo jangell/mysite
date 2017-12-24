@@ -84,6 +84,30 @@ html{
  	text-align:center;
 }
 
+/* preprocessing */
+
+/* the div containing a single preprocess */
+.single_preproc{
+	width: 95%;
+	margin: 5px auto;
+	background-color: #eee;
+	border-radius: 5px;
+}
+
+/* title of that div */
+.preproc_name{
+	font-weight:bold;
+	text-align:center;
+	border-bottom:1px solid #ccc;
+	margin:0;
+}
+
+/* preprocess args table */
+.preproc_table{
+	width:100%;
+}
+
+
 /* selected vs unselected row actions */
 .unselected_row{
 	transition: background-color .5s ease

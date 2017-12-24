@@ -97,7 +97,7 @@ Preprocess = function(name, fields, processor, specConfig){
 }
 Preprocess.prototype.generatePreprocessHtml = function(){
 	// label the preprocess
-	var container = $('<div>');
+	var container = $('<div>').addClass('single_preproc');
 	container.append($('<h3>').addClass('preproc_name').html(this.name));
 	// generate a table
 	var table = $('<table>').addClass('preproc_table');
@@ -117,7 +117,7 @@ Preprocess.prototype.generatePreprocessHtml = function(){
 }
 Preprocess.prototype.runProcess = function(data){
 	// only run if the run_me flag is true
-	if(this.run_me){
+	if(this.run_field.getValue()){
 		return this.processor(data);
 	}
 	// otherwise, don't do anything and just return the data
@@ -136,7 +136,6 @@ Normalization = function(){
 		},
 		// processor
 		function(data){
-			console.log('running normalization');
 			var wavs = data[0];
 			var counts = data[1];
 
@@ -145,8 +144,8 @@ Normalization = function(){
 			var pre_range = my_max - my_min;
 
 			// this should come from the 'upper' and 'lower' fields when this is in the page
-			var upper = parseFloat(this.fields['upper']); // parseFloat just in case the field tries to give us an integer
-			var lower = parseFloat(this.fields['lower']);
+			var upper = parseFloat(this.fields['upper'].getValue()); // parseFloat just in case the field tries to give us an integer
+			var lower = parseFloat(this.fields['lower'].getValue());
 			var post_range = upper - lower;
 
 			for(var i = 0; i < counts.length; i++){
@@ -166,11 +165,13 @@ Normalization = function(){
 
 
 // testing preprocess
+var sd;
+/*
 var data = [[1.,2.,3.,4.,5.], [7.,8.,7.1,10.2,6.4]];
-
 var n = new Normalization();
 console.log('n = new Normalization() has loaded');
 console.log('try n.generatePreprocessHtml()');
+*/
 
 /*
 class Preprocess{
@@ -243,6 +244,19 @@ class SpecConfig{
 	}
 	getConfigSelector(){
 		return '#'+this.getConfigId();
+	}
+
+	getData(){
+		//wavs = JSON.parse(JSON.stringify(this.spec_data[0])); // fastest way to deep copy counts (we're gonna preprocess it so we need our own copy)
+		/*for(var p in this.preprocesses){
+			// preprocess run function handles checking the run_process flag
+		//	data = this.preprocesses[p].runProcess(data);
+		}*/
+		var cur_data = JSON.parse(JSON.stringify(this.spec_data));
+		for(var p in this.preprocesses){
+			cur_data = this.preprocesses[p].runProcess(cur_data);
+		}
+		return cur_data;
 	}
 
 	// generates a row with name and show/don't-show checkbox
@@ -358,10 +372,10 @@ class SpecConfig{
 
 
 		// all of the preprocessing divs will go in this
-		var preproc = $('<div>').addClass('spec_conig_preprocs');
+		var preproc = $('<div>').addClass('spec_config_preprocs');
 
 		for(var p in this.preprocesses){
-			console.log(this.preprocesses[p]);
+			preproc.append(this.preprocesses[p].generatePreprocessHtml());
 		}
 
 
@@ -377,10 +391,11 @@ class SpecConfig{
 	// returns a plotly-friendly data object
 	getPlotlyData(){
 		// check here if 'show' is true or not (if not, return null immediately)
+		var data = this.getData();
 		if(!this.valueOf('show')){return null;}
 		return {
-			x: this.spec_data[0],
-			y: this.spec_data[1],
+			x: data[0],
+			y: data[1],
 			name: this.valueOf('legend_name'),
 			showlegend: !(this.valueOf('legend_name') == ''), // only show in legend if field isn't blank
 			line: {
