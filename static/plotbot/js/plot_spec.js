@@ -208,8 +208,11 @@ BaselineRemoval = function(){
 		},
 		// algorithm
 		function(data){
-			var wavs = data[0];
-			var counts = data[1];
+			//var wavs = data[0];
+			//var counts = data[1];
+
+			// bypass for now
+			return data;
 
 			// simple (zeroth order fit)
 

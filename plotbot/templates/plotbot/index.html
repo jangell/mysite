@@ -29,12 +29,12 @@
 		<div class="modal_content">
 			<div class="tabs">
 				<div class="tab selected_tab" id="csv_tab">
-					<h3 class="modal_subtitle">Upload from CSV</h3>
+					<h3 class="modal_subtitle" title="Use for files on your computer">Upload from CSV</h3>
 				</div>
 				<div class="tab" id="db_tab">
-					<h3 class="modal_subtitle">Add from database</h3>
+					<h3 class="modal_subtitle" title="Use to add mineral spectra from the database">Add from database</h3>
 				</div>
-				<button id="cancel_modal">Cancel</button>
+				<button id="cancel_modal" title="Return to plotting window">Cancel</button>
 			</div>
 			<div class="modal_option" id="modal_csv">
 				<!-- add by uploading csv -->
@@ -56,7 +56,7 @@
 				<!-- filter by wavelength -->
 				<div class="db_filters">
 					<div class="filter wv_filter">
-						<label for="wv_select">Filter by wavelength</label>
+						<label for="wv_select" title="Only show spectra with selected wavelength">Filter by wavelength</label>
 						<select id="wv_select">
 							<option value="all">All</option>
 							{% for wv in wavelengths %}
@@ -65,7 +65,7 @@
 						</select>
 					</div>
 					<div class="filter name_filter">
-						<label for="name_select">Filter by name</label>
+						<label for="name_select" title="Show minerals whose name contains the search string">Filter by name</label>
 						<input id="name_select">
 					</div>
 				</div>
@@ -77,10 +77,10 @@
 					<table class="database_table">
 						<thead id="modal_db_thead">
 							<tr class="modal_db_headrow">
-								<th class="modal_db_id">ID</th>
-								<th class="modal_db_name">Name</th>
-								<th class="modal_db_source">Source</th>
-								<th class="modal_db_wv">Wavelength</th>
+								<th class="modal_db_id" title="ID number">ID</th>
+								<th class="modal_db_name" title="Mineral name">Name</th>
+								<th class="modal_db_source" title="Source of data">Source</th>
+								<th class="modal_db_wv" title="Excitation wavelength (nm)">Wavelength</th>
 							</tr>
 						</thead>
 						<tbody id="modal_db_tbody">
@@ -112,9 +112,9 @@
 					<table class="spec_table">
 						<thead class="spec_table_head">
 							<tr>
-								<th class="spec_row_name">Name</th>
-								<th class="spec_row_color">Color</th>
-								<th class="spec_row_show">Showing</th>
+								<th class="spec_row_name" title="Name of spectrum">Name</th>
+								<th class="spec_row_color" title="Color of plotted line">Color</th>
+								<th class="spec_row_show" title="Whether spectrum is shown in plot">Showing</th>
 							</tr>
 						</thead>
 
