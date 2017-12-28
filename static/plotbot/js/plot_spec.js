@@ -20,6 +20,13 @@ function randomColor(){
 	return '#'+r+g+b;
 }
 
+class Point{
+	constructor(x,y){
+		self.x = x;
+		self.y = y;
+	}
+}
+
 // one field of a config (like figure width, or line color)
 class Field{
 	constructor(ident,label,input,defaults={}){
@@ -168,8 +175,9 @@ MovingAverage = function(){
 		'Moving Average Filter',
 		// fields
 		{
-			'window': new Field('window', 'Window size', 'number', {'value':5, 'step':2, 'placeholder':'odd only'}), // odd values only!
+			'window': new Field('window', 'Window size', 'number', {'value':5, 'step':2, 'min':3, 'placeholder':'odd only'}), // odd values only!
 		},
+		// algorithm
 		function(data){
 			var wavs = data[0];
 			var counts = data[1];
@@ -184,18 +192,66 @@ MovingAverage = function(){
 				av_counts.push(avg);
 			}
 			return [wavs, av_counts];
-		},
+		}
 	);
 
 	return that;
 }
 
+BaselineRemoval = function(){
+	that = new Preprocess(
+		//name
+		'Baseline Removal',
+		// field(s)
+		{
+			'window': new Field('window', 'Window size', 'number', {'value':5, 'step':2, 'min':3}),
+		},
+		// algorithm
+		function(data){
+			var wavs = data[0];
+			var counts = data[1];
+
+			// simple (zeroth order fit)
+
+			/*
+			// advanced (first-order fit instead of zeroth order)
+
+			// grab the window size
+			var win_size = parseInt(this.fields['window'].getValue());
+			var win_start = 0;
+
+			// here's the big boy loop
+			while((win_start + win_size) < counts.length){
+
+				// walk through the window, from left to right, creating the highest straight line under all the points
+				var left = win_start;
+				var right = win_start + 1;
+
+				// start with corners being the left and left+1 points
+				var lowCorner = new Point(wavs[left],counts[left]);
+				var highCorner = new Point(wavs[right],counts[right])
+
+				// line-fit the local slice (convex hull!)
+
+				// subtract that ish off
+
+				// iterate
+				win_start++;
+			}
+			return data;
+			*/
+
+		},
+		// debug flag - DEVELOPMENT ONLY
+		true
+	);
+	return that;
+}
 
 // testing preprocess
-var data = [[1.,2.,3.,4.,5.], [7.,8.,7.1,10.2,6.4]];
-var ma = new MovingAverage();
-console.log('ma = new MovingAverage() has loaded');
-console.log('try ma.runProcess(data)');
+var br = new BaselineRemoval();
+console.log('br = new BaselineRemoval() has loaded');
+console.log('try br.runProcess(data)');
 
 
 /*
@@ -485,6 +541,7 @@ class PlotHandler{
 		this.preprocs = {
 			'Normalization':Normalization,
 			'Moving Average':MovingAverage,
+			'Baseline Removal':BaselineRemoval,
 		};
 	}
 
