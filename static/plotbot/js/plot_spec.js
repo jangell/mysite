@@ -41,6 +41,10 @@ class Field{
 		else{
 			this.defaults = defaults;
 		}
+		// if a field doesn't have a title (for explanatory text), complain about it in the console
+		if(!('title' in defaults)){
+			console.log('Note: Field '+this.label+' does not have title text');
+		}
 		this.element = null; // this is where the value in the element gets wired into the field itself (to be accessed by the specconfig via getValue() )
 	}
 	// gets the value from the current element that this field has generated
@@ -95,7 +99,7 @@ Preprocess = function(name, fields, processor, debug){
 	this.name = name;
 	this.fields = fields;
 	this.processor = processor;
-	this.run_field = new Field('run_'+this.name, 'Run '+this.name, 'checkbox', {'checked':true});
+	this.run_field = new Field('run_'+this.name, 'Run '+this.name, 'checkbox', {'checked':false, 'title':'Determines whether the selected spectrum uses or bypasses this preprocessing method'});
 	
 	this.debug = debug === undefined ? false : debug;
 }
@@ -137,8 +141,8 @@ Normalization = function(){
 		'Normalization',
 		// fields
 		{
-			'lower': new Field('lower_limit', 'Lower limit', 'number', {'value':0}),
-			'upper': new Field('upper_limit', 'Upper limit', 'number', {'value':1}),
+			'lower': new Field('lower_limit', 'Lower limit', 'number', {'value':0, 'title':'Minimum value of the processed spectrum'}),
+			'upper': new Field('upper_limit', 'Upper limit', 'number', {'value':1, 'title':'Maximum value of the processed spectrum'}),
 		},
 		// processor
 		function(data){
@@ -175,7 +179,7 @@ MovingAverage = function(){
 		'Moving Average Filter',
 		// fields
 		{
-			'window': new Field('window', 'Window size', 'number', {'value':5, 'step':2, 'min':3, 'placeholder':'odd only'}), // odd values only!
+			'window': new Field('window', 'Window size', 'number', {'value':5, 'step':2, 'min':3, 'placeholder':'odd only', 'title':'Width of the window to take the moving average. Each point is replaced by the average of itself and the surrounding points, and the total number of points used is this value. So for a window value of 5, each point becomes the average of itself, the two preceeding values, and the two following values. At the ends, when there are not enough points on one side, the average takes only the existing points. For example, the first point is replaced with an average of itself and the (({window size} - 1) / 2) points that follow.'}),
 		},
 		// algorithm
 		function(data){
@@ -252,10 +256,10 @@ BaselineRemoval = function(){
 }
 
 // testing preprocess
-var br = new BaselineRemoval();
+/* var br = new BaselineRemoval();
 console.log('br = new BaselineRemoval() has loaded');
 console.log('try br.runProcess(data)');
-
+*/
 
 /*
 class Preprocess{
@@ -498,18 +502,18 @@ class PlotConfig{
 		this.fields = {};
 		//this.fields['fig_width'] = new Field('fig_width', 'Width', 'number');
 		//this.fields['fig_height'] = new Field('fig_height', 'Height', 'number');
-		this.fields['title'] = new Field('title', 'Title', 'text', {'placeholder':'No title'});
+		this.fields['title'] = new Field('title', 'Title', 'text', {'placeholder':'No title', 'title':'Title displayed on plot'});
 		//this.fields['show_title'] = new Field('show_title', 'Show title', 'checkbox');
-		this.fields['xlabel'] = new Field('xlabel', 'X-axis label', 'text', {'value': 'Wavenumber'});
-		this.fields['ylabel'] = new Field('ylabel', 'Y-axis label', 'text', {'value': 'Intensity'});
-		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number', {'placeholder':'Auto'}); // doesn't do anything yet
-		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number', {'placeholder':'Auto'}); // doesn't do anything yet
-		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number', {'placeholder':'Auto'}); // doesn't do anything yet
-		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number', {'placeholder':'Auto'}); // doesn't do anything yet
-		this.fields['show_legend'] = new Field('show_legend', 'Show legend', 'checkbox', {'checked':'true'});
-		this.fields['quick_add'] = new Field('quick_add', 'Quick add from database', 'text', {'placeholder':'Try typing "qua"'});
-		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add'});
-		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove'});
+		this.fields['xlabel'] = new Field('xlabel', 'X-axis label', 'text', {'value': 'Wavenumber', 'title':'Label on x axis of plot'});
+		this.fields['ylabel'] = new Field('ylabel', 'Y-axis label', 'text', {'value': 'Intensity', 'title':'Label on y axis of plot'});
+		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number', {'placeholder':'Auto', 'title':'Minimum value of x axis'}); // doesn't do anything yet
+		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number', {'placeholder':'Auto', 'title':'Maximum value of x axis '}); // doesn't do anything yet
+		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number', {'placeholder':'Auto', 'title':'Minimum value of y axis'}); // doesn't do anything yet
+		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number', {'placeholder':'Auto', 'title':'Maximum value of y axis'}); // doesn't do anything yet
+		this.fields['show_legend'] = new Field('show_legend', 'Show legend', 'checkbox', {'checked':'true', 'title':'Show / hide legend'});
+		this.fields['quick_add'] = new Field('quick_add', 'Quick add from database', 'text', {'placeholder':'Try typing "qua"', 'title':'Start typing a mineral name and select the desired mineral from the dropdown list'});
+		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add', 'title':'Add spectrum, from file or database'});
+		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove', 'title':'Delete the curretly selected spectrum and its settings (this cannot be undone)'});
 		// TODO: create legend location
 		//this.legend_location = new Field('legend_location', 'Legend location', 'option', {'0':'Top right', '1':'Top left', '2':'Bottom left', '3':'Bottom right'});
 	}
@@ -541,6 +545,8 @@ class PlotHandler{
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
 		// register preprocesses here to automatically add them to specconfigs
+		// unfortunately, the order here matters. this is the order in which, if used, preprocesses will be applied
+		// (actually, dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
 		this.preprocs = {
 			'Normalization':Normalization,
 			'Moving Average':MovingAverage,
