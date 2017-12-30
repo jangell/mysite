@@ -208,7 +208,7 @@ BaselineRemoval = function(){
 		'Baseline Removal',
 		// field(s)
 		{
-			'window': new Field('window', 'Window size', 'number', {'value':5, 'step':2, 'min':3}),
+			'window': new Field('window', 'Window size', 'number', {'value':5, 'step':2, 'min':3, 'title':'Size of baseline removal window'}),
 		},
 		// algorithm
 		function(data){
@@ -306,11 +306,11 @@ class SpecConfig{
 		this.preprocesses = preprocs;
 		this.selected = false; // keep track of which is currently showing (and highlighted)
 		this.fields = {};
-		this.fields['show'] = new Field('spec'+this.spec_id+'_show', 'Show', 'checkbox', {'checked':true});
-		this.fields['legend_name'] = new Field('spec'+this.spec_id+'_legend_name', 'Legend label', 'text',{'value':this.spec_name,'placeholder':'No label'});
-		this.fields['line_width'] = new Field('spec'+this.spec_id+'_line_width', 'Line width (px)', 'number', {'value':2});
-		this.fields['color'] = new Field('spec'+this.spec_id+'_color', 'Color', 'color', {'value':randomColor()});
-		this.fields['opacity'] = new Field('spec'+this.spec_id+'_opacity', 'Opacity', 'number', {'value':1});
+		this.fields['show'] = new Field('spec'+this.spec_id+'_show', 'Show', 'checkbox', {'checked':true, 'title':'Show / hide this spectrum in the plot'});
+		this.fields['legend_name'] = new Field('spec'+this.spec_id+'_legend_name', 'Legend label', 'text',{'value':this.spec_name,'placeholder':'No label', 'title':'Text label shown for this spectrum in the legend'});
+		this.fields['line_width'] = new Field('spec'+this.spec_id+'_line_width', 'Line width (px)', 'number', {'value':2, 'title':'Width of line in pixels'});
+		this.fields['color'] = new Field('spec'+this.spec_id+'_color', 'Color', 'color', {'value':randomColor(), 'title':'Line color'});
+		this.fields['opacity'] = new Field('spec'+this.spec_id+'_opacity', 'Opacity', 'number', {'value':1, 'title':'Line opacity (transparency)'});
 		// this.last_data = this.spec_data;
 		// this.has_changed = false;
 	}
