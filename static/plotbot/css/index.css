@@ -90,8 +90,9 @@ html{
 .single_preproc{
 	width: 95%;
 	margin: 5px auto;
-	background-color: #eee;
+	background-color: #f8f8f8;
 	border-radius: 5px;
+	overflow:hidden;
 }
 
 /* title of that div */
@@ -100,6 +101,15 @@ html{
 	text-align:center;
 	border-bottom:1px solid #ccc;
 	margin:0;
+}
+.preproc_name:hover{
+	background-color:#eaeaea;
+}
+.collapser{
+	cursor:pointer;
+}
+.collapser:hover{
+	font-weight:bold;
 }
 
 /* preprocess args table */

@@ -106,19 +106,30 @@ Preprocess = function(name, fields, processor, debug){
 Preprocess.prototype.generatePreprocessHtml = function(){
 	// label the preprocess
 	var container = $('<div>').addClass('single_preproc');
-	container.append($('<h3>').addClass('preproc_name').html(this.name));
-	// generate a table
-	var table = $('<table>').addClass('preproc_table');
-	// start with a checkbox field for run_me
+	var header = $('<h3>').addClass('preproc_name').addClass('collapser').html(this.name);
+	var tableWrapper = $('<div>').addClass('collapsible');
+	var table = $('<table>').addClass('preproc_table').addClass('collapsible');
+
+	// add stuff to table
+	// start with a checkbox field for run_me (this could be a switch element eventually if we wanna be cute)
 	table.append(this.run_field.toTableRow());
-	// TODO: register element or listener or something
-	// for ... in ... iterates through a list of keys
+	// then iterate through the rest of the fields
 	for(f in this.fields){
 		table.append(this.fields[f].toTableRow());
-		// TODO: register listeners
 	}
+	tableWrapper.append(table);
 
-	container.append(table);
+	// add functionality - click to collapse
+	$(header).click(function(){
+		$(tableWrapper).slideToggle();
+	});
+
+	// start with the table hidden and only the title showing
+	$(tableWrapper).hide();
+
+	// put everything in the container to return a single item
+	container.append(header);
+	container.append(tableWrapper);
 
 	// TODO: add a handler to style running and not running differently and to update the values in the object when things change in the html
 	return container;
