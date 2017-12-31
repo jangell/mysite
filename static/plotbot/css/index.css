@@ -91,6 +91,7 @@ html{
 	width: 95%;
 	margin: 5px auto;
 	background-color: #f8f8f8;
+	border:1px solid #bbb;
 	border-radius: 5px;
 	overflow:hidden;
 }
@@ -99,17 +100,26 @@ html{
 .preproc_name{
 	font-weight:bold;
 	text-align:center;
-	border-bottom:1px solid #ccc;
 	margin:0;
+	border-bottom:1px solid #ccc;
 }
 .preproc_name:hover{
 	background-color:#eaeaea;
 }
+.table_expanded{
+}
+
 .collapser{
 	cursor:pointer;
 }
 .collapser:hover{
-	font-weight:bold;
+}
+.running_preproc{
+	font-style:italic;
+	background-color:#d8d8ff;
+}
+.running_preproc:hover{
+	background-color:#d0d0f8;
 }
 
 /* preprocess args table */

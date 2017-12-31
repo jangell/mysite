@@ -104,6 +104,8 @@ Preprocess = function(name, fields, processor, debug){
 	this.debug = debug === undefined ? false : debug;
 }
 Preprocess.prototype.generatePreprocessHtml = function(){
+	var _this = this;
+
 	// label the preprocess
 	var container = $('<div>').addClass('single_preproc');
 	var header = $('<h3>').addClass('preproc_name').addClass('collapser').html(this.name);
@@ -119,9 +121,18 @@ Preprocess.prototype.generatePreprocessHtml = function(){
 	}
 	tableWrapper.append(table);
 
-	// add functionality - click to collapse
+	// add functionality - click to collapse, toggle 'running' class on header based on 'run' checkbox
 	$(header).click(function(){
-		$(tableWrapper).slideToggle();
+		$(tableWrapper).slideToggle('fast');
+	});
+	$(this.run_field.element).change(function(){
+		// actually checking seems safer than just toggling
+		if(_this.run_field.getValue()){
+			$(header).addClass('running_preproc');
+		}
+		else{
+			$(header).removeClass('running_preproc');
+		}
 	});
 
 	// start with the table hidden and only the title showing

@@ -1,3 +1,5 @@
+{% load static %}
+
 <!doctype html>
 <!-- generic layout file for plotbot templates to inherit (just header, footer, body) -->
 <html lang="en">
@@ -12,6 +14,8 @@
 	</script>
 	<!-- fonts -->
 	<link href="https://fonts.googleapis.com/css?family=Montserrat:500|Dosis" rel="stylesheet">
+	<!-- favicon -->
+	<link rel="icon" href="{% static 'plotbot/img/favicon.ico' %}">
 	<!--
 	style stays here until we move it to its own file
 	my classes & ids use underscores. imported (bootstrap, etc) classes & ids use hyphens
