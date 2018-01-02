@@ -570,9 +570,9 @@ class PlotHandler{
 		// unfortunately, the order here matters. this is the order in which, if used, preprocesses will be applied
 		// (actually, dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
 		this.preprocs = {
-			'Normalization':Normalization,
-			'Moving Average':MovingAverage,
 			'Baseline Removal':BaselineRemoval,
+			'Moving Average':MovingAverage,
+			'Normalization':Normalization,
 		};
 	}
 
