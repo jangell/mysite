@@ -9,9 +9,8 @@ from .models import *
 
 # default page for plotbot, with tools and plotting button
 def index(request):
-	specs = Spec.objects.all().order_by('name')[:1]	# production
-	#specs = None 							# development
 	# TODO: let's make an option to only load a 'slim' catalog of the most-used spectra
+	specs = Spec.objects.filter(slim=True)
 	# get all unique wavelengths (for filter in db modal)
 	wvs = Spec.objects.values('wavelength').order_by('wavelength').distinct()
 	context = {'specs':specs, 'wavelengths':wvs}
@@ -38,6 +37,10 @@ def spectrum(request, spec_id):
 	points = spec.getPoints()
 	context = {'spectrum':spec, 'spec_data':points}
 	return render(request,'plotbot/single_spectrum.html',context)
+
+
+# everything below this point has been depricated
+
 
 # args: opacity, line_width, ymax, title, color, legend_location, legend_name, xlabel, xmax, ylabel, xmin, ymin
 floats = ['opacity','line_width','ymax','ymin','xmax','xmin','fig_height','fig_width']

@@ -40,6 +40,7 @@ class Spec(models.Model):
 	name = models.CharField(max_length=1000)
 	wavelength = models.IntegerField(default=-1)
 	source = models.ForeignKey(Source, blank=True,null=True)
+	slim = models.BooleanField(default=False) # whether this is part of the slim library or not
 	description = models.TextField(blank=True,null=True)
 	hash_val = models.CharField(max_length=1000, blank=True,null=True)		# hash value to determine if an identical spectrum has already been uploaded
 	timestamp = models.DateTimeField(default=datetime.now)
