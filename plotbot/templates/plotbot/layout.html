@@ -5,13 +5,15 @@
 <html lang="en">
 
 <head>
-	<title>PlotBot | Spectral plotting</title>
-	<!-- jQuery -->
+	<!-- jQuery 
 	<script
 	  src="https://code.jquery.com/jquery-3.2.1.min.js"
 	  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
 	  crossorigin="anonymous">
 	</script>
+	-->
+	<!-- local for offline development -->
+	<script src="{% static 'plotbot/js/jquery.js' %}"></script>
 	<!-- fonts -->
 	<link href="https://fonts.googleapis.com/css?family=Montserrat:500|Dosis" rel="stylesheet">
 	<!-- favicon -->
@@ -103,6 +105,7 @@
 			<div class="spacer"></div>
 			<a class="header_link" href="/plotbot/"><h2>Plotting Tool</h2></a>
 			<a class="header_link" href="{% url 'spectra' %}"><h2>Spectral Browser</h2></a>
+			<a class="header_link" href="{% url 'manageSlim' %}"><h2>Manage Library</h2></a>
 		</div>
 		<div id="body_content">
 			{% block body %}{% endblock %}

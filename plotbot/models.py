@@ -36,17 +36,16 @@ class Source(models.Model):
 # model for a spectrum
 class Spec(models.Model):
 	spec_id = models.AutoField(primary_key=True)
-	#owner = models.ForeignKey(Session, blank=True,null=True)	# id referring to the session (will be modified in the future to refer to a user, once accounts are implemented)
+	#owner = models.ForeignKey(Session, blank=True,null=True)				# id referring to the session (will be modified in the future to refer to a user, once accounts are implemented)
 	name = models.CharField(max_length=1000)
 	wavelength = models.IntegerField(default=-1)
 	source = models.ForeignKey(Source, blank=True,null=True)
-	slim = models.BooleanField(default=False) # whether this is part of the slim library or not
+	slim = models.BooleanField(default=False) 								# whether this is part of the slim library or not
 	description = models.TextField(blank=True,null=True)
 	hash_val = models.CharField(max_length=1000, blank=True,null=True)		# hash value to determine if an identical spectrum has already been uploaded
 	timestamp = models.DateTimeField(default=datetime.now)
 	# example_plot = models.ForeignKey('Plot',blank=True,null=True)
-	# the actual data gets stored in a CSV
-	spec_file = models.FileField(upload_to='spec/csv')
+	spec_file = models.FileField(upload_to='spec/csv')						# the actual data gets stored in a CSV
 
 	# meta options (to order alphabetically in admin)
 	class Meta:

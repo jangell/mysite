@@ -14,7 +14,7 @@ def index(request):
 	# get all unique wavelengths (for filter in db modal)
 	wvs = Spec.objects.values('wavelength').order_by('wavelength').distinct()
 	context = {'specs':specs, 'wavelengths':wvs}
-	return render(request,'plotbot/index.html',context)
+	return render(request, 'plotbot/index.html', context)
 
 # AJAX function to return a single spectrum (incl. data) based on its id
 def getSpec(request):
@@ -26,24 +26,57 @@ def getSpec(request):
 	spec_dict['data'] = spec.getPoints()
 	return http.HttpResponse(json.dumps(spec_dict), content_type='application/json')
 
+# manage what parts of the database are and aren't slim
+# TODO: restrict access to superusers only
+def manageSlim(request):
+	#if request.user.is_superuser:
+	slim = Spec.objects.filter(slim=True)
+	non_slim = Spec.objects.filter(slim=False)
+	context = {'slim':slim, 'non_slim':non_slim}
+	return render(request, 'plotbot/manage_slim.html', context)
+	#else:
+
+# POST function to mark all spectra in list as slim
+def setSlim(request):
+	get = request.GET
+	to_set = get.keys()[0]
+	ids = json.loads(to_set)
+	for s in ids:
+		sp = Spec.objects.get(pk=int(s))
+		sp.slim = True
+		sp.save()
+	return http.HttpResponse(True)
+
+
+# POST function to mark all spectra in list as full (not slim)
+def setNotSlim(request):
+	get = request.GET
+	to_set = get.keys()[0]
+	ids = json.loads(to_set)
+	for s in ids:
+		sp = Spec.objects.get(pk=int(s))
+		sp.slim = False
+		sp.save()
+	return http.HttpResponse(True)
+
 # spectral browser
 def spectra(request):
 	context = {'spec_list':Spec.objects.all()}
-	return render(request,'plotbot/spec_browser.html',context)
+	return render(request, 'plotbot/spec_browser.html', context)
 
 # single spectrum page
 def spectrum(request, spec_id):
 	spec = Spec.objects.get(spec_id=spec_id)
 	points = spec.getPoints()
 	context = {'spectrum':spec, 'spec_data':points}
-	return render(request,'plotbot/single_spectrum.html',context)
+	return render(request, 'plotbot/single_spectrum.html', context)
 
 
 # everything below this point has been depricated
 
 
 # args: opacity, line_width, ymax, title, color, legend_location, legend_name, xlabel, xmax, ylabel, xmin, ymin
-floats = ['opacity','line_width','ymax','ymin','xmax','xmin','fig_height','fig_width']
+floats = ['opacity', 'line_width', 'ymax', 'ymin', 'xmax', 'xmin', 'fig_height', 'fig_width']
 ints = ['legend_location']
 defaults = {'opacity':1.,'line_width':1.}
 def make_plot(request):
