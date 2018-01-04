@@ -51,6 +51,10 @@ class Spec(models.Model):
 	class Meta:
 		ordering = ['name']
 
+	def setSlim(self, val):
+		self.slim = val
+		self.save()
+
 	# returns a list of points corresponding to the spectrum
 	def getPoints(self):
 		# get all points from querying the Point table, ordered by index

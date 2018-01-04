@@ -43,9 +43,7 @@ def setSlim(request):
 	to_set = get.keys()[0]
 	ids = json.loads(to_set)
 	for s in ids:
-		sp = Spec.objects.get(pk=int(s))
-		sp.slim = True
-		sp.save()
+		Spec.objects.get(pk=int(s)).setSlim(True)
 	return http.HttpResponse(True)
 
 
@@ -55,9 +53,7 @@ def setNotSlim(request):
 	to_set = get.keys()[0]
 	ids = json.loads(to_set)
 	for s in ids:
-		sp = Spec.objects.get(pk=int(s))
-		sp.slim = False
-		sp.save()
+		Spec.objects.get(pk=int(s)).setSlim(False)
 	return http.HttpResponse(True)
 
 # spectral browser

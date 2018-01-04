@@ -115,7 +115,7 @@ html{
 .collapser:hover{
 }
 .running_preproc{
-	font-style:italic;
+	font-style:bold;
 	background-color:#d8d8ff;
 }
 .running_preproc:hover{
