@@ -110,7 +110,7 @@ Preprocess.prototype.generatePreprocessHtml = function(){
 	var container = $('<div>').addClass('single_preproc');
 	var header = $('<h3>').addClass('preproc_name').addClass('collapser').html(this.name);
 	var tableWrapper = $('<div>').addClass('collapsible');
-	var table = $('<table>').addClass('preproc_table').addClass('collapsible');
+	var table = $('<table>').addClass('preproc_table');
 
 	// add stuff to table
 	// start with a checkbox field for run_me (this could be a switch element eventually if we wanna be cute)
@@ -123,6 +123,14 @@ Preprocess.prototype.generatePreprocessHtml = function(){
 
 	// add functionality - click to collapse, toggle 'running' class on header based on 'run' checkbox
 	$(header).click(function(){
+		$('.collapsible').each(function(){
+			// $(this) is a jquery-fied version of the object we're iterating through. _this is the instance of the preprocess
+			if($(this).siblings('.preproc_name').html() != _this.name && $(this).css('display') == 'block'){
+				// holy cow this actually works. go me.
+				$(this).slideToggle('fast');
+			}
+		});
+		// collapse all others
 		$(tableWrapper).slideToggle('fast');
 	});
 	$(this.run_field.element).change(function(){
