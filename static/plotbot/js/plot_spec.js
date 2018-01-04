@@ -283,41 +283,6 @@ console.log('br = new BaselineRemoval() has loaded');
 console.log('try br.runProcess(data)');
 */
 
-/*
-class Preprocess{
-	constructor(args){
-		// make sure this isn't being instantiated directly (this is an abstract class)
-		if(this.constructor === Preprocess){
-			throw 'Preprocess is an abstract class and cannot be implemented directly';
-		}
-		
-		this.args = args;
-		this.processor = processor;
-		this.usePreprocess = false;
-	}
-
-	setArg(key,val){
-		this.args[key] = val;
-	}
-	getArg(key){
-		if(key in args){
-			return args[key];
-		}
-		throw key+' is not a key in args'
-	}
-
-	preprocess(data){
-		// only preprocess if this flag has been set to true
-		if(this.usePreprocess){
-			return this.processor(data);
-		}
-		// by default, return the same data
-		return data;
-	}
-}*/
-
-
-
 // SpecConfig (reminder: classes are not hoisted in js)
 class SpecConfig{
 	constructor(spec_id, spec_name, spec_data, preprocs){
@@ -333,8 +298,6 @@ class SpecConfig{
 		this.fields['line_width'] = new Field('spec'+this.spec_id+'_line_width', 'Line width (px)', 'number', {'value':2, 'title':'Width of line in pixels'});
 		this.fields['color'] = new Field('spec'+this.spec_id+'_color', 'Color', 'color', {'value':randomColor(), 'title':'Line color'});
 		this.fields['opacity'] = new Field('spec'+this.spec_id+'_opacity', 'Opacity', 'number', {'value':1, 'title':'Line opacity (transparency)'});
-		// this.last_data = this.spec_data;
-		// this.has_changed = false;
 	}
 
 	valueOf(field){
@@ -522,6 +485,7 @@ class PlotConfig{
 	constructor(){
 		// set values to defaults
 		this.fields = {};
+		this.ad_fields = {}; // advanced fields
 		//this.fields['fig_width'] = new Field('fig_width', 'Width', 'number');
 		//this.fields['fig_height'] = new Field('fig_height', 'Height', 'number');
 		this.fields['title'] = new Field('title', 'Title', 'text', {'placeholder':'No title', 'title':'Title displayed on plot'});
@@ -537,7 +501,15 @@ class PlotConfig{
 		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add', 'title':'Add spectrum, from file or database'});
 		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove', 'title':'Delete the curretly selected spectrum and its settings (this cannot be undone)'});
 		// TODO: create legend location
-		//this.legend_location = new Field('legend_location', 'Legend location', 'option', {'0':'Top right', '1':'Top left', '2':'Bottom left', '3':'Bottom right'});
+		/*
+		// waiting on advanced options until we discuss separating js and html
+
+		this.ad_fields['left_margin'] = new Field('left_margin', 'Left margin', 'number', {'value':70, 'title':'Left margin (pixels)'});
+		this.ad_fields['right_margin'] = new Field('right_margin', 'Right margin', 'number', {'value':40, 'title':'Right margin (pixels)'});
+		this.ad_fields['top_margin'] = new Field('top_margin', 'Top margin', 'number', {'value':60, 'title':'Top margin (pixels)'});
+		this.ad_fields['bottom_margin'] = new Field('bottom_margin', 'Bottom margin', 'number', {'value':80, 'title':'Bottom margin (pixels)'});
+		*/
+
 	}
 
 	// convert fields to html table
@@ -683,20 +655,23 @@ class PlotHandler{
 			},
 			title: this.plotConfig.valueOf('title'),
 			titlefont: {
-				size: 22,
+				size: 24,
+				family: "'Helvetica', sans-serif"
 			},
 			// x axis dictionary (expand to advanced features later)
 			xaxis: {
 				title: this.plotConfig.valueOf('xlabel'),
 				titlefont: {
-					size: 16,
+					size: 20,
+					family: "'Helvetica', sans-serif"
 				},
 				range: [parseFloat(this.plotConfig.valueOf('xmin')),parseFloat(this.plotConfig.valueOf('xmax'))]
 			},
 			yaxis: {
 				title: this.plotConfig.valueOf('ylabel'),
 				titlefont: {
-					size: 16,
+					size: 20,
+					family: "'Helvetica', sans-serif"
 				},
 				range: [parseFloat(this.plotConfig.valueOf('ymin')),parseFloat(this.plotConfig.valueOf('ymax'))]
 			},
@@ -704,7 +679,7 @@ class PlotHandler{
 
 		}
 
-		Plotly.newPlot(plot_div, data, layout, {showLink:false});
+		Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false});
 
 		// hook in a function to update settings on zoom / pan
 		plot_div.on('plotly_relayout',function(eventdata){
