@@ -32,7 +32,8 @@ def manageSlim(request):
 	#if request.user.is_superuser:
 	slim = Spec.objects.filter(slim=True)
 	non_slim = Spec.objects.filter(slim=False)
-	context = {'slim':slim, 'non_slim':non_slim}
+	wvs = Spec.objects.values('wavelength').order_by('wavelength').distinct()
+	context = {'slim':slim, 'non_slim':non_slim, 'wvs':wvs}
 	return render(request, 'plotbot/manage_slim.html', context)
 	#else:
 
