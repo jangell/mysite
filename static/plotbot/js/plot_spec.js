@@ -249,38 +249,69 @@ BaselineRemoval = function(){
 			return data;
 
 			// simple (zeroth order fit)
-
 			/*
 			// advanced (first-order fit instead of zeroth order)
-
 			// grab the window size
 			var win_size = parseInt(this.fields['window'].getValue());
 			var win_start = 0;
-
 			// here's the big boy loop
 			while((win_start + win_size) < counts.length){
-
 				// walk through the window, from left to right, creating the highest straight line under all the points
 				var left = win_start;
 				var right = win_start + 1;
-
 				// start with corners being the left and left+1 points
 				var lowCorner = new Point(wavs[left],counts[left]);
 				var highCorner = new Point(wavs[right],counts[right])
-
 				// line-fit the local slice (convex hull!)
-
 				// subtract that ish off
-
 				// iterate
 				win_start++;
 			}
 			return data;
 			*/
-
 		},
 		// debug flag - DEVELOPMENT ONLY
 		true
+	);
+	return that;
+}
+
+Crop = function(){
+	that = new Preprocess(
+		// name
+		'Crop',
+		// field(s)
+		{
+			'cropMin': new Field('cropMin', 'Minimum wavenumber', 'number', {'value':0, 'title':'Lowest wavenumber to include in plot'}),
+			'cropMax': new Field('cropMax', 'Maximum wavenumber', 'number', {'value':1200, 'title':'Highest wavenumber to include in plot'}),
+		},
+		// algorithm
+		function(data){
+			var wavs = data[0];
+			var counts = data[1];
+			var xmin = parseInt(this.fields['cropMin'].getValue());
+			var xmax = parseInt(this.fields['cropMax'].getValue());
+			// this is slow-ish, but it works: just walk up and walk down
+			var lo_ind = 0;
+			var hi_ind = wavs.length - 1;
+			// walk up to the min
+			while(lo_ind < wavs.length && wavs[lo_ind] < xmin){
+				lo_ind ++;
+			}
+			// go back one (will always overshoot by one unless we literally didn't move)
+			if(lo_ind > 0){
+				lo_ind --;
+			}
+			// walk down to the max
+			// the lo_ind-2 makes it so no data shows up if xmin == xmax
+			while(hi_ind > lo_ind-2 && wavs[hi_ind] > xmax){
+				hi_ind --;
+			}
+			if(hi_ind < wavs.length-1){
+				hi_ind ++;
+			}
+			return [wavs.slice(lo_ind, hi_ind), counts.slice(lo_ind, hi_ind)];
+		}
 	);
 	return that;
 }
@@ -550,6 +581,7 @@ class PlotHandler{
 		// unfortunately, the order here matters. this is the order in which, if used, preprocesses will be applied
 		// (actually, dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
 		this.preprocs = {
+			'Crop':Crop,
 			'Baseline Removal':BaselineRemoval,
 			'Moving Average':MovingAverage,
 			'Normalization':Normalization,

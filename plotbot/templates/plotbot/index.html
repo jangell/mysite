@@ -220,14 +220,6 @@ $('#modal_form').submit(function(event){
 		// gap is the difference between the mid and half the span
 		var lista_gap = Math.abs(lista_mid - (lista[0] + (lista_span/2)));
 		var listb_gap = Math.abs(listb_mid - (listb[0] + (listb_span/2)));
-		console.log('list a');
-		console.log(lista);
-		console.log(lista_mid);
-		console.log(lista_gap);
-		console.log('list b');
-		console.log(listb)
-		console.log(listb_mid);
-		console.log(listb_gap);
 		// the smaller gap is the wavenumbers
 		if(lista_gap < listb_gap){
 			wavs = lista;
