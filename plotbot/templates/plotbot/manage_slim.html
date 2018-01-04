@@ -1,0 +1,368 @@
+{% extends "plotbot/layout.html" %}
+{% load static %}
+
+{% block head_bottom %}
+<title>PlotBot | Manage Library</title>
+<style>
+/* toolset and toolset_title are taken from index.html with slight modifications */
+.body_container{
+}
+#body_content{
+}
+.toolset{
+	background-color:#ddd;
+	margin:5px;
+	min-width:400px;
+	border:1px solid #888;
+	box-shadow:3px 3px 1px #888;
+	height:100%;
+	max-height:100%;
+	white-space:nowrap;
+}
+.toolset_title{
+	font-family: 'Dosis', sans-serif;
+	font-size:1.8rem;
+	text-align:center;
+	margin:0;
+	background-color:#bbb;
+	border-bottom:2px solid #aaa;
+}
+.lists_holder{
+	padding:5px;
+	flex:1;
+	display: flex;
+	flex-direction: row;
+	align-content: center;
+	justify-content: center;
+	height:74vh;
+}
+.db_div{
+	flex: 1;
+	display:flex;
+	flex-direction:column;
+}
+.db_title{
+	text-align: center;
+	margin: 10px;
+}
+.list_wrapper{
+	flex:1;
+	overflow:scroll;
+	border-radius: 5px;
+	border: 1px solid #aaa;
+	margin: 5px;
+	background-color:#fff;
+}
+.db_table{
+	width:100%;
+	border-collapse:collapse;
+}
+.db_table thead{
+	border-bottom:1px solid #888;
+}
+.db_list{
+	list-style: none;
+	padding:0px;
+	margin:0;
+}
+.db_item{
+	padding:2px;
+	cursor:pointer;
+}
+.db_item:hover{
+	background-color: #ddd;
+}
+.bottom_border{
+	border-bottom: 1px solid #bbb;
+}
+
+.selected_db_item{
+	background-color:#ccf;
+}
+.selected_db_item:hover{
+	background-color:#bbf;
+}
+
+.arrows_holder{
+	display:flex;
+	flex-direction:column;
+	justify-content:center;
+}
+
+.arrow_button{
+	margin:5px;
+	background-color:#aaa;
+	border:1px solid #444;
+	cursor:pointer;
+}
+.arrow_button:hover{
+	background-color:#999;
+}
+
+.db_filters{
+	display:flex;
+	flex-direction:row;
+	flex-basis: justify;
+}
+.filter{
+	margin:5px;
+	display:inline-block;
+}
+
+</style>
+
+{% endblock %}
+
+{% block body %}
+{% csrf_token %}
+
+<div class="toolset">
+	<h2 class="toolset_title">Manage library (slim vs full databases)</h2>
+	<div class="lists_holder">
+		<div class="db_div" id="slim_div">
+			<h3 class="db_title">Slim</h3>
+
+			<div class="db_filters">
+				<div class="filter wv_filter">
+					<label for="wv_select" title="Only show spectra with selected wavelength">Filter by wavelength</label>
+					<select class="wv_select">
+						<option value="all">All</option>
+						{% for wv in wvs %}
+						<option value="{{wv.wavelength}}">{{wv.wavelength}}nm</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="filter name_filter">
+					<label for="name_select" title="Show minerals whose name contains the search string">Filter by name</label>
+					<input class="name_select" placeholder="[enter] to update list">
+				</div>
+			</div>
+
+			<div class="list_wrapper">
+				<table class="db_table" id="slim_table">
+					<thead>
+						<th class="id">ID</th>
+						<th class="name">Name</th>
+						<th class="wv">Wavelength</th>
+						<th class="source">Source</th>
+					</thead>
+					<tbody>
+						{% for s in slim %}
+						<tr class="db_item bottom_border">
+							<td class="id">{{s.spec_id}}</td>
+							<td class="name">{{s.name}}</td>
+							<td class="wv">{{s.wavelength}}</td>
+							<td class="source">{{s.source}}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				<!--
+				<ul class="db_list" id="slim_list">
+					{% for s in slim %}
+					<li class="db_item bottom_border" db_id="{{s.spec_id}}">{{s}}</li>
+					{% endfor %}
+				</ul>
+				-->
+			</div>
+		</div>
+
+		<div class="arrows_holder">
+			<!-- left and right arrows to shift selected spectra -->
+			<button class="arrow_button" id="left_button" disabled><</button>
+			<button class="arrow_button" id="right_button" disabled>></button>
+		</div>
+
+		<div class="db_div" id="full_div">
+			<h3 class="db_title">Full</h3>
+
+			<div class="db_filters">
+				<div class="filter wv_filter">
+					<label for="wv_select" title="Only show spectra with selected wavelength">Filter by wavelength</label>
+					<select class="wv_select">
+						<option value="all">All</option>
+						{% for wv in wvs %}
+						<option value="{{wv.wavelength}}">{{wv.wavelength}}nm</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="filter name_filter">
+					<label for="name_select" title="Show minerals whose name contains the search string">Filter by name</label>
+					<input class="name_select" placeholder="[enter] to update list">
+				</div>
+			</div>
+
+			<div class="list_wrapper">
+				<table class="db_table" id="full_table">
+					<thead>
+						<th class="id">ID</th>
+						<th class="name">Name</th>
+						<th class="wv">Wavelength</th>
+						<th class="source">Source</th>
+					</thead>
+					<tbody>
+						{% for s in non_slim %}
+						<tr class="db_item bottom_border">
+							<td class="id">{{s.spec_id}}</td>
+							<td class="name">{{s.name}}</td>
+							<td class="wv">{{s.wavelength}}</td>
+							<td class="source">{{s.source}}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				<!--
+				<ul class="db_list" id="full_list">
+					{% for ns in non_slim %}
+					<li class="db_item {% if not forloop.last %} bottom_border {% endif %}" db_id="{{ns.spec_id}}">{{ns}}</li>
+					{% endfor %}
+				</ul>
+			-->
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+// select / unselect list items on click (click once to select, again to deselect) (multiple selected at once is a-ok)
+$('.db_item').click(function(){
+
+	// the immediate, obvious thing - toggle the selected_... class
+	$(this).toggleClass('selected_db_item');
+
+	// check whether we have to activate or deactivate either of the move buttons
+	if($('#full_table').find('.selected_db_item').length > 0){
+		$('#left_button').attr('disabled',false);
+	}
+	else{
+		$('#left_button').attr('disabled',true);
+	}
+	if($('#slim_table').find('.selected_db_item').length > 0){
+		$('#right_button').attr('disabled',false);
+	}
+	else{
+		$('#right_button').attr('disabled',true);
+	}
+});
+
+// when the right button gets clicked, move everything selected in slim to full
+$('#right_button').click(function(){
+	// the 'disabled' attribute automatically filters out clicks when nothing is selected
+
+	// add each selected db item in slim list to full list, and remove each from slim list
+	var moved = [];
+	var to_shift = [];
+	$('#slim_table').find('.selected_db_item').each(function(){
+		moved.push($(this).find('.id').html());
+		to_shift.push(this);
+		$(this).removeClass('selected_db_item');
+	});
+	to_shift.reverse(); // this is sort of silly but it pretends to preserve order between removing from one list and adding to the other
+	// now there's nothing selected on that side, so disable the button
+	$('#right_button').attr('disabled',true);
+
+	// GET to let the server know which spectra were moved (this could be multiple, from inside the loop, or (better) one single post)
+	//var data = JSON.stringify({'spec_list':moved});
+	$.get({
+		url: 'setNotSlim',
+		data: JSON.stringify(moved),
+		success: function(response){
+			$(to_shift).each(function(){
+				$('#full_table').find('tbody').prepend($(this));		// this simultaneously removes it from slim list and adds it to the beginning of full list
+			});
+		}
+	});
+
+});
+
+$('#left_button').click(function(){
+	var moved = [];
+	var to_shift = []
+	$('#full_table').find('.selected_db_item').each(function(){
+		moved.push($(this).find('.id').html());
+		to_shift.push(this);
+		$(this).removeClass('selected_db_item');
+	});
+	to_shift.reverse();
+	$('#left_button').attr('disabled',true);
+
+	// GET to the server
+	$.get({
+		url: 'setSlim',
+		data: JSON.stringify(moved),
+		success: function(response){
+			// this doesn't happen until here so as to wait for the server to confirm that the database has successfully been updated
+			$(to_shift).each(function(){
+				$('#slim_table').find('tbody').prepend($(this));
+			});
+		}
+	})
+
+});
+
+// this updates the filters within a particular div
+function updateFilters(target){
+
+	var wv = target.find('.wv_select').val();
+	var str = target.find('.name_select').val().toLowerCase();
+
+	if(wv == 'all'){
+		// show all wavelengths
+		target.find('.db_item').show();
+		// then filter by name
+		target.find('.db_item').each(function(){
+			if($(this).find('.name').html().toLowerCase().match(str)){
+				$(this).show();
+			}
+			else{
+				$(this).hide();
+			}
+		});
+	}
+	else{
+		target.find('.db_item').each(function(){
+			if($(this).find('.wv').html() != wv){
+				$(this).hide();
+			}
+			else{
+				// this is where filter-by-name comes in
+				if($(this).find('.name').html().toLowerCase().match(str)){
+					$(this).show();
+				}
+				else{
+					$(this).hide();
+				}
+			}
+		});
+	}
+}
+
+$(document).ready(function(){
+	// load database into modal_db_tbody at page load (for now)
+	{% for spec in specs %}
+	$('#modal_db_tbody').append(modalDbRow('{{spec.spec_id}}', '{{spec.name}}', '{{spec.source}}', '{{spec.wavelength}}'));
+	{% endfor %}
+
+	// target is a jQuery object that contains a number of rows
+
+	// wavelength filter
+	$('#slim_div').find('.wv_select').change(function(){
+		updateFilters($('#slim_div'));
+	});
+	$('#full_div').find('.wv_select').change(function(){
+		updateFilters($('#full_div'));
+	});
+
+	// this requires the user to hit enter
+	$('#slim_div').find('.name_select').change(function(){
+		updateFilters($('#slim_div'));
+	});
+	$('#full_div').find('.name_select').change(function(){
+		updateFilters($('#full_div'));
+	});
+
+});
+
+</script>
+
+{% endblock %}
