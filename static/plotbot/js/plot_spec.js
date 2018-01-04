@@ -684,6 +684,14 @@ class PlotHandler{
 			}
 		}
 
+		// get values for x and y range
+		var to_xmin = parseFloat(this.plotConfig.valueOf('xmin'));
+		var to_xmax = parseFloat(this.plotConfig.valueOf('xmax'));
+		var to_ymin = parseFloat(this.plotConfig.valueOf('ymin'));
+		var to_ymax = parseFloat(this.plotConfig.valueOf('ymax'));
+		// if only one in a pair (xmin vs xmax) is filled in, set other one to current value in plot
+		if(to_xmin !== NaN && to_xmax === NaN){};
+
 		// global variables -> layout
 		var layout = {
 			// margin is arbitrary for now
@@ -719,7 +727,8 @@ class PlotHandler{
 
 		}
 
-		Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false});
+		var p = Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false});
+		console.log(p);
 
 		// hook in a function to update settings on zoom / pan
 		plot_div.on('plotly_relayout',function(eventdata){
