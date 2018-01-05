@@ -47,14 +47,28 @@ class Field{
 		}
 		this.element = null; // this is where the value in the element gets wired into the field itself (to be accessed by the specconfig via getValue() )
 	}
+	
 	// gets the value from the current element that this field has generated
 	getValue(){
+		// start by making sure the element exists
 		if(this.element){
 			if(this.input == 'checkbox')
 				return this.element.is(':checked');
 			return this.element.val();
 		}
 		return null;
+	}
+
+	setValue(value){
+		if(this.element){
+			if(this.input == 'checkbox'){
+				this.element.attr('checked',true);
+				return true;
+			}
+			this.element.val(value);
+			return true;
+		}
+		return false;
 	}
 	
 	//
@@ -328,12 +342,9 @@ Offset = function(){
 			var wavs = data[0];
 			var counts = data[1];
 			var offset = parseFloat(this.fields['offset'].getValue());
-			//console.log(offset);
 
 			for(var i = 0; i < counts.length; i++){
-				//console.log(counts[i])
 				counts[i] += offset;
-				//console.log(counts[i])
 			}
 
 			return [wavs,counts];
@@ -551,10 +562,10 @@ class PlotConfig{
 		//this.fields['show_title'] = new Field('show_title', 'Show title', 'checkbox');
 		this.fields['xlabel'] = new Field('xlabel', 'X-axis label', 'text', {'value': 'Wavenumber', 'title':'Label on x axis of plot'});
 		this.fields['ylabel'] = new Field('ylabel', 'Y-axis label', 'text', {'value': 'Intensity', 'title':'Label on y axis of plot'});
-		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number', {'placeholder':'Auto', 'title':'Minimum value of x axis'}); // doesn't do anything yet
-		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number', {'placeholder':'Auto', 'title':'Maximum value of x axis '}); // doesn't do anything yet
-		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number', {'placeholder':'Auto', 'title':'Minimum value of y axis'}); // doesn't do anything yet
-		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number', {'placeholder':'Auto', 'title':'Maximum value of y axis'}); // doesn't do anything yet
+		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Minimum value of x axis'}); // doesn't do anything yet
+		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Maximum value of x axis '}); // doesn't do anything yet
+		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Minimum value of y axis'}); // doesn't do anything yet
+		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Maximum value of y axis'}); // doesn't do anything yet
 		this.fields['show_legend'] = new Field('show_legend', 'Show legend', 'checkbox', {'checked':'true', 'title':'Show / hide legend'});
 		this.fields['quick_add'] = new Field('quick_add', 'Quick add from database', 'text', {'placeholder':'Try typing "qua"', 'title':'Start typing a mineral name and select the desired mineral from the dropdown list'});
 		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add', 'title':'Add spectrum, from file or database'});
@@ -581,8 +592,13 @@ class PlotConfig{
 	}
 
 	// returns the value of a field
-	valueOf(field){
-		return this.fields[field].getValue();
+	valueOf(field, value){
+		if(value === undefined){
+			return this.fields[field].getValue();
+		}
+		else{
+			this.fields[field].setValue(value);
+		}
 	}
 }
 
@@ -597,6 +613,7 @@ class PlotHandler{
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
+		this.annotationList = [];
 		// register preprocesses here to automatically add them to specconfigs
 		// unfortunately, the order here matters. this is the order in which, if used, preprocesses will be applied
 		// (actually, dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
@@ -607,6 +624,22 @@ class PlotHandler{
 			'Normalization':Normalization,
 			'Offset':Offset,
 		};
+	}
+
+	getDivData(){
+		// plot_target is a jquery object, so we need to pull the native DOM out of it
+		return this.plot_target[0].data;
+	}
+	getDivLayout(){
+		return this.plot_target[0].layout;
+	}
+	getDivXRange(){
+		var xr = this.getDivLayout().xaxis.range;
+		return xr;
+	}
+	getDivYRange(){
+		var yr = this.getDivLayout().yaxis.range;
+		return yr;
 	}
 
 	// get the index of a spectrum in specConfigList based on its spec id
@@ -710,8 +743,34 @@ class PlotHandler{
 		var to_xmax = parseFloat(this.plotConfig.valueOf('xmax'));
 		var to_ymin = parseFloat(this.plotConfig.valueOf('ymin'));
 		var to_ymax = parseFloat(this.plotConfig.valueOf('ymax'));
+
+		// update x and y range once it's plotted
+		// var xrange = this.getDivXRange();
+		// var yrange = this.getDivYRange();
+		// this.plotConfig.valueOf('xmin', xrange[0].toFixed(1));
+		// this.plotConfig.valueOf('xmax', xrange[1].toFixed(1));
+		// this.plotConfig.valueOf('ymin', yrange[0].toFixed(1));
+		// this.plotConfig.valueOf('ymax', yrange[1].toFixed(1));
+
 		// if only one in a pair (xmin vs xmax) is filled in, set other one to current value in plot
-		if(to_xmin !== NaN && to_xmax === NaN){};
+		if(!isNaN(to_xmin) && isNaN(to_xmax)){
+			to_xmax = this.getDivXRange()[1];
+			// also set the html element so the user knows why the plot is behaving the way it is
+			console.log(to_xmax);
+			this.plotConfig.valueOf('xmax', to_xmax.toFixed(1));
+		}
+		else if(isNaN(to_xmin) && !isNaN(to_xmax)){
+			to_xmin = this.getDivXRange()[0];
+			this.plotConfig.valueOf('xmin', to_xmin.toFixed(1));
+		}
+		if(!isNaN(to_ymin) && isNaN(to_ymax)){
+			to_ymax = this.getDivYRange()[1];
+			this.plotConfig.valueOf('ymax', to_ymax.toFixed(1));
+		}
+		else if(isNaN(to_ymin) && !isNaN(to_ymax)){
+			to_ymin = this.getDivYRange()[0];
+			this.plotConfig.valueOf('ymin', to_ymin.toFixed(1));
+		}
 
 		// global variables -> layout
 		var layout = {
@@ -734,7 +793,7 @@ class PlotHandler{
 					size: 20,
 					family: "'Helvetica', sans-serif"
 				},
-				range: [parseFloat(this.plotConfig.valueOf('xmin')),parseFloat(this.plotConfig.valueOf('xmax'))]
+				range: [to_xmin, to_xmax]
 			},
 			yaxis: {
 				title: this.plotConfig.valueOf('ylabel'),
@@ -742,7 +801,7 @@ class PlotHandler{
 					size: 20,
 					family: "'Helvetica', sans-serif"
 				},
-				range: [parseFloat(this.plotConfig.valueOf('ymin')),parseFloat(this.plotConfig.valueOf('ymax'))]
+				range: [to_ymin, to_ymax]
 			},
 			showlegend: this.plotConfig.valueOf('show_legend'),
 

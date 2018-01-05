@@ -158,9 +158,12 @@
 */
 
 var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plot_holder'));
-
 ph.initialize();
 
+// stop <input type=number> from changing on scroll
+$(document).on("wheel", "input[type=number]", function (e) {
+    $(this).blur();
+});
 
 // modal window
 
