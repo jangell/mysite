@@ -282,15 +282,15 @@ Crop = function(){
 		'Crop',
 		// field(s)
 		{
-			'cropMin': new Field('cropMin', 'Minimum wavenumber', 'number', {'value':0, 'title':'Lowest wavenumber to include in plot'}),
-			'cropMax': new Field('cropMax', 'Maximum wavenumber', 'number', {'value':1200, 'title':'Highest wavenumber to include in plot'}),
+			'cropMin': new Field('cropMin', 'Minimum wavenumber', 'number', {'value':0, 'step':'any', 'title':'Lowest wavenumber to include in plot'}),
+			'cropMax': new Field('cropMax', 'Maximum wavenumber', 'number', {'value':1200, 'step':'any', 'title':'Highest wavenumber to include in plot'}),
 		},
 		// algorithm
 		function(data){
 			var wavs = data[0];
 			var counts = data[1];
-			var xmin = parseInt(this.fields['cropMin'].getValue());
-			var xmax = parseInt(this.fields['cropMax'].getValue());
+			var xmin = parseFloat(this.fields['cropMin'].getValue());
+			var xmax = parseFloat(this.fields['cropMax'].getValue());
 			// this is slow-ish, but it works: just walk up and walk down
 			var lo_ind = 0;
 			var hi_ind = wavs.length - 1;
@@ -316,11 +316,31 @@ Crop = function(){
 	return that;
 }
 
-// testing preprocess
-/* var br = new BaselineRemoval();
-console.log('br = new BaselineRemoval() has loaded');
-console.log('try br.runProcess(data)');
-*/
+Offset = function(){
+	that = new Preprocess(
+		// name
+		'Offset',
+		// field
+		{
+			'offset': new Field('offset', 'Offset', 'number', {'value':0.1, 'title':'Value by which to offset'}),
+		},
+		function(data){
+			var wavs = data[0];
+			var counts = data[1];
+			var offset = parseFloat(this.fields['offset'].getValue());
+			//console.log(offset);
+
+			for(var i = 0; i < counts.length; i++){
+				//console.log(counts[i])
+				counts[i] += offset;
+				//console.log(counts[i])
+			}
+
+			return [wavs,counts];
+		}
+	);
+	return that;
+}
 
 // SpecConfig (reminder: classes are not hoisted in js)
 class SpecConfig{
@@ -582,9 +602,10 @@ class PlotHandler{
 		// (actually, dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
 		this.preprocs = {
 			'Crop':Crop,
-			'Baseline Removal':BaselineRemoval,
+			//'Baseline Removal':BaselineRemoval,
 			'Moving Average':MovingAverage,
 			'Normalization':Normalization,
+			'Offset':Offset,
 		};
 	}
 
@@ -727,8 +748,7 @@ class PlotHandler{
 
 		}
 
-		var p = Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false});
-		console.log(p);
+		Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false});
 
 		// hook in a function to update settings on zoom / pan
 		plot_div.on('plotly_relayout',function(eventdata){
