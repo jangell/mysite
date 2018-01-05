@@ -613,7 +613,19 @@ class PlotHandler{
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
-		this.annotationList = [];
+		this.annotationsList = [
+			{
+				x: 1,
+				y: 1,
+				xref: 'x',
+				yref: 'y',
+				text: 'test annotation',
+				showarrow: 'true',
+				arrowhead: 7,
+				ax: 0,
+				ay: -40
+			}
+		]
 		// register preprocesses here to automatically add them to specconfigs
 		// unfortunately, the order here matters. this is the order in which, if used, preprocesses will be applied
 		// (actually, dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
@@ -626,6 +638,12 @@ class PlotHandler{
 		};
 	}
 
+	getElementId(){
+		return this.plot_target.attr('id');
+	}
+	getElement(){
+		return document.getElementById(this.getElementId());
+	}
 	getDivData(){
 		// plot_target is a jquery object, so we need to pull the native DOM out of it
 		return this.plot_target[0].data;
@@ -718,15 +736,17 @@ class PlotHandler{
 		this.addToolListeners();
 		// select the newly added plot (hint: it's the last one)
 		$(this.specConfigList[this.specConfigList.length-1].getRowSelector()).click();
-		// redraw the plot
+		
+		// redraw the plot -> move this to something that just updates the necessary parts of the plot
 		this.updatePlot();
+
 	}
 
-	// updates the plot drawing
+
+	// updates the plot drawing -> move this to startPlot and only have it start the plot
 	updatePlot(){
 		var _this = this;
-		var id = this.plot_target.attr('id');
-		var plot_div = document.getElementById(id);
+		var plot_div = this.getElement();
 
 		// spectral data -> list of data
 		var data = [];
@@ -756,7 +776,6 @@ class PlotHandler{
 		if(!isNaN(to_xmin) && isNaN(to_xmax)){
 			to_xmax = this.getDivXRange()[1];
 			// also set the html element so the user knows why the plot is behaving the way it is
-			console.log(to_xmax);
 			this.plotConfig.valueOf('xmax', to_xmax.toFixed(1));
 		}
 		else if(isNaN(to_xmin) && !isNaN(to_xmax)){
@@ -804,13 +823,17 @@ class PlotHandler{
 				range: [to_ymin, to_ymax]
 			},
 			showlegend: this.plotConfig.valueOf('show_legend'),
-
+			annotations: this.annotationsList,
 		}
 
-		Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false});
+		Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false, editable:true});
 
-		// hook in a function to update settings on zoom / pan
+		// hook in a function to update settings on zoom / pan, or annotation(s) change
 		plot_div.on('plotly_relayout',function(eventdata){
+			// set annotations
+
+			_this.annotationsList = _this.getElement().layout.annotations;
+
 			var nDigits = 2;
 			// eventdata is either dragmode, autorange, or x-/y-axis ranges
 			var pc = _this.plotConfig;

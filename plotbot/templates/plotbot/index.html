@@ -353,6 +353,15 @@ $(document).ready(function(){
 });
 
 
+// testing ground for new code
+
+/*
+$('#plot_holder').on('plotly_relayout',function(e){
+	console.log('yo!');
+	debugger;
+});
+*/
+
 // nothing below here matters if we're doing plotly (except for saving state sometime in the future)
 
 // pass form data as json
@@ -383,59 +392,8 @@ $(function() {
 		return false; // don't reload the page
 	});
 
-	// This handles uploading 1+ new spectra. It is also garbage
-	/*
-	$('#add_spec [type=file]').on('change',function(){
-		// loop through files and add to FormData object
-		// FUTURE: keep a list of hashes of all available spectra, and don't bother re-uploading if the spectra is already in the database (that checking will get build in this time as well, but only server-side; going client-side with hashes will make it faster)
-		var formData = new FormData();
-		for(var i = 0; i < this.files.length; i++){
-			var curFile = this.files[i];
-			formData.append('spectra',curFile);
-		}
-		// set up XMLHttpRequest to transfer files to server
-		var xhr = new XMLHttpRequest();
-		xhr.open('POST', 'upload_spec', true);
-
-		// Set up a handler for when the request finishes.
-		xhr.onload = function () {
-		  if (xhr.status === 200) {
-		    // File(s) uploaded.
-		    console.log('File(s) uploaded!')
-		  } else {
-		    alert('An error occurred =(');
-		  }
-		};
-
-		// Send the Data.
-		xhr.send(formData);
-
-	});
-	*/
-
-	// This adds a new set of SpecConfig settings (for cleanliness, settings are handled entirely in HTML until it's time to transfer them to the server)
-
-	// This removes a spectrum from the working set, including removing its SpecConfig
-
-});
-// re-fit the plot div when the window is resized
-/*
-$(window).on('resize',function(){
-	fitPlotDiv();
 });
 
-// scales the height of the plot div so that it exactly fits the original plot dimensions with a fixed width
-function fitPlotDiv(){
-	var shown_width = $('#plot_holder').width();
-	var img = new Image();
-	img.src = $('#plot_holder').css('background-image').replace(/url\(|\)$|"/ig, '');
-	$(img).on('load',function(){
-		var shown_width = $('#plot_holder').width();
-		var to_h = shown_width * img.height / img.width;
-		$('#plot_holder').height(to_h);
-	});
-}
-*/
 </script>
 
 {% endblock %}
