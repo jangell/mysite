@@ -232,7 +232,7 @@ MovingAverage = function(){
 			var av_counts = [];
 
 			var win_size = parseInt(this.fields['window'].getValue());
-			var half_win = parseInt(win_size / 2); // javascript doesn't floor by default
+			var half_win = parseInt(win_size / 2); // parseInt is necessary because javascript doesn't floor by default
 
 			for(var i = 0; i < counts.length; i++){
 				var set = counts.slice( Math.max( 0, i-half_win ), Math.min( i+half_win+1, counts.length ) ); // the "+1" and ".length" (instead of ".length-1") is because slice gets up to but not including the second value
@@ -246,6 +246,76 @@ MovingAverage = function(){
 	return that;
 }
 
+SavGol = function(){
+	that = new Preprocess(
+		// name
+		'Savitzky-Golay Filter',
+		// fields
+		{
+			'window': new Field('sg_window', 'Window size (5-11 only)', 'number', {'value':5, 'step':2, 'min':5, 'max':11,	 'title':'Sav-gol window (must be between 5 and 11)'})
+			// 'order': new Field('sg_order', 'Order', 'number', {'value':3, 'step':1, 'min':0, 'title':'Order of polynomial for sav-gol filter'});
+		},
+		function(data){
+			// coefficients taken from here: http://www.statistics4u.info/fundstat_eng/cc_savgol_coeff.html
+			var coeffs = {
+				5:  [-3,12,17,12,-3],
+				7:  [-2,3,6,7,6,3,-2],
+				9:  [-21,14,39,54,59,54,39,14,-21],
+				11: [-36,9,44,69,84,89,84,69,44,9,-36]
+			}
+
+			var wavs = data[0];
+			var counts = data[1];
+			var win_size = parseInt(this.fields['window'].getValue());
+			var half_win = (win_size-1)/2;
+
+			// make sure the window size is valid (and as such has coefficients)
+			if(!(win_size in coeffs)){
+				console.log('Something went wrong with the sav-gol filter. Skipping it for now.')
+				return data;
+			}
+			var my_coeffs = coeffs[win_size];
+			var norm_fact = 1. / my_coeffs.reduce((a,b) => a + b, 0); // normalization factor
+			var smooth_counts = [];
+			var cur_ind = 0;
+			var set;
+			var to_push;
+
+			// run moving average on first points
+			while(cur_ind < half_win){
+				set = counts.slice(0, cur_ind + half_win + 1);
+				to_push = parseFloat(set.reduce((a, b) => a + b, 0))/set.length;
+				smooth_counts.push(to_push);
+				cur_ind += 1;
+			}
+
+			// run sg until we hit the last few points
+			while(cur_ind < (counts.length - half_win)){
+				set = counts.slice(cur_ind - half_win, cur_ind + half_win + 1)
+				to_push = 0.;
+				for(var i = 0; i < set.length; i++){
+					to_push += set[i] * my_coeffs[i] * norm_fact;
+				}
+				smooth_counts.push(to_push);
+				console.log(Math.abs(to_push - counts[cur_ind]))
+				cur_ind += 1;
+			}
+
+			// moving average on last few points
+			while(cur_ind < counts.length){
+				set = counts.slice(cur_ind - half_win, counts.length);
+				to_push = parseFloat(set.reduce((a,b) => a + b, 0))/set.length;
+				smooth_counts.push(to_push);
+				cur_ind += 1;
+			}
+
+			return [wavs, smooth_counts];
+		}
+	)
+	return that;
+}
+
+// not currently implemented or in use
 BaselineRemoval = function(){
 	that = new Preprocess(
 		//name
@@ -630,11 +700,12 @@ class PlotHandler{
 		// unfortunately, the order here matters. this is the order in which, if used, preprocesses will be applied
 		// (actually, dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
 		this.preprocs = {
-			'Crop':Crop,
-			//'Baseline Removal':BaselineRemoval,
-			'Moving Average':MovingAverage,
-			'Normalization':Normalization,
-			'Offset':Offset,
+			'Crop': Crop,
+			//'Baseline Removal': BaselineRemoval,
+			'Savitzky-Golay Filter': SavGol,
+			//'Moving Average': MovingAverage,
+			'Normalization': Normalization,
+			'Offset': Offset,
 		};
 	}
 
