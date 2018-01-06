@@ -684,6 +684,8 @@ class PlotHandler{
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
 		this.annotationsList = [
+/*
+			// this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
 			{
 				x: 1,
 				y: 1,
@@ -695,7 +697,8 @@ class PlotHandler{
 				ax: 0,
 				ay: -40
 			}
-		]
+*/
+		];
 		// register preprocesses here to automatically add them to specconfigs
 		// unfortunately, the order here matters. this is the order in which, if used, preprocesses will be applied
 		// (actually, dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
