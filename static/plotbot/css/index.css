@@ -7,34 +7,27 @@ html{
 
 .toolset{
 	background-color:#ddd;
-	margin:5px;
-	min-width:400px;
+	/*min-width:300px;*/
+	max-height:40vh;
+	overflow-y:scroll;
 	flex:1;
-	border:1px solid #888;
-	box-shadow:3px 3px 1px #888;
+	border-left:1px solid #a0a0a0;
+	border-bottom:1px solid #a0a0a0;
 }
 .toolset_title{
 	font-family: 'Titillium Web', sans-serif;
-	font-size:1.8rem;
+	font-size:1.1rem;
 	text-align:center;
 	margin:0;
-	background-color:#bbb;
-	border-bottom:2px solid #aaa;
+	background-color:#c8c8c8;
+	border-bottom:1px solid #aaa;
 }
 .toolset_content{
 	margin:0;
 }
-.tools_table{
-	width:100%;
-	border-collapse:collapse;
-}
 /* applied in javascript-based html generation */
 .tool{
 	border-bottom:1px solid #aaa;
-}
-.tool_label{
-	padding-left:20px;
-	font-weight:bold;
 }
 .tool_action{
 	display:inline-block;
@@ -169,25 +162,9 @@ html{
 	background-color: #ffb2b2;
 }
 
-.all_tools{
-	display:flex;
-	flex-direction:row;
-	flex-wrap:wrap;
-}
-
 #plot_holder{
-	margin:5px;
-	height:50vh; /* default */
-	display:flex;
-	flex-direction:column;
-	justify-content:center;
-	background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-}
-#plot_placeholder{
-	text-align:center;
-	font-size:2rem;
+	min-height:55vh; /* default */
+	flex:1;
 }
 .loading_text{
 	margin:0;

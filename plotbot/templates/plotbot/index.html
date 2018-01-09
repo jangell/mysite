@@ -96,20 +96,136 @@
 	</div>
 </div>
 
+<style>
+.all_tools{
+	display:flex;
+	flex-direction:row;
+	flex-wrap:wrap;
+}
+.tools_table{
+	width:100%;
+	border-collapse:collapse;
+}
+.flex_tool{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+.mini_number{
+	width:50px;
+}
+.tool_label{
+	white-space:nowrap;
+	padding-left:10px;
+}
+.right{
+	float:right;
+	padding-right:10px;
+}
+</style>
+
 <form id="plot_form">
 	<div class="all_tools">
-		<div class="toolset" id="global_tools">
-			<h2 class="toolset_title" title="Settings that affect the plot as a whole">Global Tools</h2>
-			
-			<div id="pc_target" class="toolset_content"></div>
+		<div class="toolset" id="global_tools" style="border-left:none;">
+			<h2 class="toolset_title" title="Settings that affect the plot as a whole">Plot Options</h2>
 
-			<div id="vl_target" class="toolset_content"></div>
-
-		</div>
-		<div class="toolset" id="spectra_tools">
-			<h2 class="toolset_title" title="Settings that affect only the selected spectrum">Spectra Tools</h2>
 			<div class="toolset_content">
-				<!-- list of current spectra -->
+				<!-- each list of tools is gonna be a table, aiight? -->
+				<table class="tools_table">
+					<tr>
+						<td><label class="tool_label" for="title_target">Title</label></td>
+						<td class="right"><input id="title_target"></td>
+					</tr>
+					<tr>
+						<td><label class="tool_label" for="xlabel_target">X Label</label></td>
+						<td class="right"><input id="xlabel_target"></td>
+					</tr>
+					<tr>
+						<td><label class="tool_label" for="ylabel_target">Y Label</label></td>
+						<td class="right"><input id="ylabel_target"></td>
+					</tr>
+					<tr>
+						<td><label class="tool_label" for="x_range">X Range</label></td>
+						<td class="right">
+							<div id="x_range" class="flex_tool">
+								<input type=number step=any class="mini_number" id="xmin_target">
+								<span> - </span>
+								<input type=number step=any class="mini_number" id="xmax_target">
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td><label class="tool_label" for="y_range">Y Range</label></td>
+						<td class="right">
+							<div id="y_range" class="flex_tool">
+								<input type=number step=any class="mini_number" id="ymin_target">
+								<span> - </span>
+								<input type=number step=any class="mini_number" id="ymax_target">
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td><label class="tool_label" for="showlegend_target">Legend</label></td>
+						<td class="right"><input type=checkbox id="showlegend_target" checked></td>
+					</tr>
+					<tr>
+						<td><label class="tool_label" for="showgrid_target">Grid</label></td>
+						<td class="right"><input type=checkbox id="showgrid_target" checked></td>
+					</tr>
+					<tr>
+						<td><label class="tool_label" for="ticks_target">Ticks</label></td>
+						<td class="right"><input type=checkbox id="ticks_target"></td>
+					</tr>
+				</table>
+			</div>
+			<!--
+				plot config target
+			<div id="pc_target" class="toolset_content"></div>
+			-->
+
+			<!--
+				vertical line target
+			<div id="vl_target" class="toolset_content"></div>
+			-->
+		</div>
+
+		<!--
+		<div class="toolset" id="spec_info">
+			<h2 class="toolset_title" title="More info about the spectrum, if available">Spec Info</h2>
+			<div class="toolset_content">
+				More to come here...
+			</div>
+		</div>
+		-->
+
+		<div class="toolset" id="spectra_tools">
+			<h2 class="toolset_title" title="Settings that affect only the selected spectrum">Spec Options</h2>
+			<div class="toolset_content">
+				<table class="tools_table">
+					<tr>
+						<td><label class="tool_label" for="show_target">Show</label></td>
+						<td class="right"><input type=checkbox id="show_target" checked></td>
+					</tr>
+					<tr>
+						<td><label class="tool_label" for="label_target">Label</label></td>
+						<td><input id="label_target"></td>
+					</tr>
+					<tr>
+						<td><label class="tool_label" for="linewidth_target">Line Width</label></td>
+						<td><input type=number step=any min=0.1 id="linewidth_target"></td>
+					</tr>
+					<tr>
+						<td><label class="tool_label" for="color_target">Color</label></td>
+						<td><input type=color id="color_target"></td>
+					</tr>
+					<tr>
+						<td><label class="tool_label" for="opacity_target">Opacity</label></td>
+						<td><input type=number step=any min=0 max=1 id="opacity_target"></td>
+					</tr>
+					<tr><td>Preprocessing...<td></tr>
+				</table>
+
+				<!--
 				<div class="spec_table_holder">
 					<table class="spec_table">
 						<thead class="spec_table_head">
@@ -126,28 +242,38 @@
 					</table>
 				</div>
 
-				<!-- tools associated with currently-selected spectrum -->
 				<div id="sc_target">
 
 				</div>
-
-			</div>
-
-		</div>
-		<!--
-		<div class="toolset" id="preproc_tools">
-			<h2 class="toolset_title">Preprocessing</h2>
-			<div class="toolset_content" id="preproc_target">
+				-->
 
 			</div>
 		</div>
-		-->
+
 		<div class="toolset" id="annotation_tools">
 			<h2 class="toolset_title">Annotations</h2>
-			<div class="toolset_content" id="annotations_target">
+			<div class="toolset_content">
+				<!-- list of currently-showing annotations & vertical lines (how do we wanna split those?) -->
+
+				<!-- buttons / options to add & remove from table -->
+				
+			</div>
+		</div>
+
+		<div class="toolset" id="spec_list">
+			<h2 class="toolset_title">Spectra</h2>
+			<div class="toolset_content">
+				<!-- table to store the currently-showing spectra -->
+
+				<!-- buttons to add & remove from table -->
+
+				<!-- quick-add -->
+
+				<!-- save png button (make that thang hi-res homie!) -->
 
 			</div>
 		</div>
+
 	</div>
 </form>
 

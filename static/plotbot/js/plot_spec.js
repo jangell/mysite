@@ -716,7 +716,7 @@ class PlotConfig{
 		//this.fields['fig_height'] = new Field('fig_height', 'Height', 'number');
 		this.fields['title'] = new Field('title', 'Title', 'text', {'placeholder':'No title', 'title':'Title displayed on plot'});
 		//this.fields['show_title'] = new Field('show_title', 'Show title', 'checkbox');
-		this.fields['xlabel'] = new Field('xlabel', 'X-axis label', 'text', {'value': 'Wavenumber', 'title':'Label on x axis of plot'});
+		this.fields['xlabel'] = new Field('xlabel', 'X-axis label', 'text', {'value': 'Wavenumber (cm<sup>-1</sup>)', 'title':'Label on x axis of plot'});
 		this.fields['ylabel'] = new Field('ylabel', 'Y-axis label', 'text', {'value': 'Intensity', 'title':'Label on y axis of plot'});
 		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Minimum value of x axis'}); // doesn't do anything yet
 		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Maximum value of x axis '}); // doesn't do anything yet
