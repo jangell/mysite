@@ -297,7 +297,6 @@ SavGol = function(){
 					to_push += set[i] * my_coeffs[i] * norm_fact;
 				}
 				smooth_counts.push(to_push);
-				console.log(Math.abs(to_push - counts[cur_ind]))
 				cur_ind += 1;
 			}
 
@@ -620,6 +619,93 @@ class SpecConfig{
 
 }
 
+class VerticalLine{
+	constructor(){
+		this.fields = {};
+
+		// functional fields
+		this.fields['show'] = new Field('show', 'Show', 'checkbox', {'checked':true, 'title': 'Show / hide this line'});
+		this.fields['xval'] = new Field('xval', 'Position', 'number', {'value': 100, 'title': 'Position of vertical line'});
+		this.fields['ymin'] = new Field('ymin', 'Minimum Y', 'number', {'placeholder':'auto', 'title': 'Y value of minimum point of vertical line (default is high enough to almost always show line stretching across plot)'});
+		this.fields['ymax'] = new Field('ymax', 'Maximum Y', 'number', {'placeholder':'auto', 'title': 'Y value of maximum point of veritcal line (default is high enough to almost always show line stretching across plot)'})
+
+		// cosmetic fields
+		this.fields['label'] = new Field('label', 'Label', 'text', {'placeholder':'No label', 'title':'Label to display by line'});
+		this.fields['width'] = new Field('width', 'Width', 'number', {'value': 2, 'title': 'line width'});
+		this.fields['color'] = new Field('color_box', 'Color', 'color', {'value': randomColor(), 'title': 'Line color'});
+		this.fields['opacity'] = new Field('opacity', 'Opacity', 'number', {'value': 1, 'min': 0, 'max': 1, 'title': 'Line opacity'});
+
+		this.yMin = -999999;	// minimum y value (to extend well below field of view)
+		this.yMax = 999999;		// maximum y value (to extend well above field of view)
+	}
+
+	// get the current color of the vertical line as rgba string
+	getColor(){
+		var r, g, b, a;
+		var hex = this.fields['color'].getValue(); // always gets a hex string (ex., #rrggbb)
+		a = this.fields['opacity'].getValue();
+		r = parseInt(hex.substring(1,3), 16);
+		g = parseInt(hex.substring(3,5), 16);
+		b = parseInt(hex.substring(5,7), 16);
+		return 'rgba('+r+','+g+','+b+','+a+')';
+	}
+
+	// update the background color of the vertical line based on the color & opacity of the 
+	/*
+	// 		don't think we need this
+	updateColor(){
+		var _this = this;
+		var rowId = this.getRowSelector();
+		$(rowId).find('.color_box').css('background-color',_this.getColor());
+	}
+	*/
+
+	vlListHtml(){
+		// html to represent line object in list of line objects
+	}
+	vlConfigHtml(){
+		var _this = this;
+		// html to represent & handle line object and its options / settings
+		var container = $('<div>').addClass('vl_container');
+
+		var table = $('<table>').addClass('tools_table');
+
+		// add all the fields
+		for(var field in this.fields){
+			table.append(this.fields[field].toTableRow());
+		}
+
+		// function to update the 'show' checkbox in spec list based on a change in the one in the spec config table
+		this.fields['show'].element.change(function(){
+			var checked = _this.valueOf('show');
+			$(rowId).find('input').attr('checked',checked);
+		});
+		
+		container.append(table);
+		return container;
+
+	}
+
+	// returns a plotly shape object formatted to be inserted into layout
+	getPlotlyShape(y0, y1){
+		console.log(this.fields['ymin'].getValue()); // use this value if it's not blank (and ymax too)
+		var x = this.fields['xval'].getValue();
+		var shape = {
+			type: 'line',
+			x0: x,
+			y0: y0,
+			x1: x,
+			y1: y1,
+			line: {
+				color: this.getColor(),
+				width: this.fields['width'].getValue(),
+			}
+		};
+		return shape;
+	}
+
+}
+
 // PlotConfig
 class PlotConfig{
 	constructor(){
@@ -640,14 +726,10 @@ class PlotConfig{
 		this.fields['quick_add'] = new Field('quick_add', 'Quick add from database', 'text', {'placeholder':'Try typing "qua"', 'title':'Start typing a mineral name and select the desired mineral from the dropdown list'});
 		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add', 'title':'Add spectrum, from file or database'});
 		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove', 'title':'Delete the curretly selected spectrum and its settings (this cannot be undone)'});
+		this.fields['add_vl'] = new Field('add_vl', 'Add vertical line', 'button', {'value': 'Add', 'title': 'Add a vertical line to the plot'});
 		// TODO: create legend location
 		/*
-		// waiting on advanced options until we discuss separating js and html
-
-		this.ad_fields['left_margin'] = new Field('left_margin', 'Left margin', 'number', {'value':70, 'title':'Left margin (pixels)'});
-		this.ad_fields['right_margin'] = new Field('right_margin', 'Right margin', 'number', {'value':40, 'title':'Right margin (pixels)'});
-		this.ad_fields['top_margin'] = new Field('top_margin', 'Top margin', 'number', {'value':60, 'title':'Top margin (pixels)'});
-		this.ad_fields['bottom_margin'] = new Field('bottom_margin', 'Bottom margin', 'number', {'value':80, 'title':'Bottom margin (pixels)'});
+		// waiting on advanced options until separating js and html
 		*/
 
 	}
@@ -674,16 +756,20 @@ class PlotConfig{
 
 // handler for plot config and all spec configs for a given page
 class PlotHandler{
-	constructor(plot_config_target, spec_list_target, spec_config_target, plot_target, preprocesses){
+	constructor(plot_config_target, spec_list_target, spec_config_target, vl_target, plot_target, preprocesses){
+		// targets are all jquery objects
 		this.plot_config_target = plot_config_target;
 		this.spec_list_target = spec_list_target;
 		this.spec_config_target = spec_config_target;
+		this.vl_target = vl_target;
+
 		this.plot_target = plot_target;
 
-		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
-		this.plotConfig = new PlotConfig();
-		this.specConfigList = [];
-		this.annotationsList = [
+		this.cur_spec_id = 0; 							// use this as spec ids as you go, to make sure they're identifiable
+		this.plotConfig = new PlotConfig();				// global settings etc.
+		this.specConfigList = [];						// list of spec config objects
+		this.vlList = [];								// list of vertical line objects
+		this.annotationsList = [						// list of annotations, stored as native plotly objects
 /*
 			// this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
 			{
@@ -720,18 +806,28 @@ class PlotHandler{
 	}
 	getDivData(){
 		// plot_target is a jquery object, so we need to pull the native DOM out of it
-		return this.plot_target[0].data;
+		if(this.plot_target[0]){
+			return this.plot_target[0].data;
+		}
+		return null;
 	}
 	getDivLayout(){
-		return this.plot_target[0].layout;
+		if(this.plot_target[0]){
+			return this.plot_target[0].layout;
+		}
+		return null;
 	}
 	getDivXRange(){
-		var xr = this.getDivLayout().xaxis.range;
-		return xr;
+		if(this.getDivLayout()){
+			return this.getDivLayout().xaxis.range;
+		}
+		return [null,null];
 	}
 	getDivYRange(){
-		var yr = this.getDivLayout().yaxis.range;
-		return yr;
+		if(this.getDivLayout()){
+			return this.getDivLayout().yaxis.range;
+		}
+		return [null,null];
 	}
 
 	// get the index of a spectrum in specConfigList based on its spec id
@@ -816,6 +912,29 @@ class PlotHandler{
 
 	}
 
+	// add a vertical line object to the list of vertical lines
+	addVL(){
+		// add to list
+		this.vlList.push(new VerticalLine());
+		// add to html
+		this.vl_target.append(this.vlList[this.vlList.length-1].vlConfigHtml());
+		// start listening
+		this.addToolListeners();
+	}
+
+	getVLs(){
+		var [y0, y1] = this.getDivYRange();
+		if(!y0){
+			return [];
+		}
+
+		var shapes = [];
+		for(var i = 0; i < this.vlList.length; i++){
+			shapes.push(this.vlList[i].getPlotlyShape(y0, y1));
+		}
+		return shapes;
+	}
+
 
 	// updates the plot drawing -> move this to startPlot and only have it start the plot
 	updatePlot(){
@@ -838,6 +957,8 @@ class PlotHandler{
 		var to_ymin = parseFloat(this.plotConfig.valueOf('ymin'));
 		var to_ymax = parseFloat(this.plotConfig.valueOf('ymax'));
 
+		var [x0, x1] = this.getDivXRange();
+		var [y0, y1] = this.getDivYRange();
 		// update x and y range once it's plotted
 		// var xrange = this.getDivXRange();
 		// var yrange = this.getDivYRange();
@@ -850,19 +971,19 @@ class PlotHandler{
 		if(!isNaN(to_xmin) && isNaN(to_xmax)){
 			to_xmax = this.getDivXRange()[1];
 			// also set the html element so the user knows why the plot is behaving the way it is
-			this.plotConfig.valueOf('xmax', to_xmax.toFixed(1));
+			this.plotConfig.valueOf('xmax', x1.toFixed(1));
 		}
 		else if(isNaN(to_xmin) && !isNaN(to_xmax)){
 			to_xmin = this.getDivXRange()[0];
-			this.plotConfig.valueOf('xmin', to_xmin.toFixed(1));
+			this.plotConfig.valueOf('xmin', x0.toFixed(1));
 		}
 		if(!isNaN(to_ymin) && isNaN(to_ymax)){
 			to_ymax = this.getDivYRange()[1];
-			this.plotConfig.valueOf('ymax', to_ymax.toFixed(1));
+			this.plotConfig.valueOf('ymax', y1.toFixed(1));
 		}
 		else if(isNaN(to_ymin) && !isNaN(to_ymax)){
 			to_ymin = this.getDivYRange()[0];
-			this.plotConfig.valueOf('ymin', to_ymin.toFixed(1));
+			this.plotConfig.valueOf('ymin', y0.toFixed(1));
 		}
 
 		// global variables -> layout
@@ -902,34 +1023,43 @@ class PlotHandler{
 
 		Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false, editable:true});
 
+		Plotly.relayout(plot_div, {shapes: this.getVLs()});
+
 		// hook in a function to update settings on zoom / pan, or annotation(s) change
 		plot_div.on('plotly_relayout',function(eventdata){
-			// set annotations
+			//debugger;
+			if(!('shapes' in eventdata)){
 
-			_this.annotationsList = _this.getElement().layout.annotations;
+				// set annotations
+				_this.annotationsList = _this.getElement().layout.annotations;
 
-			var nDigits = 2;
-			// eventdata is either dragmode, autorange, or x-/y-axis ranges
-			var pc = _this.plotConfig;
-			if(eventdata['dragmode']){
-				// do nothing
-				return;
+				var nDigits = 2;
+				// eventdata is either dragmode, autorange, or x-/y-axis ranges
+				var pc = _this.plotConfig;
+				if(eventdata['dragmode']){
+					// do nothing
+					return;
+				}
+				// implied <else if>, because if the last one was true, it returns and never gets here
+				// for autorange, reset plotting range in form
+				if(eventdata['xaxis.autorange']){
+					pc.fields['xmin'].element.val('');
+					pc.fields['xmax'].element.val('');
+				}
+				if(eventdata['yaxis.autorange']){
+					pc.fields['ymin'].element.val('');
+					pc.fields['ymax'].element.val('');
+				}
+				// this just gives us the whole range, no questions asked! What a great day!
+				if(eventdata['xaxis.range[0]']){pc.fields['xmin'].element.val(eventdata['xaxis.range[0]'].toFixed(nDigits));} // yes, the whole thing is the key. no, i don't get it either
+				if(eventdata['xaxis.range[1]']){pc.fields['xmax'].element.val(eventdata['xaxis.range[1]'].toFixed(nDigits));}
+				if(eventdata['yaxis.range[0]']){pc.fields['ymin'].element.val(eventdata['yaxis.range[0]'].toFixed(nDigits));}
+				if(eventdata['yaxis.range[1]']){pc.fields['ymax'].element.val(eventdata['yaxis.range[1]'].toFixed(nDigits));}
+
+				// now update shapes (which shouldn't re-trigger this block because of the if statement)
+				Plotly.relayout(plot_div, {shapes: _this.getVLs()})
 			}
-			// implied <else if>, because if the last one was true, it returns and never gets here
-			// for autorange, reset plotting range in form
-			if(eventdata['xaxis.autorange']){
-				pc.fields['xmin'].element.val('');
-				pc.fields['xmax'].element.val('');
-			}
-			if(eventdata['yaxis.autorange']){
-				pc.fields['ymin'].element.val('');
-				pc.fields['ymax'].element.val('');
-			}
-			// this just gives us the whole range, no questions asked! What a great day!
-			if(eventdata['xaxis.range[0]']){pc.fields['xmin'].element.val(eventdata['xaxis.range[0]'].toFixed(nDigits));} // yes, the whole thing is the key. no, i don't get it either
-			if(eventdata['xaxis.range[1]']){pc.fields['xmax'].element.val(eventdata['xaxis.range[1]'].toFixed(nDigits));}
-			if(eventdata['yaxis.range[0]']){pc.fields['ymin'].element.val(eventdata['yaxis.range[0]'].toFixed(nDigits));}
-			if(eventdata['yaxis.range[1]']){pc.fields['ymax'].element.val(eventdata['yaxis.range[1]'].toFixed(nDigits));}
+			
 		});
 
 		// hook in a resize function
@@ -960,7 +1090,7 @@ class PlotHandler{
 	}
 
 	
-	// adds event listeners to the add and remove buttons
+	// adds event listeners to the add and remove buttons and vertical line add/remove
 	startAddRemove(){
 		var _this = this;
 		// add spectrum
@@ -1012,6 +1142,12 @@ class PlotHandler{
 			// so now we selected something valid the list is empty. ok. cool.
 			return true;
 		});
+
+		// vertical lines
+		_this.plotConfig.fields['add_vl'].element.click(function(){
+			_this.addVL();
+		});
+
 	}
 	
 	// add key commands (up and down arrow) for navigating spec list

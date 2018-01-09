@@ -101,9 +101,9 @@
 		<div class="toolset" id="global_tools">
 			<h2 class="toolset_title" title="Settings that affect the plot as a whole">Global Tools</h2>
 			
-			<div id="pc_target" class="toolset_content">
+			<div id="pc_target" class="toolset_content"></div>
 
-			</div>
+			<div id="vl_target" class="toolset_content"></div>
 
 		</div>
 		<div class="toolset" id="spectra_tools">
@@ -142,6 +142,12 @@
 			</div>
 		</div>
 		-->
+		<div class="toolset" id="annotation_tools">
+			<h2 class="toolset_title">Annotations</h2>
+			<div class="toolset_content" id="annotations_target">
+
+			</div>
+		</div>
 	</div>
 </form>
 
@@ -157,7 +163,7 @@
 	- generate any spec config html and insert into correct point (hide all but one)
 */
 
-var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plot_holder'));
+var ph = new PlotHandler($('#pc_target'), $('#sl_target'), $('#sc_target'), $('#vl_target'), $('#plot_holder'));
 ph.initialize();
 
 // stop <input type=number> from changing on scroll
