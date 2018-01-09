@@ -208,19 +208,19 @@
 					</tr>
 					<tr>
 						<td><label class="tool_label" for="label_target">Label</label></td>
-						<td><input id="label_target"></td>
+						<td class="right"><input id="label_target"></td>
 					</tr>
 					<tr>
 						<td><label class="tool_label" for="linewidth_target">Line Width</label></td>
-						<td><input type=number step=any min=0.1 id="linewidth_target"></td>
+						<td class="right"><input type=number step=any min=0.1 id="linewidth_target"></td>
 					</tr>
 					<tr>
 						<td><label class="tool_label" for="color_target">Color</label></td>
-						<td><input type=color id="color_target"></td>
+						<td class="right"><input type=color id="color_target"></td>
 					</tr>
 					<tr>
 						<td><label class="tool_label" for="opacity_target">Opacity</label></td>
-						<td><input type=number step=any min=0 max=1 id="opacity_target"></td>
+						<td class="right"><input type=number step=any min=0 max=1 id="opacity_target"></td>
 					</tr>
 					<tr><td>Preprocessing...<td></tr>
 				</table>
@@ -250,26 +250,78 @@
 			</div>
 		</div>
 
+
 		<div class="toolset" id="annotation_tools">
 			<h2 class="toolset_title">Annotations</h2>
 			<div class="toolset_content">
 				<!-- list of currently-showing annotations & vertical lines (how do we wanna split those?) -->
 
 				<!-- buttons / options to add & remove from table -->
-				
+
 			</div>
 		</div>
+
+		<style>
+		.table_wrapper{
+			margin:5px;
+			background-color: #f8f8f8;
+			flex:1;
+			overflow-y: scroll;
+		}
+		.lines_table{
+			border-collapse: collapse;
+		}
+		.toolset_row{
+			display:flex;
+			flex-direction:row;
+
+		}
+		.toolset_row_item{
+			flex:1;
+			margin:5px;
+		}
+		.button_spacer{
+			padding: 2px 7px 1px 7px;
+		}
+		#savepng_target{
+		}
+		</style>
 
 		<div class="toolset" id="spec_list">
 			<h2 class="toolset_title">Spectra</h2>
 			<div class="toolset_content">
 				<!-- table to store the currently-showing spectra -->
+				<!-- .showing is regular, .not_showing is greyed out (or greyed over, including color patch?) -->
+				<div class="table_wrapper">
+					<table class="lines_table">
+						<tr>
+							<td class="name showing">Spec 1</td>
+							<td class="color"><div class="color_patch"></div></td>
+						</tr>
+						<tr>
+							<td class="name showing">Spec 2</td>
+							<td class="color"><div class="color_patch"></div></td>
+						</tr>
+					</table>
+				</div>
 
 				<!-- buttons to add & remove from table -->
+				<div class="toolset_row">
+					<button class="toolset_row_item" id="add_button">Add Spec</button>
+					<button class="toolset_row_item" id="remove_button">Remove Spec</button>
+				</div>
 
 				<!-- quick-add -->
+				<div class="toolset_row">
+					<label class="toolset_row_item" for="quickadd_target">Quick Add</label>
+					<input class="toolset_row_item" id="quickadd_target">
+				</div>
 
 				<!-- save png button (make that thang hi-res homie!) -->
+				<div class="toolset_row">
+					<span class="toolset_row_item button_spacer"></span>
+					<button class="toolset_row_item" id="savepng_target">Save PNG</button>
+				</div>
 
 			</div>
 		</div>

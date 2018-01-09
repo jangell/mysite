@@ -9,8 +9,11 @@ html{
 	background-color:#ddd;
 	/*min-width:300px;*/
 	max-height:40vh;
-	overflow-y:scroll;
 	flex:1;
+
+	display:flex;
+	flex-direction: column;
+
 	border-left:1px solid #a0a0a0;
 	border-bottom:1px solid #a0a0a0;
 }
@@ -23,7 +26,11 @@ html{
 	border-bottom:1px solid #aaa;
 }
 .toolset_content{
+	flex:1;
 	margin:0;
+	display:flex;
+	flex-direction:column;
+	overflow-y:scroll;
 }
 /* applied in javascript-based html generation */
 .tool{

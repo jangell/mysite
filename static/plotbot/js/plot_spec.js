@@ -29,13 +29,16 @@ class Point{
 
 // one field of a config (like figure width, or line color)
 class Field{
-	constructor(ident,label,input,defaults={}){
+	constructor(id){
+
+		this.id = id;
+		this.element = null
+
 		// default input type is text
-		if(valid_inputs.indexOf(input) == -1){input = 'text';}
-		this.identifier = ident;
-		this.label = label;
-		this.input = input;
-		if(typeof(defaults) === 'undefined'){
+		//if(valid_inputs.indexOf(input) == -1){input = 'text';}
+		//this.label = label;
+		//this.input = input;
+		/*if(typeof(defaults) === 'undefined'){
 			this.defaults = null;
 		}
 		else{
@@ -46,6 +49,7 @@ class Field{
 			console.log('Note: Field '+this.label+' does not have title text');
 		}
 		this.element = null; // this is where the value in the element gets wired into the field itself (to be accessed by the specconfig via getValue() )
+		*/
 	}
 	
 	// gets the value from the current element that this field has generated
@@ -70,12 +74,12 @@ class Field{
 		}
 		return false;
 	}
-	
-	//
-	updateValue(){
-		alert('value of '+this.label+'is '+self.getValue());
+
+	bindTo(element){
+		this.element = element;
 	}
 
+	/*
 	// generates html to represent this field as a table row
 	toTableRow(){
 		// return the field as a table row
@@ -100,6 +104,7 @@ class Field{
 		container.append(action);
 		return container;
 	}
+	*/
 }
 
 // abstract class to be inherited by all Preprocess classes
@@ -1071,7 +1076,6 @@ class PlotHandler{
 	// adds an event listener to all .tool changes to update the plot
 	addToolListeners(){
 		var _this = this;
-		this.updatePlot();
 		$('.tool').change(function(){
 			_this.updatePlot();
 		});
@@ -1174,7 +1178,7 @@ class PlotHandler{
 
 	initialize(){
 		// insert plot configuration html
-		this.insertPlotConfigHtml();
+		//this.insertPlotConfigHtml();
 		// add event listeners for plot updates
 		this.addToolListeners();
 		// add event listeners to add & remove spectra and key commands
