@@ -8,7 +8,7 @@ html{
 .toolset{
 	background-color:#ddd;
 	/*min-width:300px;*/
-	max-height:40vh;
+	height:30vh;
 	flex:1;
 
 	display:flex;
@@ -34,7 +34,6 @@ html{
 }
 /* applied in javascript-based html generation */
 .tool{
-	border-bottom:1px solid #aaa;
 }
 .tool_action{
 	display:inline-block;

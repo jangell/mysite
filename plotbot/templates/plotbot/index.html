@@ -9,7 +9,6 @@
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script> <!-- for autocomplete -->
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> <!-- autocomplete css -->
-<script src="{% static 'plotbot/js/plot_spec.js' %}"></script> <!-- main script with classes and everything for this all to work -->
 <link rel="stylesheet" href="{% static 'plotbot/css/index.css' %}"> <!-- all of the custom page styling -->
 <link href="https://fonts.googleapis.com/css?family=Montserrat|Spectral+SC" rel="stylesheet"> <!-- google fonts cdn for our page fonts -->
 
@@ -122,6 +121,9 @@
 	float:right;
 	padding-right:10px;
 }
+label{
+	white-space: nowrap;
+}
 </style>
 
 <form id="plot_form">
@@ -134,23 +136,23 @@
 				<table class="tools_table">
 					<tr>
 						<td><label class="tool_label" for="title_target">Title</label></td>
-						<td class="right"><input id="title_target"></td>
+						<td class="right"><input class="tool" id="title_target" placeholder='No title' title='Title displayed on plot'></td>
 					</tr>
 					<tr>
 						<td><label class="tool_label" for="xlabel_target">X Label</label></td>
-						<td class="right"><input id="xlabel_target"></td>
+						<td class="right"><input class="tool" id="xlabel_target" value="Wavenumber (cm<sup>-1</sup>)" title="Label on x axis of plot"></td>
 					</tr>
 					<tr>
 						<td><label class="tool_label" for="ylabel_target">Y Label</label></td>
-						<td class="right"><input id="ylabel_target"></td>
+						<td class="right"><input class="tool" id="ylabel_target" value="Intensity" title="Label on y axis of plot"></td>
 					</tr>
 					<tr>
 						<td><label class="tool_label" for="x_range">X Range</label></td>
 						<td class="right">
 							<div id="x_range" class="flex_tool">
-								<input type=number step=any class="mini_number" id="xmin_target">
+								<input type=number step=any class="mini_number" id="xmin_target" placeholder="Auto" title="Minimum value of x axis">
 								<span> - </span>
-								<input type=number step=any class="mini_number" id="xmax_target">
+								<input type=number step=any class="mini_number" id="xmax_target" placeholder="Auto" title="Maximum value of x axis">
 							</div>
 						</td>
 					</tr>
@@ -158,23 +160,23 @@
 						<td><label class="tool_label" for="y_range">Y Range</label></td>
 						<td class="right">
 							<div id="y_range" class="flex_tool">
-								<input type=number step=any class="mini_number" id="ymin_target">
+								<input type=number step=any class="mini_number" id="ymin_target" placeholder="Auto" title="Minimum value of y axis">
 								<span> - </span>
-								<input type=number step=any class="mini_number" id="ymax_target">
+								<input type=number step=any class="mini_number" id="ymax_target" placeholder="Auto" title="Maximum value of y axis">
 							</div>
 						</td>
 					</tr>
 					<tr>
 						<td><label class="tool_label" for="showlegend_target">Legend</label></td>
-						<td class="right"><input type=checkbox id="showlegend_target" checked></td>
+						<td class="right"><input type=checkbox id="showlegend_target" checked title="Show / hide legend"></td>
 					</tr>
 					<tr>
 						<td><label class="tool_label" for="showgrid_target">Grid</label></td>
-						<td class="right"><input type=checkbox id="showgrid_target" checked></td>
+						<td class="right"><input type=checkbox id="showgrid_target" checked title="Show / hide grid"></td>
 					</tr>
 					<tr>
-						<td><label class="tool_label" for="ticks_target">Ticks</label></td>
-						<td class="right"><input type=checkbox id="ticks_target"></td>
+						<td><label class="tool_label" for="showticks_target">Ticks</label></td>
+						<td class="right"><input type=checkbox id="showticks_target" title="Show / hide ticks"></td>
 					</tr>
 				</table>
 			</div>
@@ -250,16 +252,14 @@
 			</div>
 		</div>
 
-
+		<!--
 		<div class="toolset" id="annotation_tools">
 			<h2 class="toolset_title">Annotations</h2>
 			<div class="toolset_content">
-				<!-- list of currently-showing annotations & vertical lines (how do we wanna split those?) -->
-
-				<!-- buttons / options to add & remove from table -->
 
 			</div>
 		</div>
+	-->
 
 		<style>
 		.table_wrapper{
@@ -267,6 +267,7 @@
 			background-color: #f8f8f8;
 			flex:1;
 			overflow-y: scroll;
+			max-height:15vh;
 		}
 		.lines_table{
 			border-collapse: collapse;
@@ -294,14 +295,8 @@
 				<!-- .showing is regular, .not_showing is greyed out (or greyed over, including color patch?) -->
 				<div class="table_wrapper">
 					<table class="lines_table">
-						<tr>
-							<td class="name showing">Spec 1</td>
-							<td class="color"><div class="color_patch"></div></td>
-						</tr>
-						<tr>
-							<td class="name showing">Spec 2</td>
-							<td class="color"><div class="color_patch"></div></td>
-						</tr>
+						<tbody id="speclist_target">
+						</tbody>
 					</table>
 				</div>
 
@@ -333,6 +328,8 @@
 
 </div>
 
+<script src="{% static 'plotbot/js/plot_spec.js' %}"></script> <!-- main script with classes and everything for this all to work -->
+
 <script>
 
 /* new plot page actions:
@@ -341,12 +338,28 @@
 	- generate any spec config html and insert into correct point (hide all but one)
 */
 
-var ph = new PlotHandler($('#pc_target'), $('#sl_target'), $('#sc_target'), $('#vl_target'), $('#plot_holder'));
+var ph = new PlotHandler($('#plot_holder'));
 ph.initialize();
 
 // stop <input type=number> from changing on scroll
 $(document).on("wheel", "input[type=number]", function (e) {
     $(this).blur();
+});
+
+// block scrolling full page when scrolling spec list
+/*
+var speclist = $('#speclist_target'),
+  height = speclist.height(),
+  scrollHeight = speclist.get(0).scrollHeight;
+
+speclist.bind('mousewheel', function(e, d) {
+if((this.scrollTop === (scrollHeight - height) && d < 0) || (this.scrollTop === 0 && d > 0)) {
+  e.preventDefault();
+}
+});
+*/
+$('#speclist_target').bind('mousewheel', function(e){
+
 });
 
 // modal window

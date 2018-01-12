@@ -56,7 +56,7 @@ class Field{
 	getValue(){
 		// start by making sure the element exists
 		if(this.element){
-			if(this.input == 'checkbox')
+			if(this.element.is(':checkbox'))
 				return this.element.is(':checked');
 			return this.element.val();
 		}
@@ -719,19 +719,22 @@ class PlotConfig{
 		this.ad_fields = {}; // advanced fields
 		//this.fields['fig_width'] = new Field('fig_width', 'Width', 'number');
 		//this.fields['fig_height'] = new Field('fig_height', 'Height', 'number');
-		this.fields['title'] = new Field('title', 'Title', 'text', {'placeholder':'No title', 'title':'Title displayed on plot'});
+		this.fields['title'] = new Field();
 		//this.fields['show_title'] = new Field('show_title', 'Show title', 'checkbox');
-		this.fields['xlabel'] = new Field('xlabel', 'X-axis label', 'text', {'value': 'Wavenumber (cm<sup>-1</sup>)', 'title':'Label on x axis of plot'});
-		this.fields['ylabel'] = new Field('ylabel', 'Y-axis label', 'text', {'value': 'Intensity', 'title':'Label on y axis of plot'});
-		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Minimum value of x axis'}); // doesn't do anything yet
-		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Maximum value of x axis '}); // doesn't do anything yet
-		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Minimum value of y axis'}); // doesn't do anything yet
-		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Maximum value of y axis'}); // doesn't do anything yet
-		this.fields['show_legend'] = new Field('show_legend', 'Show legend', 'checkbox', {'checked':'true', 'title':'Show / hide legend'});
-		this.fields['quick_add'] = new Field('quick_add', 'Quick add from database', 'text', {'placeholder':'Try typing "qua"', 'title':'Start typing a mineral name and select the desired mineral from the dropdown list'});
-		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add', 'title':'Add spectrum, from file or database'});
-		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove', 'title':'Delete the curretly selected spectrum and its settings (this cannot be undone)'});
-		this.fields['add_vl'] = new Field('add_vl', 'Add vertical line', 'button', {'value': 'Add', 'title': 'Add a vertical line to the plot'});
+		this.fields['xlabel'] = new Field();
+		this.fields['ylabel'] = new Field();
+		this.fields['xmin'] = new Field(); // doesn't do anything yet
+		this.fields['xmax'] = new Field(); // doesn't do anything yet
+		this.fields['ymin'] = new Field(); // doesn't do anything yet
+		this.fields['ymax'] = new Field(); // doesn't do anything yet
+		this.fields['show_legend'] = new Field();
+		this.fields['show_grid'] = new Field();
+		this.fields['show_ticks'] = new Field();
+
+		//this.fields['quick_add'] = new Field('quick_add', 'Quick add from database', 'text', {'placeholder':'Try typing "qua"', 'title':'Start typing a mineral name and select the desired mineral from the dropdown list'});
+		//this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add', 'title':'Add spectrum, from file or database'});
+		//this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove', 'title':'Delete the curretly selected spectrum and its settings (this cannot be undone)'});
+		//this.fields['add_vl'] = new Field('add_vl', 'Add vertical line', 'button', {'value': 'Add', 'title': 'Add a vertical line to the plot'});
 		// TODO: create legend location
 		/*
 		// waiting on advanced options until separating js and html
@@ -739,7 +742,28 @@ class PlotConfig{
 
 	}
 
+	bind(field_key, target){
+		// make sure the field key is valid
+		if(!(field_key in this.fields)){
+			console.log(field_key + ' is not a valid field');
+			return false;
+		}
+		var sel = $(target);
+		// make sure the selector is valid
+		if(sel.length < 1){
+			console.log(target + ' is not a valid element. could not bind ' + field_key);
+			return false;
+		}
+		else if(sel.length > 1){
+			console.log(target + ' selects multiple elements. could not bind ' + field_key);
+			return false;
+		}
+		this.fields[field_key].bindTo(sel);
+		return true;
+	}
+
 	// convert fields to html table
+	/*
 	toTable(){
 		var table = $('<table>').addClass('tools_table');
 		for(var field in this.fields){
@@ -747,6 +771,7 @@ class PlotConfig{
 		}
 		return table;
 	}
+	*/
 
 	// returns the value of a field
 	valueOf(field, value){
@@ -761,12 +786,11 @@ class PlotConfig{
 
 // handler for plot config and all spec configs for a given page
 class PlotHandler{
-	constructor(plot_config_target, spec_list_target, spec_config_target, vl_target, plot_target, preprocesses){
+	// TODO: remove all targets from this except plot_target (even that we can bind in bindAll, tbh. maybe leave it here though)
+	constructor(plot_target){
 		// targets are all jquery objects
-		this.plot_config_target = plot_config_target;
-		this.spec_list_target = spec_list_target;
-		this.spec_config_target = spec_config_target;
-		this.vl_target = vl_target;
+		this.spec_list_target = $('#speclist_target');
+		//this.spec_config_target = spec_config_target;
 
 		this.plot_target = plot_target;
 
@@ -859,9 +883,6 @@ class PlotHandler{
 
 	// appends the plot config html to the jquery element <target>
 	// creates a handler for any changes to tools to redraw the plot
-	insertPlotConfigHtml(){
-		this.plot_config_target.append(this.plotConfig.toTable());
-	}
 
 	// inserts the spec list html at the end of the current spec list
 	appendSpecListRow(specConfig){
@@ -1091,23 +1112,39 @@ class PlotHandler{
 				$('.modal_bg').hide();
 			}
 		});
+	}	
+
+	// bindings for all of the fields (page-specific)
+	bindAll(){
+		var pc = this.plotConfig;
+		// pc.bind takes the field name and then the jquery selector
+		//pc.fields['title'].bindTo($('#title_target'));
+		pc.bind('title','#title_target');
+		pc.bind('xlabel', '#xlabel_target');
+		pc.bind('ylabel', '#ylabel_target');
+		pc.bind('xmin', '#xmin_target');
+		pc.bind('xmax', '#xmax_target');
+		pc.bind('ymin', '#ymin_target');
+		pc.bind('ymax', '#ymax_target');
+		pc.bind('show_legend', '#showlegend_target');
+		pc.bind('show_grid', '#showgrid_target');
+		pc.bind('show_ticks', '#showticks_target');
 	}
 
-	
 	// adds event listeners to the add and remove buttons and vertical line add/remove
 	startAddRemove(){
 		var _this = this;
 		// add spectrum
-		_this.plotConfig.fields['add_spec'].element.click(function(){
+		$('#add_button').click(function(){
 			_this.showAddModal();
 		});
 
 		// quick add from db (autofill on quick_add)
-		$(_this.plotConfig.fields['quick_add'].element).autocomplete({
+		$('#quickadd_target').autocomplete({
 			source: quick_add_list,
-			minLength: 3,
+			minLength: 2,
 			select: function(event, ui){
-				$(_this.plotConfig.fields['quick_add'].element).val('');
+				$('#quickadd_target').val('');
 				var selected = ui.item.value;
 				_this.addSpecByDbId(selected); // oh my god this is so cool and so easy
 				return false;
@@ -1115,7 +1152,7 @@ class PlotHandler{
 		})
 
 		// remove spectrum
-		_this.plotConfig.fields['remove_spec'].element.click(function(){
+		$('#remove_button').click(function(){
 			// get which spectrum is currently selected
 			var selected_spec_index = _this.getSelectedSpecIndex();
 			// make sure it exists
@@ -1148,9 +1185,9 @@ class PlotHandler{
 		});
 
 		// vertical lines
-		_this.plotConfig.fields['add_vl'].element.click(function(){
+		/*_this.plotConfig.fields['add_vl'].element.click(function(){
 			_this.addVL();
-		});
+		});*/
 
 	}
 	
@@ -1180,6 +1217,7 @@ class PlotHandler{
 		// insert plot configuration html
 		//this.insertPlotConfigHtml();
 		// add event listeners for plot updates
+		this.bindAll();
 		this.addToolListeners();
 		// add event listeners to add & remove spectra and key commands
 		this.startAddRemove();
