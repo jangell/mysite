@@ -34,22 +34,6 @@ class Field{
 		this.id = id;
 		this.element = null
 
-		// default input type is text
-		//if(valid_inputs.indexOf(input) == -1){input = 'text';}
-		//this.label = label;
-		//this.input = input;
-		/*if(typeof(defaults) === 'undefined'){
-			this.defaults = null;
-		}
-		else{
-			this.defaults = defaults;
-		}
-		// if a field doesn't have a title (for explanatory text), complain about it in the console
-		if(!('title' in defaults)){
-			console.log('Note: Field '+this.label+' does not have title text');
-		}
-		this.element = null; // this is where the value in the element gets wired into the field itself (to be accessed by the specconfig via getValue() )
-		*/
 	}
 	
 	// gets the value from the current element that this field has generated
@@ -79,33 +63,9 @@ class Field{
 		this.element = element;
 	}
 
-	/*
-	// generates html to represent this field as a table row
-	toTableRow(){
-		// return the field as a table row
-		var container = $('<tr>');
-		container.addClass('tool');
-		container.attr('id', this.identifier); // identifier is id of row and name of input
-		container.append($('<td>').addClass('tool_label').html(this.label));
-		var inputter = $('<input>').attr('type',this.input).attr('name',this.identifier);
-		
-		// wire in the moving parts
-		this.element = inputter;
-		
-		// number inputter should default to a step of any
-		if(this.input == 'number' && !('step' in this.defaults)){inputter.attr('step','any');}
-
-		// set the defaults based on the dictionary passed in
-		for(var key in this.defaults){
-			inputter.attr(key,this.defaults[key]);
-		}
-
-		var action = $('<td>').addClass('tool_action').append(inputter);
-		container.append(action);
-		return container;
-	}
-	*/
 }
+
+/******************** PREPROCESSING *************************/
 
 // abstract class to be inherited by all Preprocess classes
 // args: a dictionary containing arguments for the preprocess (for sav-gol, window size and exponent, for example)
@@ -427,6 +387,18 @@ Offset = function(){
 	return that;
 }
 
+/********************************** SPECCONFIG, PLOTCONFIG CLASSES **************************************/
+
+// Vue rewrite
+
+
+
+
+
+
+
+// end Vue rewrite
+
 // SpecConfig (reminder: classes are not hoisted in js)
 class SpecConfig{
 	constructor(spec_id, spec_name, spec_data, preprocs){
@@ -437,11 +409,32 @@ class SpecConfig{
 		this.preprocesses = preprocs;
 		this.selected = false; // keep track of which is currently showing (and highlighted)
 		this.fields = {};
-		this.fields['show'] = new Field('spec'+this.spec_id+'_show', 'Show', 'checkbox', {'checked':true, 'title':'Show / hide this spectrum in the plot'});
-		this.fields['legend_name'] = new Field('spec'+this.spec_id+'_legend_name', 'Legend label', 'text',{'value':this.spec_name,'placeholder':'No label', 'title':'Text label shown for this spectrum in the legend'});
-		this.fields['line_width'] = new Field('spec'+this.spec_id+'_line_width', 'Line width (px)', 'number', {'value':2, 'title':'Width of line in pixels'});
-		this.fields['color'] = new Field('spec'+this.spec_id+'_color', 'Color', 'color', {'value':randomColor(), 'title':'Line color'});
-		this.fields['opacity'] = new Field('spec'+this.spec_id+'_opacity', 'Opacity', 'number', {'value':1, 'title':'Line opacity (transparency)'});
+		this.fields['show'] = new Field();
+		this.fields['legend_name'] = new Field();
+		this.fields['line_width'] = new Field();
+		this.fields['color'] = new Field();
+		this.fields['opacity'] = new Field();
+	}
+
+	// same as plotconfig bind
+	bind(field_key, target){
+		// make sure the field key is valid
+		if(!(field_key in this.fields)){
+			console.log(field_key + ' is not a valid field');
+			return false;
+		}
+		var sel = $(target);
+		// make sure the selector is valid
+		if(sel.length < 1){
+			console.log(target + ' is not a valid element. could not bind ' + field_key);
+			return false;
+		}
+		else if(sel.length > 1){
+			console.log(target + ' selects multiple elements. could not bind ' + field_key);
+			return false;
+		}
+		this.fields[field_key].bindTo(sel);
+		return true;
 	}
 
 	valueOf(field){
@@ -464,11 +457,6 @@ class SpecConfig{
 	}
 
 	getData(){
-		//wavs = JSON.parse(JSON.stringify(this.spec_data[0])); // fastest way to deep copy counts (we're gonna preprocess it so we need our own copy)
-		/*for(var p in this.preprocesses){
-			// preprocess run function handles checking the run_process flag
-		//	data = this.preprocesses[p].runProcess(data);
-		}*/
 		var cur_data = JSON.parse(JSON.stringify(this.spec_data));
 		for(var p in this.preprocesses){
 			cur_data = this.preprocesses[p].runProcess(cur_data);
@@ -514,16 +502,6 @@ class SpecConfig{
 			// select this one
 			$(rowId).removeClass('unselected_row').addClass('selected_row');
 		});
-
-		// not allowing 'showing' checkbox to be clickable at the moment (weird bugs)
-		/*
-		// function for when this spec's 'show' checkbox is clicked on
-		show_box.click(function(){
-			var checked = show_box.is(':checked');	// get whether or not it's checked
-			// TODO: show or hide in plot (tbd)
-			_this.fields['show'].element.attr('checked',checked);	// update the show box in the relevant config
-		});
-		*/
 
 		return row;
 	}
@@ -716,29 +694,16 @@ class PlotConfig{
 	constructor(){
 		// set values to defaults
 		this.fields = {};
-		this.ad_fields = {}; // advanced fields
-		//this.fields['fig_width'] = new Field('fig_width', 'Width', 'number');
-		//this.fields['fig_height'] = new Field('fig_height', 'Height', 'number');
 		this.fields['title'] = new Field();
-		//this.fields['show_title'] = new Field('show_title', 'Show title', 'checkbox');
 		this.fields['xlabel'] = new Field();
 		this.fields['ylabel'] = new Field();
-		this.fields['xmin'] = new Field(); // doesn't do anything yet
-		this.fields['xmax'] = new Field(); // doesn't do anything yet
-		this.fields['ymin'] = new Field(); // doesn't do anything yet
-		this.fields['ymax'] = new Field(); // doesn't do anything yet
+		this.fields['xmin'] = new Field();
+		this.fields['xmax'] = new Field();
+		this.fields['ymin'] = new Field();
+		this.fields['ymax'] = new Field();
 		this.fields['show_legend'] = new Field();
 		this.fields['show_grid'] = new Field();
 		this.fields['show_ticks'] = new Field();
-
-		//this.fields['quick_add'] = new Field('quick_add', 'Quick add from database', 'text', {'placeholder':'Try typing "qua"', 'title':'Start typing a mineral name and select the desired mineral from the dropdown list'});
-		//this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add', 'title':'Add spectrum, from file or database'});
-		//this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove', 'title':'Delete the curretly selected spectrum and its settings (this cannot be undone)'});
-		//this.fields['add_vl'] = new Field('add_vl', 'Add vertical line', 'button', {'value': 'Add', 'title': 'Add a vertical line to the plot'});
-		// TODO: create legend location
-		/*
-		// waiting on advanced options until separating js and html
-		*/
 
 	}
 
@@ -761,17 +726,6 @@ class PlotConfig{
 		this.fields[field_key].bindTo(sel);
 		return true;
 	}
-
-	// convert fields to html table
-	/*
-	toTable(){
-		var table = $('<table>').addClass('tools_table');
-		for(var field in this.fields){
-			table.append(this.fields[field].toTableRow());
-		}
-		return table;
-	}
-	*/
 
 	// returns the value of a field
 	valueOf(field, value){
@@ -1115,7 +1069,7 @@ class PlotHandler{
 	}	
 
 	// bindings for all of the fields (page-specific)
-	bindAll(){
+	bindPlotConfig(){
 		var pc = this.plotConfig;
 		// pc.bind takes the field name and then the jquery selector
 		//pc.fields['title'].bindTo($('#title_target'));
@@ -1129,6 +1083,11 @@ class PlotHandler{
 		pc.bind('show_legend', '#showlegend_target');
 		pc.bind('show_grid', '#showgrid_target');
 		pc.bind('show_ticks', '#showticks_target');
+	}
+
+	// binds a specConfig to an html specConfig, 
+	bindSpecConfig(sc,html){
+
 	}
 
 	// adds event listeners to the add and remove buttons and vertical line add/remove
