@@ -1176,7 +1176,7 @@ class PlotHandler{
 		// insert plot configuration html
 		//this.insertPlotConfigHtml();
 		// add event listeners for plot updates
-		this.bindAll();
+		this.bindPlotConfig();
 		this.addToolListeners();
 		// add event listeners to add & remove spectra and key commands
 		this.startAddRemove();

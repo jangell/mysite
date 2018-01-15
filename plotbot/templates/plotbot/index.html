@@ -305,8 +305,8 @@ label{
 
 				<!-- buttons to add & remove from table -->
 				<div class="toolset_row">
-					<button class="toolset_row_item" id="add_button">Add Spec</button>
-					<button class="toolset_row_item" id="remove_button">Remove Spec</button>
+					<button type=button class="toolset_row_item" id="add_button">Add Spec</button>
+					<button type=button class="toolset_row_item" id="remove_button">Remove Spec</button>
 				</div>
 
 				<!-- quick-add -->
@@ -315,10 +315,10 @@ label{
 					<input class="toolset_row_item" id="quickadd_target">
 				</div>
 
-				<!-- save png button (make that thang hi-res homie!) -->
+				<!-- save png button (TODO: make that thang hi-res homie!) -->
 				<div class="toolset_row">
 					<span class="toolset_row_item button_spacer"></span>
-					<button class="toolset_row_item" id="savepng_target">Save PNG</button>
+					<button type=button class="toolset_row_item" id="savepng_target">Save PNG</button>
 				</div>
 
 			</div>
@@ -569,6 +569,8 @@ $(function() {
 
 	// This takes all settings and passes it over to the server, and then updates the plot holder with the image url returned by the server
 	$('#plot_form').submit(function() {
+		// bail!
+		return false;
 		var form_data = $('#plot_form').serializeArray();
 		to_json = {};
 		for(var i = 0; i < form_data.length; i++)
@@ -589,7 +591,7 @@ $(function() {
 				}
 			});
 			*/
-		return false; // don't reload the page
+		//return false; // don't reload the page
 	});
 
 });
