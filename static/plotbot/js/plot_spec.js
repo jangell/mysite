@@ -423,6 +423,58 @@ Offset = function(){
 	return that;
 }
 
+// vertical line
+class VertLine{
+	constructor(vl_id){
+		this.id = vl_id;
+		this.fields = {};
+		this.fields['xval'] = new Field('xval', 'X Value', 'number', {'value':100});
+		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number', {'value':0});
+		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number', {'value':10000});
+	}
+
+	// return html for vertical line
+	vlHtml(){
+		var container = $('<div>').addClass('vl_config');
+		for(var f in this.fields){
+			container.append(this.fields[f].toTableRow());
+		}
+		return container;
+	}
+
+	// return nice, plotly.js-ified line
+	getPlotly(){
+		var x = this.fields['xval'].getValue();
+		var y0 = this.fields['ymin'].getValue();
+		var y1 = this.fields['ymax'].getValue();
+		return {
+			x: [x,x],
+			y: [y0,y1],
+			name: x,
+			line: {
+				color: '#8921d5',
+				width: 2,
+			}
+		};
+	}
+
+	getPlotlyData(){
+		// check here if 'show' is true or not (if not, return null immediately)
+		var data = this.getData();
+		if(!this.valueOf('show')){return null;}
+		return {
+			x: data[0],
+			y: data[1],
+			name: this.valueOf('legend_name'),
+			showlegend: !(this.valueOf('legend_name') == ''), // only show in legend if field isn't blank
+			line: {
+				color: this.getColor(), // color and opacity (convert to rgba)
+				width: this.valueOf('line_width'), // line width in pixels
+			}
+		}
+	}
+}
+
 // SpecConfig (reminder: classes are not hoisted in js)
 class SpecConfig{
 	constructor(spec_id, spec_name, spec_data, preprocs){
@@ -681,8 +733,10 @@ class PlotHandler{
 		this.plot_target = plot_target;
 
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
+		this.cur_vl_id = 0; // same deal but with vertical lines
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
+		this.vlList = [];
 		this.annotationsList = [
 /*
 			// this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
@@ -816,6 +870,18 @@ class PlotHandler{
 
 	}
 
+	addVl(){
+		var new_vl = new VertLine(this.cur_vl_id);
+		this.vlList.push(new_vl);
+		this.cur_vl_id ++;
+
+		// abstract this to a plothandler constructor variable
+		$('#annotations_target').append(new_vl.vlHtml());
+
+		this.addToolListeners();
+		this.updatePlot();
+	}
+
 
 	// updates the plot drawing -> move this to startPlot and only have it start the plot
 	updatePlot(){
@@ -830,6 +896,12 @@ class PlotHandler{
 			if(cur_data != null){
 				data.push(cur_data);
 			}
+		}
+
+		// vertical lines -> list of plotly traces, just like the spectra
+		for(var i = 0; i < this.vlList.length; i++){
+			var cur_data = this.vlList[i].getPlotly();
+			data.push(cur_data);
 		}
 
 		// get values for x and y range
