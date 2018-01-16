@@ -3,18 +3,145 @@ html{
 	background:#cce;
 }
 
-
-
-
-/* tools */
+/* tab time!! */
 
 .all_tools{
-	display:flex;
-	flex-direction:row;
-	flex-wrap:wrap;
-	max-height:40vh;
+	display:flex;		display: -webkit-flex;
+	flex-direction:row;	-webkit-flex-direction: row;
+	height:40vh;
+}
+.toolbar{
+	background: #f0f0f0;
+	width:100%;
+	flex:2;
+	display:flex;			display: -webkit-flex;
+	flex-direction:column;	-webkit-flex-direction: column;
+}
+.spec_list{
+	flex:1;
 }
 
+.tabs{
+	list-style: none;
+	padding:0;
+	margin:0;
+	display:flex;					display: -webkit-flex;
+	flex-direction:row;				-webkit-flex-direction: row;
+	justify-content: flex-start;	-webkit-justify-content: flex-start;
+}
+.tab{
+	flex:1;
+	display:flex;			display: -webkit-flex;
+	justify-content:center;	-webkit-justify-content: center;
+	align-items:center;		-webkit-align-items: center;
+
+	padding:3px;
+	background:#d8d8d8;
+
+	font-family: 'Roboto', sans-serif;
+	font-size:1.2rem;
+
+	border:1px solid #808080;
+	border-left:none;
+	
+	cursor:pointer;
+	transition: .2s all; -webkit-transition: .2s all;
+}
+.tab:first-child{
+	border-left: 1px solid #808080;
+}
+.tab:not(.selected_tab):hover{
+	background:#e8e8e8;
+}
+.selected_tab{
+	background:#f0f0f0;
+	cursor:default;
+	border-bottom-color:rgba(0,0,0,0);
+}
+
+.toolset_container{
+	border: 1px solid #808080;
+	border-top:0px;
+	flex:1;			-webkit-flex: 1;
+
+}
+.toolset{
+	height:100%;
+	width:100%;
+
+	display:flex;		display: -webkit-flex;
+	flex-direction:row;	-webkit-flex-direction: row;
+
+	padding:10px;
+
+	display:none;
+}
+.tools_col{
+	flex:1;
+	padding:10px;
+}
+
+.setting{
+	display:flex;					display: -webkit-flex;
+	flex-direction:row;				-webkit-flex-direction: row;
+	justify-content: space-between;	-webkit-justify-content: space-between;
+	align-items:center;				-webkit-align-items: center;
+	width:100%;
+	margin:5px;
+}
+.right{
+	float:right;
+}
+.range{
+	width:50%;
+	float:right;
+	display:flex;					display: -webkit-flex;
+	flex-direction:row;				-webkit-flex-direction: row;
+	justify-content:space-between;	-webkit-justify-content: space-between;
+	align-items:center;				-webkit-align-items: center;
+}
+input[type=number]{
+	width:5em;
+}
+
+.spec_name{
+	margin: 0 auto; /* 0 for top & bottom, auto for sides */
+	font-family:'Roboto', sans-serif;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 .toolset{
 	background-color:#ddd;
 	margin:5px;
@@ -24,6 +151,7 @@ html{
 	box-shadow:3px 3px 1px #808080;
 	overflow:scroll;
 }
+*/
 .toolset_title{
 	font-family: 'Roboto', sans-serif;
 	font-size:1.4rem;
@@ -241,26 +369,8 @@ html{
 	margin:5px;
 	float:right;
 }
-.tab{
-	display:inline-block;
-	border-top-left-radius:5px;
-	border-top-right-radius:5px;
-	border:1px solid #888;
-	border-bottom:none;
-	background:#bbb;
-	cursor:pointer;
-}
-.tab:hover{
-	background:#ccc;
-}
-.selected_tab{
-	font-weight:bold;
-	background:#ddd;
-}
-.selected_tab:hover{
-	background:#ddd;
-	cursor:default;
-}
+
+
 .modal_subtitle{
 	margin: 5px;
 }

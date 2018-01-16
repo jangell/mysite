@@ -47,6 +47,10 @@ class Field{
 		}
 		this.element = null; // this is where the value in the element gets wired into the field itself (to be accessed by the specconfig via getValue() )
 	}
+
+	setElement(element){
+		this.element = element;
+	}
 	
 	// gets the value from the current element that this field has generated
 	getValue(){
@@ -562,7 +566,7 @@ class SpecConfig{
 			// select this one
 			$(rowId).removeClass('unselected_row').addClass('selected_row');
 		});
-		
+
 		return row;
 	}
 
@@ -691,6 +695,11 @@ class PlotConfig{
 		this.ad_fields['top_margin'] = new Field('top_margin', 'Top margin', 'number', {'value':60, 'title':'Top margin (pixels)'});
 		this.ad_fields['bottom_margin'] = new Field('bottom_margin', 'Bottom margin', 'number', {'value':80, 'title':'Bottom margin (pixels)'});
 		*/
+
+	}
+
+	// binds the plotconfig to all of the target tools within a particular div (the given element)
+	bindTo(element){
 
 	}
 

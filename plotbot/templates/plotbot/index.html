@@ -11,16 +11,144 @@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> <!-- autocomplete css -->
 <script src="{% static 'plotbot/js/plot_spec.js' %}"></script> <!-- main script with classes and everything for this all to work -->
 <link rel="stylesheet" href="{% static 'plotbot/css/index.css' %}"> <!-- all of the custom page styling -->
-<link href="https://fonts.googleapis.com/css?family=Montserrat|Spectral+SC" rel="stylesheet"> <!-- google fonts cdn for our page fonts -->
+
 
 {% endblock %}
 
 {% block body %}
 {% csrf_token %}
 
+<style>
+</style>
+<div class="all_tools">
+	<div class="toolbar">
+		<ul class="tabs">
+			<li class="tab" for="global_tools" id="global_tab">Plot Settings</li>
+			<li class="tab default_tab" for="spec_tools" id="spec_tab">Spec Settings</li>
+			<li class="tab" for="anno_tools" id="anno_tab">Annotations</li>
+		</ul>
+		
+		<div class="toolset_container">
+			<div class="toolset" id="global_tools">
+				<!-- binding inputs for global tools -->
+
+				<div class="tools_col">
+					<div class="setting">
+						<label for="title_target">Title</label>
+						<input class="right" id="title_target">
+					</div>
+					<div class="setting">
+						<label for="xlabel_target">X Label</label>
+						<input class="right" id="xlabel_target">
+					</div>
+					<div class="setting">
+						<label for="ylabel_target">Y Label</label>
+						<input class="right" id="ylabel_target">
+					</div>
+					<div class="setting">
+						<label for="x_range">X Range</label>
+						<div class="right" id="x_range">
+							<input id="xmin_target" type=number step=any>
+							<span>-</span>
+							<input id="xmax_target" type=number step=any>
+						</div>
+					</div>
+					<div class="setting">
+						<label for="y_range">Y Range</label>
+						<div class="right" id="y_range">
+							<input id="ymin_target" type=number step=any>
+							<span>-</span>
+							<input id="ymax_target" type=number step=any>
+						</div>
+					</div>
+				</div>
+
+				<div class="tools_col">
+					
+					<div class="setting">
+						<label for="showlegend_target">Show Legend</label>
+						<input type=checkbox class="right" id="showlegend_target" checked>
+					</div>
+					<div class="setting">
+						<label for="showgrid_target">Show Grid</label>
+						<input type=checkbox class="right" id="showgrid_target" checked>
+					</div>
+
+				</div>
+
+				<div class="tools_col">
+					
+				</div>
+
+			</div>
+
+			<div class="toolset" id="spec_tools">
+
+				<div class="tools_col">
+
+					<div class="setting">
+						<h4 class="spec_name" id="spec_name_target">No Spectrum Selected</h4>
+					</div>
+					<div class="setting">
+						<label for="show_target">Show</label>
+						<input type=checkbox class="right" id="show_target" checked>
+					</div>
+					<div class="setting">
+						<label for="label_target">Label</label>
+						<input class="right" id="label_target">
+					</div>
+					<div class="setting">
+						<label for="color_target">Color</label>
+						<input type=color class="right" id="color_target">
+					</div>
+					<div class="setting">
+						<label for="opacity_target">Opacity</label>
+						<input type=number class="right" min=0 max=1. step=any>
+					</div>
+				</div>
+
+				<div class="tools_col">
+				</div>
+				
+				<div class="tools_col">
+				</div>
+
+			</div>
+
+			<div class="toolset" id="anno_tools">
+
+			</div>
+		</div>
+	</div>
+	<div class="spec_list">
+		
+	</div>
+</div>
+
+<div id="plot_holder">
+
+</div>
+
+
+
+<script>
+$('.tab').click(function(){
+	// toggle tab css
+	$('.selected_tab').removeClass('selected_tab');
+	$(this).addClass('selected_tab');
+	
+	// turn on the right tab content
+	let target_id = '#' + $(this).attr('for');
+	$('.toolset').css({'display':'none'});
+	$(target_id).css({'display':'flex'});
+});
+// start with default one
+$('.default_tab').click();
+</script>
 
 
 <!-- modal -->
+<!--
 <div class="modal_bg">
 	<script>
 	// hide modal on page load (not the long-term solution) (actually, for now, it is)
@@ -39,7 +167,6 @@
 				<button id="cancel_modal" title="Return to plotting window">Cancel</button>
 			</div>
 			<div class="modal_option" id="modal_csv">
-				<!-- add by uploading csv -->
 				<form id="modal_form">
 					<input name=file type=file accept=".csv" id="spec_upload_file">
 					<hr>
@@ -54,8 +181,6 @@
 				</form>
 			</div>
 			<div class="modal_option" id="modal_db">
-				<!-- search by name -->
-				<!-- filter by wavelength -->
 				<div class="db_filters">
 					<div class="filter wv_filter">
 						<label for="wv_select" title="Only show spectra with selected wavelength">Filter by wavelength</label>
@@ -71,7 +196,6 @@
 						<input id="name_select">
 					</div>
 				</div>
-				<!-- adding from database - list all database options (for now, in one list) -->
 				<div class="db_table_holder">
 					<div id="filter_loading">
 						<img src="{% static 'plotbot/img/loading.gif' %}">
@@ -86,12 +210,10 @@
 							</tr>
 						</thead>
 						<tbody id="modal_db_tbody">
-							<!-- database spectra get filled in here -->
 						</tbody>
 					</table>
 				</div>
 			</div>
-			<!-- end of options -->
 		</div>
 	</div>
 </div>
@@ -109,7 +231,6 @@
 		<div class="toolset" id="spectra_tools">
 			<h2 class="toolset_title" title="Settings that affect only the selected spectrum">Spectra Tools</h2>
 			<div class="toolset_content">
-				<!-- list of current spectra -->
 				<div class="spec_table_holder">
 					<table class="spec_table">
 						<thead class="spec_table_head">
@@ -126,7 +247,6 @@
 					</table>
 				</div>
 
-				<!-- tools associated with currently-selected spectrum -->
 				<div id="sc_target">
 
 				</div>
@@ -143,10 +263,7 @@
 		</div>
 	</div>
 </form>
-
-<div class="toolset" id="plot_holder">
-
-</div>
+-->
 
 <script>
 
@@ -170,8 +287,10 @@ $(document).on("wheel", "input[type=number]", function (e) {
     $(this).blur();
 });
 
+
 // modal window
 
+/*
 // make the 'cancel' button in modal close the modal
 $('#cancel_modal').click(function(){
 	clearModal();
@@ -293,8 +412,11 @@ $('.tab').click(function(){
 	}
 });
 
+*/
+
 $(document).ready(function(){
 	// load database into modal_db_tbody at page load (for now)
+	/*
 	{% for spec in specs %}
 	$('#modal_db_tbody').append(modalDbRow('{{spec.spec_id}}', '{{spec.name}}', '{{spec.source}}', '{{spec.wavelength}}'));
 	quick_add_list.push({'label':'{{spec.name}} - {{spec.wavelength}}nm','value':'{{spec.spec_id}}'});
@@ -354,11 +476,14 @@ $(document).ready(function(){
 	$('#name_select').on('input',function(){
 		updateFilters();
 	});
+	
+	*/
 
 	// development tool: autopopulate
 	for(let i = 0; i < startWith.length; i++){
 		ph.addSpecByDbId(startWith[i]);	
 	}
+
 
 });
 
