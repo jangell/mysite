@@ -150,6 +150,12 @@
 
 <script>
 
+var qz = 2481;	// quartz
+var al = 51;	// albite
+var startWith = []; // list of specIds to autopopulate chart
+startWith.push(qz);
+startWith.push(al);
+
 /* new plot page actions:
 	- generate plot config html and insert into correct point in page
 	- generate spec list html and insert into correct point in page
@@ -348,6 +354,11 @@ $(document).ready(function(){
 	$('#name_select').on('input',function(){
 		updateFilters();
 	});
+
+	// development tool: autopopulate
+	for(let i = 0; i < startWith.length; i++){
+		ph.addSpecByDbId(startWith[i]);	
+	}
 
 });
 

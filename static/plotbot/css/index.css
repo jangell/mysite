@@ -3,23 +3,34 @@ html{
 	background:#cce;
 }
 
+
+
+
 /* tools */
+
+.all_tools{
+	display:flex;
+	flex-direction:row;
+	flex-wrap:wrap;
+	max-height:40vh;
+}
 
 .toolset{
 	background-color:#ddd;
 	margin:5px;
 	min-width:400px;
 	flex:1;
-	border:1px solid #888;
-	box-shadow:3px 3px 1px #888;
+	border:1px solid #808080;
+	box-shadow:3px 3px 1px #808080;
+	overflow:scroll;
 }
 .toolset_title{
-	font-family: 'Dosis', sans-serif;
-	font-size:1.8rem;
+	font-family: 'Roboto', sans-serif;
+	font-size:1.4rem;
 	text-align:center;
 	margin:0;
 	background-color:#bbb;
-	border-bottom:2px solid #aaa;
+	border-bottom:1px solid #909090;
 }
 .toolset_content{
 	margin:0;
@@ -48,7 +59,7 @@ html{
 	margin-top:none;
 	margin:20px;
 	border:1px solid #888;
-	border-radius:5px;
+	border-radius:2px;
 	overflow:hidden;
 }
 .spec_table{
@@ -72,6 +83,9 @@ html{
 	width:100%;
 	table-layout:fixed;
 	border-top:1px solid #ccc;
+}
+.spec_table_row:first-child{
+	border-top:0px;
 }
 .spec_row_name{
 	overflow:auto;
@@ -130,14 +144,14 @@ html{
 
 /* selected vs unselected row actions */
 .unselected_row{
-	transition: background-color .5s ease
+	transition: background-color .2s ease
 }
 .unselected_row:hover{
 	cursor:pointer;
-	background-color:rgba(122,199,255,.5);
+	background-color:rgba(137,209,255,.3);
 }
 .selected_row{
-	background-color:#7ac7ff;
+	background-color:#9ad7ff;
 	font-weight:bold;
 }
 
@@ -167,12 +181,6 @@ html{
 }
 #remove_spec{
 	background-color: #ffb2b2;
-}
-
-.all_tools{
-	display:flex;
-	flex-direction:row;
-	flex-wrap:wrap;
 }
 
 #plot_holder{

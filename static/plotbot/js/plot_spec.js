@@ -562,17 +562,7 @@ class SpecConfig{
 			// select this one
 			$(rowId).removeClass('unselected_row').addClass('selected_row');
 		});
-
-		// not allowing 'showing' checkbox to be clickable at the moment (weird bugs)
-		/*
-		// function for when this spec's 'show' checkbox is clicked on
-		show_box.click(function(){
-			var checked = show_box.is(':checked');	// get whether or not it's checked
-			// TODO: show or hide in plot (tbd)
-			_this.fields['show'].element.attr('checked',checked);	// update the show box in the relevant config
-		});
-		*/
-
+		
 		return row;
 	}
 
