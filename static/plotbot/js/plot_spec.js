@@ -484,11 +484,11 @@ class SpecConfig{
 		this.selected = false; // keep track of which is currently showing (and highlighted)
 		this.fields = {};
 
-		this.fields['show'] = new Field('spec'+this.spec_id+'_show', 'Show', 'checkbox', {'checked':true, 'title':'Show / hide this spectrum in the plot'});
-		this.fields['label'] = new Field('spec'+this.spec_id+'_legend_name', 'Legend label', 'text',{'value':this.spec_name,'placeholder':'No label', 'title':'Text label shown for this spectrum in the legend'});
-		this.fields['line_width'] = new Field('spec'+this.spec_id+'_line_width', 'Line width (px)', 'number', {'value':2, 'title':'Width of line in pixels'});
-		this.fields['color'] = new Field('spec'+this.spec_id+'_color', 'Color', 'color', {'value':randomColor(), 'title':'Line color'});
-		this.fields['opacity'] = new Field('spec'+this.spec_id+'_opacity', 'Opacity', 'number', {'value':1, 'title':'Line opacity (transparency)'});
+		this.fields['show'] = new Field();
+		this.fields['label'] = new Field();
+		this.fields['line_width'] = new Field();
+		this.fields['color'] = new Field();
+		this.fields['opacity'] = new Field();
 
 		this.target_element = $('#spec_tools');
 		this.template_element = $('#spec_config_example');
