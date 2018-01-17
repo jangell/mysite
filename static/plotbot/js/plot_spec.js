@@ -41,10 +41,7 @@ class Field{
 		else{
 			this.defaults = defaults;
 		}
-		// if a field doesn't have a title (for explanatory text), complain about it in the console
-		if(!('title' in defaults)){
-			console.log('Note: Field '+this.label+' does not have title text');
-		}
+
 		this.element = null; // this is where the value in the element gets wired into the field itself (to be accessed by the specconfig via getValue() )
 	}
 
@@ -57,7 +54,7 @@ class Field{
 	getValue(){
 		// start by making sure the element exists
 		if(this.element){
-			if(this.input == 'checkbox')
+			if(this.element.attr('type') == 'checkbox')
 				return this.element.is(':checked');
 			return this.element.val();
 		}
@@ -974,6 +971,7 @@ class PlotHandler{
 					size: 20,
 					family: "'Helvetica', sans-serif"
 				},
+				showgrid: this.plotConfig.valueOf('show_grid'),
 				range: [to_xmin, to_xmax]
 			},
 			yaxis: {
@@ -982,6 +980,7 @@ class PlotHandler{
 					size: 20,
 					family: "'Helvetica', sans-serif"
 				},
+				showgrid: this.plotConfig.valueOf('show_grid'),
 				range: [to_ymin, to_ymax]
 			},
 			showlegend: this.plotConfig.valueOf('show_legend'),
