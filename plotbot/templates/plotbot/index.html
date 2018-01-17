@@ -23,8 +23,8 @@
 <div class="all_tools">
 	<div class="toolbar">
 		<ul class="tabs">
-			<li class="tab" for="global_tools" id="global_tab">Plot Settings</li>
-			<li class="tab default_tab" for="spec_tools" id="spec_tab">Spec Settings</li>
+			<li class="tab default_tab" for="global_tools" id="global_tab">Plot Settings</li>
+			<li class="tab" for="spec_tools" id="spec_tab">Spec Settings</li>
 			<li class="tab" for="anno_tools" id="anno_tab">Annotations</li>
 		</ul>
 		
@@ -34,31 +34,31 @@
 
 				<div class="tools_col">
 					<div class="setting">
-						<label for="title_target">Title</label>
-						<input class="right" id="title_target">
+						<label>Title</label>
+						<input class="right" target="title" placeholder="No title">
 					</div>
 					<div class="setting">
-						<label for="xlabel_target">X Label</label>
-						<input class="right" id="xlabel_target">
+						<label>X Label</label>
+						<input class="right" target="xlabel" value="Wavenumber (cm<sup>-1</sup>)">
 					</div>
 					<div class="setting">
-						<label for="ylabel_target">Y Label</label>
-						<input class="right" id="ylabel_target">
+						<label>Y Label</label>
+						<input class="right" target="ylabel" value="Intensity">
 					</div>
 					<div class="setting">
-						<label for="x_range">X Range</label>
+						<label>X Range</label>
 						<div class="right" id="x_range">
-							<input id="xmin_target" type=number step=any>
+							<input target="xmin" type=number step=any>
 							<span>-</span>
-							<input id="xmax_target" type=number step=any>
+							<input target="xmax" type=number step=any>
 						</div>
 					</div>
 					<div class="setting">
-						<label for="y_range">Y Range</label>
+						<label>Y Range</label>
 						<div class="right" id="y_range">
-							<input id="ymin_target" type=number step=any>
+							<input target="ymin" type=number step=any>
 							<span>-</span>
-							<input id="ymax_target" type=number step=any>
+							<input target="ymax" type=number step=any>
 						</div>
 					</div>
 				</div>
@@ -66,12 +66,12 @@
 				<div class="tools_col">
 					
 					<div class="setting">
-						<label for="showlegend_target">Show Legend</label>
-						<input type=checkbox class="right" id="showlegend_target" checked>
+						<label>Show Legend</label>
+						<input type=checkbox class="right" target="showlegend" checked>
 					</div>
 					<div class="setting">
-						<label for="showgrid_target">Show Grid</label>
-						<input type=checkbox class="right" id="showgrid_target" checked>
+						<label>Show Grid</label>
+						<input type=checkbox class="right" target="showgrid" checked>
 					</div>
 
 				</div>
@@ -87,23 +87,23 @@
 				<div class="tools_col">
 
 					<div class="setting">
-						<h4 class="spec_name" id="spec_name_target">No Spectrum Selected</h4>
+						<h4 class="spec_name" target="spec_name">No Spectrum Selected</h4>
 					</div>
 					<div class="setting">
-						<label for="show_target">Show</label>
-						<input type=checkbox class="right" id="show_target" checked>
+						<label>Show</label>
+						<input type=checkbox class="right" target="show" checked>
 					</div>
 					<div class="setting">
-						<label for="label_target">Label</label>
-						<input class="right" id="label_target">
+						<label>Label</label>
+						<input class="right" target="label">
 					</div>
 					<div class="setting">
-						<label for="color_target">Color</label>
-						<input type=color class="right" id="color_target">
+						<label>Color</label>
+						<input type=color class="right" target="color">
 					</div>
 					<div class="setting">
-						<label for="opacity_target">Opacity</label>
-						<input type=number class="right" min=0 max=1. step=any>
+						<label>Opacity</label>
+						<input type=number class="right" min=0 max=1. step=any target="opacity">
 					</div>
 				</div>
 
@@ -120,8 +120,13 @@
 			</div>
 		</div>
 	</div>
+
 	<div class="spec_list">
-		
+		<div class="table_row head_row">
+			<div class="text">Name</div>
+			<div class="color">Color</div>
+			<div class="showing">Show</div>
+		</div>
 	</div>
 </div>
 

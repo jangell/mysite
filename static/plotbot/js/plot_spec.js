@@ -48,8 +48,9 @@ class Field{
 		this.element = null; // this is where the value in the element gets wired into the field itself (to be accessed by the specconfig via getValue() )
 	}
 
-	setElement(element){
+	bindTo(element){
 		this.element = element;
+		this.element.addClass('tool');
 	}
 	
 	// gets the value from the current element that this field has generated
@@ -671,18 +672,15 @@ class PlotConfig{
 	constructor(){
 		// set values to defaults
 		this.fields = {};
-		this.ad_fields = {}; // advanced fields
-		//this.fields['fig_width'] = new Field('fig_width', 'Width', 'number');
-		//this.fields['fig_height'] = new Field('fig_height', 'Height', 'number');
-		this.fields['title'] = new Field('title', 'Title', 'text', {'placeholder':'No title', 'title':'Title displayed on plot'});
-		//this.fields['show_title'] = new Field('show_title', 'Show title', 'checkbox');
-		this.fields['xlabel'] = new Field('xlabel', 'X-axis label', 'text', {'value': 'Wavenumber', 'title':'Label on x axis of plot'});
+		this.fields['title'] = new Field();
+		this.fields['xlabel'] = new Field();
 		this.fields['ylabel'] = new Field('ylabel', 'Y-axis label', 'text', {'value': 'Intensity', 'title':'Label on y axis of plot'});
 		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Minimum value of x axis'}); // doesn't do anything yet
 		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Maximum value of x axis '}); // doesn't do anything yet
 		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Minimum value of y axis'}); // doesn't do anything yet
 		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Maximum value of y axis'}); // doesn't do anything yet
 		this.fields['show_legend'] = new Field('show_legend', 'Show legend', 'checkbox', {'checked':'true', 'title':'Show / hide legend'});
+		this.fields['show_grid'] = new Field()
 		this.fields['quick_add'] = new Field('quick_add', 'Quick add from database', 'text', {'placeholder':'Try typing "qua"', 'title':'Start typing a mineral name and select the desired mineral from the dropdown list'});
 		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add', 'title':'Add spectrum, from file or database'});
 		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove', 'title':'Delete the curretly selected spectrum and its settings (this cannot be undone)'});
@@ -699,7 +697,26 @@ class PlotConfig{
 	}
 
 	// binds the plotconfig to all of the target tools within a particular div (the given element)
-	bindTo(element){
+	bindAll(element){
+		if(!(element instanceof $)){
+			alert('plotConfig bindings failed');
+			return;
+		}
+		// helper function for the rest of this
+		function finder(s){
+			let e = element.find('[target='+s+']');
+			return e;
+		}
+
+		this.fields['title'].bindTo(finder('title'));
+		this.fields['xlabel'].bindTo(finder('xlabel'));
+		this.fields['ylabel'].bindTo(finder('ylabel'));
+		this.fields['xmin'].bindTo(finder('xmin'));
+		this.fields['xmax'].bindTo(finder('xmax'));
+		this.fields['ymin'].bindTo(finder('ymin'));
+		this.fields['ymax'].bindTo(finder('ymax'));
+		this.fields['show_legend'].bindTo(finder('showlegend'));
+		this.fields['show_grid'].bindTo(finder('showgrid'));
 
 	}
 
@@ -1109,11 +1126,12 @@ class PlotHandler{
 
 	initialize(){
 		// insert plot configuration html
-		this.insertPlotConfigHtml();
+		// this.insertPlotConfigHtml();
+		this.plotConfig.bindAll($('#global_tools'));
 		// add event listeners for plot updates
 		this.addToolListeners();
 		// add event listeners to add & remove spectra and key commands
-		this.startAddRemove();
+		//this.startAddRemove();
 		this.startArrowShortcuts();
 
 		this.updatePlot();

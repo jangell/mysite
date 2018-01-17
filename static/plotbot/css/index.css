@@ -17,9 +17,6 @@ html{
 	display:flex;			display: -webkit-flex;
 	flex-direction:column;	-webkit-flex-direction: column;
 }
-.spec_list{
-	flex:1;
-}
 
 .tabs{
 	list-style: none;
@@ -88,6 +85,8 @@ html{
 	align-items:center;				-webkit-align-items: center;
 	width:100%;
 	margin:5px;
+	white-space: nowrap;
+	-webkit-white-space: nowrap;
 }
 .right{
 	float:right;
@@ -107,6 +106,47 @@ input[type=number]{
 .spec_name{
 	margin: 0 auto; /* 0 for top & bottom, auto for sides */
 	font-family:'Roboto', sans-serif;
+}
+
+.spec_list{
+	flex: 1;					-webkit-flex: 1;
+	background-color: #f0f0f0;
+	border: 1px solid #808080;
+	border-left:0;
+}
+.table_row{
+	width:100%;
+	display: flex;				-webkit-display: flex;
+	flex-direction: row;		-webkit-flex-direction: row;
+	flex-grow: 0;				-webkit-flex-grow: 0;
+	align-items:center;
+	border-collapse: collapse;
+	border-bottom: 1px solid #c0c0c0;
+}
+.table_row:not(.head_row):last-child{
+	border-bottom:0;
+}
+.head_row{
+	height:23px;
+	padding:3px;
+	border-bottom: 1px solid #a0a0a0;
+	background: #e0e0e0;
+}
+.text{
+	flex: 3;				-webkit-flex: 3;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	padding-right:10px;
+	width:100px;
+}
+.color{
+	flex:2;					-webkit-flex: 2;
+	width:50px;
+}
+.showing{
+	flex:1;					-webkit-flex: 1;
+	width:50px;
 }
 
 
@@ -168,9 +208,10 @@ input[type=number]{
 	border-collapse:collapse;
 }
 /* applied in javascript-based html generation */
-.tool{
+/*.tool{
 	border-bottom:1px solid #aaa;
 }
+*/
 .tool_label{
 	padding-left:20px;
 	font-weight:bold;
