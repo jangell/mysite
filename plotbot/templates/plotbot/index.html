@@ -65,7 +65,7 @@
 				</div>
 
 				<div class="tools_col">
-					
+
 					<div class="setting">
 						<label>Show Legend</label>
 						<input type=checkbox class="right" target="show_legend" checked>
@@ -78,7 +78,7 @@
 				</div>
 
 				<div class="tools_col">
-					
+					<!-- this column is for advanced settings -->
 					<div class="setting">
 						<label>Left Margin</label>
 						<input type=number class="right" target="left_margin" value=70>
@@ -102,12 +102,12 @@
 
 			<div class="toolset" id="spec_tools">
 				
-				<div id="spec_config_example" class="showing_config">
+				<div id="spec_config_example" class="spec_config showing_config">
 
 					<div class="tools_col">
-
+						<!-- this column is for general settings -->
 						<div class="setting">
-							<h4 class="spec_name" target="spec_name">No Spectrum Selected</h4>
+							<h4 class="col_title" target="spec_name">No Spectrum Selected</h4>
 						</div>
 						<div class="setting">
 							<label>Show</label>
@@ -116,6 +116,10 @@
 						<div class="setting">
 							<label>Label</label>
 							<input class="right" target="label" placeholder="no label">
+						</div>
+						<div class="setting">
+							<label>Line Width</label>
+							<input class="right" target="line_width" type=number min=0 value=2>
 						</div>
 						<div class="setting">
 							<label>Color</label>
@@ -128,8 +132,146 @@
 					</div>
 
 					<div class="tools_col">
+						<div class="preprocess_list">
+							<div class="preproc_selector" for="crop"><h4 class="preproc_name">Crop</h4></div>
+							<div class="preproc_selector" for="savgol"><h4 class="preproc_name">Savitzky-Golay Filter</h4></div>
+							<div class="preproc_selector" for="norm"><h4 class="preproc_name">Normalization</h4></div>
+							<dib class="preproc_selector" for="offset"><h4 class="preproc_name">Offset</h4></dib>
+						</div>
 					</div>
-					
+
+					<div class="tools_col">
+
+						<div class="preproc_settings" name="crop">
+							<div class="setting">
+								<div class="col_title">Crop</div>
+							</div>
+							<div class="setting">
+								<label>Run</label>
+								<input type=checkbox target="run">
+							</div>
+							<div class="setting">
+								<label>x<sub>min</sub></label>
+								<input type=number target="xmin" val=100>
+							</div>
+							<div class="setting">
+								<label>x<sub>max</sub></label>
+								<input type=number target="xmax" val=1200>
+							</div>
+						</div>
+
+						<div class="preproc_settings" name="savgol">
+							<div class="setting">
+								<div class="col_title">Savitzky-Golay Filter</div>
+							</div>
+							<div class="setting">
+								<label>Run</label>
+								<input type=checkbox target="run">
+							</div>
+							<div class="setting">
+								<label>Window Size</label>
+								<input type=number target="window" val=5 min=5 max=11 step=2>
+							</div>
+						</div>
+
+						<div class="preproc_settings" name="norm">
+							<div class="setting">
+								<div class="col_title">Normalization</div>
+							</div>
+							<div class="setting">
+								<label>Run</label>
+								<input type=checkbox target="run">
+							</div>
+							<div class="setting">
+								<label>Lower Limit</label>
+								<input type=number step=any target="lower">
+							</div>
+							<div class="setting">
+								<label>Upper Limit</label>
+								<input type=number step=any target="upper">
+							</div>
+						</div>
+
+						<div class="preproc_settings" name="offset">
+							<div class="setting">
+								<div class="col_title">Offset</div>
+							</div>
+							<div class="setting">
+								<label>Run</label>
+								<input type=checkbox target="run">
+							</div>
+							<div class="setting">
+								<label>Offset</label>
+								<input type=number val=1 step=any target="offset">
+							</div>
+						</div>
+
+						<!--
+						<div class="preprocesses">
+							<div class="preprocess" target="crop">
+								<h4 class="preproc_name collapser">Crop</h5>
+								<div class="collapsee">
+									<div class="setting">
+										<label>Run</label>
+										<input type=checkbox target="run">
+									</div>
+									<div class="setting">
+										<label>x<sub>min</sub></label>
+										<input type=number target="xmin" val=100>
+									</div>
+									<div class="setting">
+										<label>x<sub>max</sub></label>
+										<input type=number target="xmax" val=1200>
+									</div>
+								</div>
+							</div>
+							<div class="preprocess" target="savgol">
+								<h4 class="preproc_name collapser">Savitzky-Golay Filter</h4>
+								<div class="collapsee">
+									<div class="setting">
+										<label>Run</label>
+										<input type=checkbox target="run">
+									</div>
+									<div class="setting">
+										<label>Window</label>
+										<input type=number val=5 min=5 max=11 step=2 target="window">
+									</div>
+								</div>
+							</div>
+							<div class="preprocess" target="norm">
+								<h4 class="preproc_name collapser">Normalization</h4>
+								<div class="collapsee">
+									<div class="setting">
+										<label>Run</label>
+										<input type=checkbox target="run">
+									</div>
+									<div class="setting">
+										<label>Lower Bound</label>
+										<input type=number target="lower">
+									</div>
+									<div class="setting">
+										<label>Upper Bound</label>
+										<input type=number target="upper">
+									</div>
+								</div>
+							</div>
+							<div class="preprocess" target="offset">
+								<h4 class="preproc_name collapser">Offset</h4>
+								<div class="collapsee">
+									<div class="setting">
+										<label>Run</label>
+										<input type=checkbox target="run">
+									</div>
+									<div class="setting">
+										<label>Offset</label>
+										<input type=number step=any val=1 target="offset">
+									</div>
+								</div>
+							</div>
+						</div>
+						-->
+					</div>
+
 				</div>
 
 			</div>
@@ -161,18 +303,34 @@
 
 
 <script>
-$('.tab').click(function(){
-	// toggle tab css
-	$('.selected_tab').removeClass('selected_tab');
-	$(this).addClass('selected_tab');
-	
-	// turn on the right tab content
-	let target_id = '#' + $(this).attr('for');
-	$('.toolset').css({'display':'none'});
-	$(target_id).css({'display':'flex'});
+$(document).ready(function(){
+	// tab clicking functionality
+	$('.tab').click(function(){
+		// toggle tab css
+		$('.selected_tab').removeClass('selected_tab');
+		$(this).addClass('selected_tab');
+		
+		// turn on the right tab content
+		let target_id = '#' + $(this).attr('for');
+		$('.showing_toolset').removeClass('showing_toolset');
+		$(target_id).addClass('showing_toolset');
+	});
+	// start with default one
+	$('.default_tab').click();
+
+	// preproc clicking functionality
+	$('#spec_tools').on('click', '.preproc_selector', function(){
+		// toggle selector css
+		$('.selected_preproc').removeClass('selected_preproc');
+		$(this).addClass('selected_preproc');
+
+		// toggle settings css
+		let target_sel = '[name=' + $(this).attr('for') + ']';
+		// search through tree, because each specConfig (the other ones are hidden) has the same layout
+		$('.selected_preproc_settings').removeClass('selected_preproc_settings');
+		$(this).closest('.spec_config').find(target_sel).addClass('selected_preproc_settings');
+	});
 });
-// start with default one
-$('.default_tab').click();
 </script>
 
 

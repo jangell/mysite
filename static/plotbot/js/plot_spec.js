@@ -509,6 +509,7 @@ class SpecConfig{
 		finder('spec_name').html(this.spec_name);
 		this.fields['show'].bindTo(finder('show'));
 		this.fields['label'].bindTo(finder('label'));
+		this.fields['line_width'].bindTo(finder('line_width'));
 		this.fields['color'].bindTo(finder('color'));
 		this.fields['opacity'].bindTo(finder('opacity'));
 	}
@@ -534,44 +535,29 @@ class SpecConfig{
 
 	getData(){
 		//wavs = JSON.parse(JSON.stringify(this.spec_data[0])); // fastest way to deep copy counts (we're gonna preprocess it so we need our own copy)
-		/*for(var p in this.preprocesses){
+		for(var p in this.preprocesses){
 			// preprocess run function handles checking the run_process flag
-		//	data = this.preprocesses[p].runProcess(data);
-		}*/
+			//data = this.preprocesses[p].runProcess(data);
+		}
 		var cur_data = JSON.parse(JSON.stringify(this.spec_data));
-		/*
+		
 		for(var p in this.preprocesses){
 			cur_data = this.preprocesses[p].runProcess(cur_data);
 		}
-		*/
+		
 		return cur_data;
 	}
 
 	// generates a row with name and show/don't-show checkbox
 	generateSpecListHtml(){
-		let _this = this; // we map the class 'this' to '_this' so that we can reference it in the function below, where 'this' refers to the jquery object
-		// javascript is dumb. jquery is dumb. programming is stupid.
-
 		let row = $('<div>').addClass('table_row').attr('id',this.getRowId());
 		row.append($('<div>').addClass('text').html(this.spec_name));
 		row.append($('<div>').addClass('color').append($('<div>').addClass('color_patch').css({'background-color':'blue'})));
 		row.append($('<div>').addClass('showing').append($('<input>').attr('type','checkbox').attr('checked',true)));
 
-		/*
-		// add entry for spec name
-		row.append($('<td>').addClass('spec_row_name').html(this.spec_name));
-		// add entry for spec color
-		var color_box = $('<td>').addClass('color_box').addClass('spec_row_color');
-		row.append(color_box);
-		// add entry for showing box
-		var show_box = $('<input>').attr('type','checkbox').attr('checked',true).attr('disabled',true);
-		var to_add = $('<td>').addClass('spec_row_show').append(show_box);
-		row.append(to_add);
-		*/
-
 		// set css based on whether this is selected or not
-		if(this.selected){row.addClass('selected_row');}
-		else{row.addClass('unselected_row');}
+		//if(this.selected){row.addClass('selected_row');}
+		//else{row.addClass('unselected_row');}
 
 		// get the html id of the config table and the speclist row (we need them for the functions)
 		var configSel = this.getConfigSelector();

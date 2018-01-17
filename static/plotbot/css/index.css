@@ -20,6 +20,7 @@ html{
 
 .tabs{
 	list-style: none;
+	flex-shrink:0;					-webkit-flex-shrink:0;
 	padding:0;
 	margin:0;
 	display:flex;					display: -webkit-flex;
@@ -55,21 +56,28 @@ html{
 	cursor:default;
 	border-bottom-color:rgba(0,0,0,0);
 }
-
 .toolset_container{
 	border: 1px solid #808080;
 	border-top:0px;
-	flex:1;			-webkit-flex: 1;
+	flex:1;							-webkit-flex: 1;
+	display:flex;					-webkit-display: flex;
+	flex-direction:column;			-webkit-flex-direction: column;
+	margin:0;
 }
 .toolset{
-	height:100%;
-	width:100%;
+	flex:1;
 	display:flex;		display: -webkit-flex;
 	flex-direction:row;	-webkit-flex-direction: row;
-
-	padding:10px;
-
-	display:none;
+	/* this hides the toolset, which corresponds to a tab, until its tab is selected */
+	display:none;		-webkit-display: none;
+}
+.showing_toolset{
+	display: flex;		-webkit-display: flex;
+}
+.spec_config{
+	flex: 1;				-webkit-flex: 1;
+	display:flex;			-webkit-display: flex;
+	flex-direction: row;	-webkit-flex-direction: row;
 }
 .tools_col{
 	flex:1;				-webkit-flex: 1;
@@ -83,8 +91,7 @@ html{
 	align-items:center;				-webkit-align-items: center;
 	width:100%;
 	margin:5px;
-	white-space: nowrap;
-	-webkit-white-space: nowrap;
+	white-space: nowrap;			-webkit-white-space: nowrap;
 }
 .right{
 	float:right;
@@ -101,7 +108,7 @@ input[type=number]{
 	width:5em;
 }
 
-.spec_name{
+.col_title{
 	margin: 0 auto; /* 0 for top & bottom, auto for sides */
 	font-family: 'Roboto', sans-serif;
 }
@@ -177,7 +184,72 @@ input[type=number]{
 	display:none;
 }
 
+/* preprocessing */
+.preprocess_list{
+	height:100%;
+	min-width:80%;
+	margin:auto;
+	display: flex;					-webkit-display: flex;
+	flex-direction: column;			-webkit-flex-direction: column;
+	justify-content: space-around;	-webkit-justify-content: space-around;
+	align-items: center;			-webkit-align-items: center;
+}
+.preproc_selector{
+	width:100%;
+	border: 1px solid #c0c0c0;
+	border-radius:3px;
+	cursor: pointer;
+}
+.selected_preproc{
+	background: #fafafa;
+}
+.preproc_name{
+	margin: 0;
+	padding:5px;
+	text-align:center;
+	font-family: 'Roboto', sans-serif;
+}
+.preproc_settings{
+	display:none;
+}
+.selected_preproc_settings{
+	display:block;
+}
 
+/*	
+.preprocesses{
+
+}
+.preprocess{
+
+}
+
+.preproc_name{
+	font-family: 'Roboto', sans-serif;
+	text-align:center;
+	margin:0;
+	border-bottom: 1px solid #c0c0c0;
+}
+.preprocess:first-child .preproc_name{
+	border-top: 1px solid #c0c0c0;
+}
+.preproc_name:hover{
+}
+
+.collapser{
+	cursor:pointer;
+}
+.collapser:hover{
+	background-color:#e0e0e0;
+}
+.running_preproc{
+	font-style:bold;
+	background-color:#d8d8ff;
+}
+.running_preproc:hover{
+	background-color:#d0d0f8;
+}
+*/
 
 
 
@@ -298,6 +370,7 @@ input[type=number]{
 /* preprocessing */
 
 /* the div containing a single preprocess */
+/*
 .single_preproc{
 	width: 95%;
 	margin: 5px auto;
@@ -306,17 +379,9 @@ input[type=number]{
 	border-radius: 5px;
 	overflow:hidden;
 }
+*/
 
 /* title of that div */
-.preproc_name{
-	font-weight:bold;
-	text-align:center;
-	margin:0;
-	border-bottom:1px solid #ccc;
-}
-.preproc_name:hover{
-	background-color:#eaeaea;
-}
 .table_expanded{
 }
 
