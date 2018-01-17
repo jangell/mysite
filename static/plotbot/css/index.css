@@ -13,7 +13,7 @@ html{
 .toolbar{
 	background: #f0f0f0;
 	width:100%;
-	flex:2;
+	flex:2;					-webkit-flex:2;
 	display:flex;			display: -webkit-flex;
 	flex-direction:column;	-webkit-flex-direction: column;
 }
@@ -60,12 +60,10 @@ html{
 	border: 1px solid #808080;
 	border-top:0px;
 	flex:1;			-webkit-flex: 1;
-
 }
 .toolset{
 	height:100%;
 	width:100%;
-
 	display:flex;		display: -webkit-flex;
 	flex-direction:row;	-webkit-flex-direction: row;
 
@@ -74,7 +72,7 @@ html{
 	display:none;
 }
 .tools_col{
-	flex:1;
+	flex:1;				-webkit-flex: 1;
 	padding:10px;
 }
 
@@ -105,7 +103,7 @@ input[type=number]{
 
 .spec_name{
 	margin: 0 auto; /* 0 for top & bottom, auto for sides */
-	font-family:'Roboto', sans-serif;
+	font-family: 'Roboto', sans-serif;
 }
 
 .spec_list{
@@ -113,7 +111,9 @@ input[type=number]{
 	background-color: #f0f0f0;
 	border: 1px solid #808080;
 	border-left:0;
+	font-family: 'Roboto', sans-serif;
 }
+
 .table_row{
 	width:100%;
 	display: flex;				-webkit-display: flex;
@@ -132,21 +132,49 @@ input[type=number]{
 	border-bottom: 1px solid #a0a0a0;
 	background: #e0e0e0;
 }
+
+.unselected_row{
+	transition: background-color .2s ease
+}
+.unselected_row:hover{
+	cursor:pointer;
+	background-color:rgba(128,128,128,.15);
+}
+.selected_row{
+	background-color:rgba(128,128,128,.3);
+}
+
 .text{
 	flex: 3;				-webkit-flex: 3;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	padding-right:10px;
+	padding-left: 10px;
 	width:100px;
 }
 .color{
 	flex:2;					-webkit-flex: 2;
+}
+.color_patch{
+	height:1rem;
+	border:1px solid #a0a0a0;
+	margin:1px;
+}
+.color_patch{
 	width:50px;
 }
 .showing{
 	flex:1;					-webkit-flex: 1;
 	width:50px;
+	margin-right:10px;
+}
+
+.showing_config{
+	display:flex;
+}
+.hidden_config{
+	display:none;
 }
 
 
@@ -312,23 +340,9 @@ input[type=number]{
 
 
 /* selected vs unselected row actions */
-.unselected_row{
-	transition: background-color .2s ease
-}
-.unselected_row:hover{
-	cursor:pointer;
-	background-color:rgba(137,209,255,.3);
-}
-.selected_row{
-	background-color:#9ad7ff;
-	font-weight:bold;
-}
+
 
 /* spec configs that are showing or hidden (only shows 1 at a time, in the same space) */
-.showing_config{}
-.hidden_config{
-	display:none;
-}
 
 .spec_button{
 	flex:1;

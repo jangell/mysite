@@ -72,11 +72,7 @@ class Field{
 		}
 		return false;
 	}
-	
-	//
-	updateValue(){
-		alert('value of '+this.label+'is '+self.getValue());
-	}
+
 
 	// generates html to represent this field as a table row
 	toTableRow(){
@@ -467,8 +463,8 @@ class VertLine{
 		return {
 			x: data[0],
 			y: data[1],
-			name: this.valueOf('legend_name'),
-			showlegend: !(this.valueOf('legend_name') == ''), // only show in legend if field isn't blank
+			name: this.valueOf('label'),
+			showlegend: !(this.valueOf('label') == ''), // only show in legend if field isn't blank
 			line: {
 				color: this.getColor(), // color and opacity (convert to rgba)
 				width: this.valueOf('line_width'), // line width in pixels
@@ -487,11 +483,34 @@ class SpecConfig{
 		this.preprocesses = preprocs;
 		this.selected = false; // keep track of which is currently showing (and highlighted)
 		this.fields = {};
+
 		this.fields['show'] = new Field('spec'+this.spec_id+'_show', 'Show', 'checkbox', {'checked':true, 'title':'Show / hide this spectrum in the plot'});
-		this.fields['legend_name'] = new Field('spec'+this.spec_id+'_legend_name', 'Legend label', 'text',{'value':this.spec_name,'placeholder':'No label', 'title':'Text label shown for this spectrum in the legend'});
+		this.fields['label'] = new Field('spec'+this.spec_id+'_legend_name', 'Legend label', 'text',{'value':this.spec_name,'placeholder':'No label', 'title':'Text label shown for this spectrum in the legend'});
 		this.fields['line_width'] = new Field('spec'+this.spec_id+'_line_width', 'Line width (px)', 'number', {'value':2, 'title':'Width of line in pixels'});
 		this.fields['color'] = new Field('spec'+this.spec_id+'_color', 'Color', 'color', {'value':randomColor(), 'title':'Line color'});
 		this.fields['opacity'] = new Field('spec'+this.spec_id+'_opacity', 'Opacity', 'number', {'value':1, 'title':'Line opacity (transparency)'});
+
+		this.target_element = $('#spec_tools');
+		this.template_element = $('#spec_config_example');
+
+	}
+
+	bindAll(element){
+		if(!(element instanceof $)){
+			alert('plotConfig bindings failed');
+			return;
+		}
+		// helper function for the rest of this
+		function finder(s){
+			let e = element.find('[target='+s+']');
+			return e;
+		}
+
+		finder('spec_name').html(this.spec_name);
+		this.fields['show'].bindTo(finder('show'));
+		this.fields['label'].bindTo(finder('label'));
+		this.fields['color'].bindTo(finder('color'));
+		this.fields['opacity'].bindTo(finder('opacity'));
 	}
 
 	valueOf(field){
@@ -520,19 +539,25 @@ class SpecConfig{
 		//	data = this.preprocesses[p].runProcess(data);
 		}*/
 		var cur_data = JSON.parse(JSON.stringify(this.spec_data));
+		/*
 		for(var p in this.preprocesses){
 			cur_data = this.preprocesses[p].runProcess(cur_data);
 		}
+		*/
 		return cur_data;
 	}
 
 	// generates a row with name and show/don't-show checkbox
 	generateSpecListHtml(){
-		var _this = this; // we map the class 'this' to '_this' so that we can reference it in the function below, where 'this' refers to the jquery object
+		let _this = this; // we map the class 'this' to '_this' so that we can reference it in the function below, where 'this' refers to the jquery object
 		// javascript is dumb. jquery is dumb. programming is stupid.
 
-		// create the actual row
-		var row = $('<tr>').addClass('spec_table_row').attr('id',this.getRowId());
+		let row = $('<div>').addClass('table_row').attr('id',this.getRowId());
+		row.append($('<div>').addClass('text').html(this.spec_name));
+		row.append($('<div>').addClass('color').append($('<div>').addClass('color_patch').css({'background-color':'blue'})));
+		row.append($('<div>').addClass('showing').append($('<input>').attr('type','checkbox').attr('checked',true)));
+
+		/*
 		// add entry for spec name
 		row.append($('<td>').addClass('spec_row_name').html(this.spec_name));
 		// add entry for spec color
@@ -542,27 +567,26 @@ class SpecConfig{
 		var show_box = $('<input>').attr('type','checkbox').attr('checked',true).attr('disabled',true);
 		var to_add = $('<td>').addClass('spec_row_show').append(show_box);
 		row.append(to_add);
+		*/
 
 		// set css based on whether this is selected or not
 		if(this.selected){row.addClass('selected_row');}
 		else{row.addClass('unselected_row');}
 
 		// get the html id of the config table and the speclist row (we need them for the functions)
-		var configId = this.getConfigSelector();
-		var rowId = this.getRowSelector();
+		var configSel = this.getConfigSelector();
+		var rowSel = this.getRowSelector();
 
 		// function for when this spec is clicked on in the list
 		row.on('click',function(){
-			// hide all
-			$('.showing_config').hide();
+			// hide showing config(s)
 			$('.showing_config').removeClass('showing_config').addClass('hidden_config');
 			// show the one that was clicked
-			$(configId).show();
-			$(configId).removeClass('hidden_config').addClass('showing_config');
+			$(configSel).removeClass('hidden_config').addClass('showing_config');
 			// unselect all rows
 			$('.selected_row').removeClass('selected_row').addClass('unselected_row');
 			// select this one
-			$(rowId).removeClass('unselected_row').addClass('selected_row');
+			$(rowSel).removeClass('unselected_row').addClass('selected_row');
 		});
 
 		return row;
@@ -582,30 +606,29 @@ class SpecConfig{
 	// update the background color of the spec list based on the color & opacity of the 
 	updateColor(){
 		var _this = this;
-		var rowId = this.getRowSelector();
-		$(rowId).find('.color_box').css('background-color',_this.getColor());
+		var rowSel = this.getRowSelector();
+		$(rowSel).find('.color_patch').css('background-color',_this.getColor());
 	}
 
 	// generates an html table for spec configuration
 	generateSpecConfigHtml(){
 		var _this = this; // see complaint in generateSpecListHtml()
 		// get the html id of the config table and the speclist row (we need them for the functions)
-		var configId = this.getConfigSelector();
-		var rowId = this.getRowSelector();
+		var configSel = this.getConfigSelector();
+		var rowSel = this.getRowSelector();
 
+		// div for spec tools
+		var el = this.template_element.clone().removeClass('spec_config_example').attr('id',this.getConfigId());
 
-		// this is the table where all the spec tools go
-		var table = $('<table>').addClass('tools_table');
-
-		// add all the fields
-		for(var field in this.fields){
-			table.append(this.fields[field].toTableRow(self.spec_id));
-		}
+		// append el to the spec_tools (and hide all others and show this)
+		this.target_element.append(el);
+		// bind all of the fields for this specconfig to the fields in el
+		this.bindAll(el);
 
 		// function to update the 'show' checkbox in spec list based on a change in the one in the spec config table
-		this.fields['show'].element.change(function(){
+		el.change(function(){
 			var checked = _this.valueOf('show');
-			$(rowId).find('input').attr('checked',checked);
+			$(rowSel).find('input').attr('checked',checked);
 		});
 		
 		// function to update the 'color' box in spec list based on a change to color or opacity in spec config
@@ -615,10 +638,11 @@ class SpecConfig{
 		this.fields['opacity'].element.change(function(){
 			_this.updateColor();
 		});
-		// go get the color of this spec and set the color well to it to start out correctly
-		_this.updateColor();
+		// set random color
+		this.fields['color'].setValue(randomColor());
+		this.updateColor();
 
-
+		/*
 		// all of the preprocessing divs will go in this
 		var preproc = $('<div>').addClass('spec_config_preprocs');
 
@@ -631,17 +655,17 @@ class SpecConfig{
 		var container = $('<div>').addClass('tools').attr('id',this.getConfigId());
 		container.append(table);
 		container.append(preproc);
-
+		*/
 
 		// show or hide to start (based, ultimately, whether or not there's one showing already, but here it's just based on a flag)
 		if(this.selected){
-			container.addClass('showing_config');
+			el.addClass('showing_config');
 		}
 		else{
-			container.addClass('hidden_config');
+			el.addClass('hidden_config');
 		}
 
-		return container;
+		return el;
 
 	}
 
@@ -653,8 +677,8 @@ class SpecConfig{
 		return {
 			x: data[0],
 			y: data[1],
-			name: this.valueOf('legend_name'),
-			showlegend: !(this.valueOf('legend_name') == ''), // only show in legend if field isn't blank
+			name: this.valueOf('label'),
+			showlegend: !(this.valueOf('label') == ''), // only show in legend if field isn't blank
 			line: {
 				color: this.getColor(), // color and opacity (convert to rgba)
 				width: this.valueOf('line_width'), // line width in pixels
@@ -741,7 +765,7 @@ class PlotConfig{
 class PlotHandler{
 	constructor(plot_config_target, spec_list_target, spec_config_target, plot_target, preprocesses){
 		this.plot_config_target = plot_config_target;
-		this.spec_list_target = spec_list_target;
+		this.spec_list_target = $('#spec_list');
 		this.spec_config_target = spec_config_target;
 		this.plot_target = plot_target;
 

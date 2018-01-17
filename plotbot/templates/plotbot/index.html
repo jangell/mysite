@@ -23,8 +23,9 @@
 <div class="all_tools">
 	<div class="toolbar">
 		<ul class="tabs">
-			<li class="tab default_tab" for="global_tools" id="global_tab">Plot Settings</li>
-			<li class="tab" for="spec_tools" id="spec_tab">Spec Settings</li>
+			<li class="tab" for="global_tools" id="global_tab">Plot Settings</li>
+			<li class="tab default_tab" for="spec_tools" id="spec_tab">Spec Settings</li>
+			<li class="tab" for="add_tools" id="add_tab">Add Spec</li>
 			<li class="tab" for="anno_tools" id="anno_tab">Annotations</li>
 		</ul>
 		
@@ -35,30 +36,30 @@
 				<div class="tools_col">
 					<div class="setting">
 						<label>Title</label>
-						<input class="right" target="title" placeholder="No title">
+						<input class="right" target="title" placeholder="no title">
 					</div>
 					<div class="setting">
 						<label>X Label</label>
-						<input class="right" target="xlabel" value="Wavenumber (cm<sup>-1</sup>)">
+						<input class="right" target="xlabel" value="Wavenumber (cm<sup>-1</sup>)" placeholder="no x label">
 					</div>
 					<div class="setting">
 						<label>Y Label</label>
-						<input class="right" target="ylabel" value="Intensity">
+						<input class="right" target="ylabel" value="Intensity" placeholder="no y label">
 					</div>
 					<div class="setting">
 						<label>X Range</label>
 						<div class="right" id="x_range">
-							<input target="xmin" type=number step=any>
+							<input target="xmin" type=number step=any placeholder="auto">
 							<span>-</span>
-							<input target="xmax" type=number step=any>
+							<input target="xmax" type=number step=any placeholder="auto">
 						</div>
 					</div>
 					<div class="setting">
 						<label>Y Range</label>
 						<div class="right" id="y_range">
-							<input target="ymin" type=number step=any>
+							<input target="ymin" type=number step=any placeholder="auto">
 							<span>-</span>
-							<input target="ymax" type=number step=any>
+							<input target="ymax" type=number step=any placeholder="auto">
 						</div>
 					</div>
 				</div>
@@ -67,61 +68,84 @@
 					
 					<div class="setting">
 						<label>Show Legend</label>
-						<input type=checkbox class="right" target="showlegend" checked>
+						<input type=checkbox class="right" target="show_legend" checked>
 					</div>
 					<div class="setting">
 						<label>Show Grid</label>
-						<input type=checkbox class="right" target="showgrid" checked>
+						<input type=checkbox class="right" target="show_grid" checked>
 					</div>
 
 				</div>
 
 				<div class="tools_col">
 					
+					<div class="setting">
+						<label>Left Margin</label>
+						<input type=number class="right" target="left_margin" value=70>
+					</div>
+					<div class="setting">
+						<label>Right Margin</label>
+						<input type=number class="right" target="right_margin" value=40>
+					</div>
+					<div class="setting">
+						<label>Top Margin</label>
+						<input type=number class="right" target="top_margin" value=60>
+					</div>
+					<div class="setting">
+						<label>Bottom Margin</label>
+						<input type=number class="right" target="bottom_margin" value=80>
+					</div>
+
 				</div>
 
 			</div>
 
 			<div class="toolset" id="spec_tools">
-
-				<div class="tools_col">
-
-					<div class="setting">
-						<h4 class="spec_name" target="spec_name">No Spectrum Selected</h4>
-					</div>
-					<div class="setting">
-						<label>Show</label>
-						<input type=checkbox class="right" target="show" checked>
-					</div>
-					<div class="setting">
-						<label>Label</label>
-						<input class="right" target="label">
-					</div>
-					<div class="setting">
-						<label>Color</label>
-						<input type=color class="right" target="color">
-					</div>
-					<div class="setting">
-						<label>Opacity</label>
-						<input type=number class="right" min=0 max=1. step=any target="opacity">
-					</div>
-				</div>
-
-				<div class="tools_col">
-				</div>
 				
-				<div class="tools_col">
+				<div id="spec_config_example" class="showing_config">
+
+					<div class="tools_col">
+
+						<div class="setting">
+							<h4 class="spec_name" target="spec_name">No Spectrum Selected</h4>
+						</div>
+						<div class="setting">
+							<label>Show</label>
+							<input type=checkbox class="right" target="show" checked>
+						</div>
+						<div class="setting">
+							<label>Label</label>
+							<input class="right" target="label" placeholder="no label">
+						</div>
+						<div class="setting">
+							<label>Color</label>
+							<input type=color class="right" target="color">
+						</div>
+						<div class="setting">
+							<label>Opacity</label>
+							<input type=number class="right" min=0 max=1 value=1 step=any target="opacity">
+						</div>
+					</div>
+
+					<div class="tools_col">
+					</div>
+					
 				</div>
+
+			</div>
+
+			<div class="toolset" id="add_tools">
 
 			</div>
 
 			<div class="toolset" id="anno_tools">
 
 			</div>
+
 		</div>
 	</div>
 
-	<div class="spec_list">
+	<div class="spec_list" id="spec_list">
 		<div class="table_row head_row">
 			<div class="text">Name</div>
 			<div class="color">Color</div>
