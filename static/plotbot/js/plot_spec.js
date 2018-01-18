@@ -328,7 +328,6 @@ SavGol = function(){
 					to_push += set[i] * my_coeffs[i] * norm_fact;
 				}
 				smooth_counts.push(to_push);
-				console.log(Math.abs(to_push - counts[cur_ind]))
 				cur_ind += 1;
 			}
 

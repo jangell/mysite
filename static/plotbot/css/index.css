@@ -217,6 +217,12 @@ input[type=number]{
 	display:block;
 }
 
+.running_preproc{
+	font-style:italic;
+}
+.running_preproc:hover{
+}
+
 /*	
 .preprocesses{
 
@@ -390,13 +396,6 @@ input[type=number]{
 	cursor:pointer;
 }
 .collapser:hover{
-}
-.running_preproc{
-	font-style:bold;
-	background-color:#d8d8ff;
-}
-.running_preproc:hover{
-	background-color:#d0d0f8;
 }
 
 /* preprocess args table */

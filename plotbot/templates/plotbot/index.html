@@ -239,6 +239,7 @@
 
 <script>
 $(document).ready(function(){
+
 	// tab clicking functionality
 	$('.tab').click(function(){
 		// toggle tab css
@@ -250,10 +251,13 @@ $(document).ready(function(){
 		$('.showing_toolset').removeClass('showing_toolset');
 		$(target_id).addClass('showing_toolset');
 	});
-	// start with default one
+	// start with default tab
 	$('.default_tab').click();
 
+
+
 	// preproc clicking functionality
+	// this syntax is to apply the function before the .preproc_selector has been inserted into the page
 	$('#spec_tools').on('click', '.preproc_selector', function(){
 		// toggle selector css
 		$('.selected_preproc').removeClass('selected_preproc');
@@ -265,6 +269,37 @@ $(document).ready(function(){
 		$('.selected_preproc_settings').removeClass('selected_preproc_settings');
 		$(this).closest('.spec_config').find(target_sel).addClass('selected_preproc_settings');
 	});
+
+
+	// set running / not running preprocess css
+	$('#spec_tools').on('change', '[target=run]', function(){
+		let running = this.checked;
+		let preproc_name = $(this).closest('.preproc_settings').attr('name');
+		// bubble up until we find the specConfig tools
+		let preproc_selector = $(this).closest('.spec_config').find('[for=' + preproc_name + ']');
+		if(running){
+			preproc_selector.addClass('running_preproc');
+		}
+		else{
+			preproc_selector.removeClass('running_preproc');
+		}
+		// update that preprocess's css based on new value of [target=run]
+	});
+
+
+	// connect show checkboxes in list and in specConfig
+	// commenting this out and disabling the checkbox in the list because they get out of sync
+	/*
+	$('#spec_list').on('change', '.showing input[type=checkbox]', function(){
+		// find the spec id
+		let row_id = $(this).closest('.table_row').attr('id');
+		let config_id = '#specconfig_' + row_id.split('speclist_')[1];
+		let box = $(config_id).find('[target=show]');
+		box.attr('checked', this.checked);
+		box.change(); // without this, the event doesn't fire
+	});
+	*/
+
 });
 </script>
 
