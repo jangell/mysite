@@ -105,16 +105,34 @@ class Field{
 // processor: a function that takes in an array ([wavs,counts]) and returns an array of the same dimensions
 
 // I've gotta switch from the class declarations I've been using to a function- / prototype-based approach because I can't figure out how to do it the other way
-Preprocess = function(name, fields, processor, debug){
+Preprocess = function(name, el_name, fields, bindings, processor){
 	// make sure fields is an object and processor is a function
 	if(typeof fields !== 'object' || typeof processor !== 'function'){throw 'Preprocesses must be instantiated with name (string), args (dictionary), and processor (function)';}
 	this.name = name;
+	this.el_name = el_name;
 	this.fields = fields;
+	this.fields['run'] = new Field();
+	this.bindings = bindings; // binding function
 	this.processor = processor;
-	this.run_field = new Field('run_'+this.name, 'Run '+this.name, 'checkbox', {'checked':false, 'title':'Determines whether the selected spectrum uses or bypasses this preprocessing method'});
-	
-	this.debug = debug === undefined ? false : debug;
 }
+// binds all of this preprocess's bindings to the [target=<bindings[i]>] elements within <target>
+// reminder: bindings are dictionaries, where the field name is the key and the element target is the value
+Preprocess.prototype.bindAll = function(target){
+	var el = target.find('[name=' + this.el_name + ']');
+	for(let b in this.bindings){
+		this.fields[b].bindTo(el.find('[target='+this.bindings[b]+']'))
+	}
+}
+// the actual algorithm that preprocesses <data>, the spectral data
+Preprocess.prototype.runProcess = function(data){
+	// only run if the run_me flag is true
+	if(this.fields['run'].getValue() || this.debug){
+		return this.processor(data);
+	}
+	// otherwise, don't do anything and just return the data
+	return data;
+}
+/*
 Preprocess.prototype.generatePreprocessHtml = function(){
 	var _this = this;
 
@@ -165,14 +183,7 @@ Preprocess.prototype.generatePreprocessHtml = function(){
 	// TODO: add a handler to style running and not running differently and to update the values in the object when things change in the html
 	return container;
 }
-Preprocess.prototype.runProcess = function(data){
-	// only run if the run_me flag is true
-	if(this.run_field.getValue() || this.debug){
-		return this.processor(data);
-	}
-	// otherwise, don't do anything and just return the data
-	return data;
-}
+*/
 
 // these are the actually preprocesses
 
@@ -181,10 +192,18 @@ Normalization = function(){
 	that = new Preprocess(
 		// name
 		'Normalization',
-		// fields
-		{
-			'lower': new Field('lower_limit', 'Lower limit', 'number', {'value':0, 'title':'Minimum value of the processed spectrum'}),
-			'upper': new Field('upper_limit', 'Upper limit', 'number', {'value':1, 'title':'Maximum value of the processed spectrum'}),
+		// element name
+		'norm',
+		// fields (run gets added automatically)
+		{	
+			'lower': new Field(),
+			'upper': new Field(),
+		},
+		// bindings
+		{	
+			'run': 'run',
+			'lower': 'lower',
+			'upper': 'upper',
 		},
 		// processor
 		function(data){
@@ -219,9 +238,16 @@ MovingAverage = function(){
 	that = new Preprocess(
 		//name
 		'Moving Average Filter',
+		// element name
+		'mov_avg',
 		// fields
 		{
 			'window': new Field('window', 'Window size', 'number', {'value':5, 'step':2, 'min':3, 'placeholder':'odd only', 'title':'Width of the window to take the moving average. Each point is replaced by the average of itself and the surrounding points, and the total number of points used is this value. So for a window value of 5, each point becomes the average of itself, the two preceeding values, and the two following values. At the ends, when there are not enough points on one side, the average takes only the existing points. For example, the first point is replaced with an average of itself and the (({window size} - 1) / 2) points that follow.'}),
+		},
+		// bindings
+		{
+			'run':'run',
+			'window':'window',
 		},
 		// algorithm
 		function(data){
@@ -248,10 +274,17 @@ SavGol = function(){
 	that = new Preprocess(
 		// name
 		'Savitzky-Golay Filter',
+		// element name
+		'savgol',
 		// fields
 		{
-			'window': new Field('sg_window', 'Window size (5-11 only)', 'number', {'value':5, 'step':2, 'min':5, 'max':11,	 'title':'Sav-gol window (must be between 5 and 11)'})
+			'window': new Field()
 			// 'order': new Field('sg_order', 'Order', 'number', {'value':3, 'step':1, 'min':0, 'title':'Order of polynomial for sav-gol filter'});
+		},
+		// bindings
+		{
+			'run': 'run',
+			'window': 'window',
 		},
 		function(data){
 			// coefficients taken from here: http://www.statistics4u.info/fundstat_eng/cc_savgol_coeff.html
@@ -318,9 +351,16 @@ BaselineRemoval = function(){
 	that = new Preprocess(
 		//name
 		'Baseline Removal',
+		// element name
+		'br',
 		// field(s)
 		{
 			'window': new Field('window', 'Window size', 'number', {'value':5, 'step':2, 'min':3, 'title':'Size of baseline removal window'}),
+		},
+		// bindings
+		{
+			'run': 'run',
+			'window': 'window',
 		},
 		// algorithm
 		function(data){
@@ -352,8 +392,6 @@ BaselineRemoval = function(){
 			return data;
 			*/
 		},
-		// debug flag - DEVELOPMENT ONLY
-		true
 	);
 	return that;
 }
@@ -362,10 +400,18 @@ Crop = function(){
 	that = new Preprocess(
 		// name
 		'Crop',
+		// element name
+		'crop',
 		// field(s)
 		{
 			'cropMin': new Field('cropMin', 'Minimum wavenumber', 'number', {'value':0, 'step':'any', 'title':'Lowest wavenumber to include in plot'}),
 			'cropMax': new Field('cropMax', 'Maximum wavenumber', 'number', {'value':1200, 'step':'any', 'title':'Highest wavenumber to include in plot'}),
+		},
+		// bindings
+		{
+			'run': 'run',
+			'cropMin': 'xmin',
+			'cropMax': 'xmax',
 		},
 		// algorithm
 		function(data){
@@ -402,9 +448,16 @@ Offset = function(){
 	that = new Preprocess(
 		// name
 		'Offset',
+		// element name
+		'offset',
 		// field
 		{
 			'offset': new Field('offset', 'Offset', 'number', {'value':0.1, 'title':'Value by which to offset'}),
+		},
+		// bindings
+		{
+			'run': 'run',
+			'offset': 'offset',
 		},
 		function(data){
 			var wavs = data[0];
@@ -512,6 +565,13 @@ class SpecConfig{
 		this.fields['line_width'].bindTo(finder('line_width'));
 		this.fields['color'].bindTo(finder('color'));
 		this.fields['opacity'].bindTo(finder('opacity'));
+
+		// delegate preprocess binding to each preprocess
+		for(let p in this.preprocesses){
+			this.preprocesses[p].bindAll(element);
+		}
+
+		return true;
 	}
 
 	valueOf(field){
