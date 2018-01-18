@@ -304,124 +304,6 @@ $(document).ready(function(){
 </script>
 
 
-<!-- modal -->
-<!--
-<div class="modal_bg">
-	<script>
-	// hide modal on page load (not the long-term solution) (actually, for now, it is)
-	$('.modal_bg').hide();
-	</script>
-	<div class="modal">
-		<h2 class="modal_title">Add Spectrum</h2>
-		<div class="modal_content">
-			<div class="tabs">
-				<div class="tab selected_tab" id="csv_tab">
-					<h3 class="modal_subtitle" title="Use for files on your computer">Upload from CSV</h3>
-				</div>
-				<div class="tab" id="db_tab">
-					<h3 class="modal_subtitle" title="Use to add mineral spectra from the database">Add from database</h3>
-				</div>
-				<button id="cancel_modal" title="Return to plotting window">Cancel</button>
-			</div>
-			<div class="modal_option" id="modal_csv">
-				<form id="modal_form">
-					<input name=file type=file accept=".csv" id="spec_upload_file">
-					<hr>
-					<table>
-						<tr>
-							<td>Name</td>
-							<td><input id="modal_spec_name" name=name></td>
-						</tr>
-					</table>
-					<hr>
-					<input type=submit value="Upload">
-				</form>
-			</div>
-			<div class="modal_option" id="modal_db">
-				<div class="db_filters">
-					<div class="filter wv_filter">
-						<label for="wv_select" title="Only show spectra with selected wavelength">Filter by wavelength</label>
-						<select id="wv_select">
-							<option value="all">All</option>
-							{% for wv in wavelengths %}
-							<option value="{{wv.wavelength}}nm">{{wv.wavelength}}nm</option>
-							{% endfor %}
-						</select>
-					</div>
-					<div class="filter name_filter">
-						<label for="name_select" title="Show minerals whose name contains the search string">Filter by name</label>
-						<input id="name_select">
-					</div>
-				</div>
-				<div class="db_table_holder">
-					<div id="filter_loading">
-						<img src="{% static 'plotbot/img/loading.gif' %}">
-					</div>
-					<table class="database_table">
-						<thead id="modal_db_thead">
-							<tr class="modal_db_headrow">
-								<th class="modal_db_id" title="ID number">ID</th>
-								<th class="modal_db_name" title="Mineral name">Name</th>
-								<th class="modal_db_source" title="Source of data">Source</th>
-								<th class="modal_db_wv" title="Excitation wavelength (nm)">Wavelength</th>
-							</tr>
-						</thead>
-						<tbody id="modal_db_tbody">
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
-<form id="plot_form">
-	<div class="all_tools">
-		<div class="toolset" id="global_tools">
-			<h2 class="toolset_title" title="Settings that affect the plot as a whole">Global Tools</h2>
-			
-			<div id="pc_target" class="toolset_content">
-
-			</div>
-
-		</div>
-		<div class="toolset" id="spectra_tools">
-			<h2 class="toolset_title" title="Settings that affect only the selected spectrum">Spectra Tools</h2>
-			<div class="toolset_content">
-				<div class="spec_table_holder">
-					<table class="spec_table">
-						<thead class="spec_table_head">
-							<tr>
-								<th class="spec_row_name" title="Name of spectrum">Name</th>
-								<th class="spec_row_color" title="Color of plotted line">Color</th>
-								<th class="spec_row_show" title="Whether spectrum is shown in plot">Showing</th>
-							</tr>
-						</thead>
-
-						<tbody class="spec_table_body" id="sl_target">
-						</tbody>
-
-					</table>
-				</div>
-
-				<div id="sc_target">
-
-				</div>
-
-			</div>
-
-		</div>
-		
-		<div class="toolset" id="annotations">
-			<h2 class="toolset_title">Annotations</h2>
-			<div class="toolset_content" id="annotations_target">
-
-			</div>
-		</div>
-	</div>
-</form>
--->
-
 <script>
 
 var qz = 2481;	// quartz
@@ -430,11 +312,6 @@ var startWith = []; // list of specIds to autopopulate chart
 startWith.push(qz);
 startWith.push(al);
 
-/* new plot page actions:
-	- generate plot config html and insert into correct point in page
-	- generate spec list html and insert into correct point in page
-	- generate any spec config html and insert into correct point (hide all but one)
-*/
 
 var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plot_holder'));
 ph.initialize();
@@ -443,133 +320,6 @@ ph.initialize();
 $(document).on("wheel", "input[type=number]", function (e) {
     $(this).blur();
 });
-
-
-// modal window
-
-/*
-// make the 'cancel' button in modal close the modal
-$('#cancel_modal').click(function(){
-	clearModal();
-	$('.modal_bg').hide();
-});
-
-// set the default name to the file name when one is selected
-$('#spec_upload_file').change(function(){
-	var filename = $('#spec_upload_file').val().split('\\').reverse()[0];
-	var specname = filename.slice(0,-4);
-	$('#modal_spec_name').attr('value',specname);
-});
-
-// clear data from modal
-function clearModal(){
-	var modal = $('.modal');
-	modal.find('#modal_spec_name').val('');
-	modal.find('#spec_upload_file').val('');
-}
-
-// handle modal form submission
-// parse csv, including checking that the domain is in output[0] and ordered low to high
-$('#modal_form').submit(function(event){
-	event.preventDefault(); // don't reload the page on form submit
-	// parse the data in a filereader (it's async and it's reeeeal ugly)
-	var wavs, counts;
-	var lista = [];
-	var listb = [];
-	var reader = new FileReader;
-	reader.onload = function(){
-		// parse into lists
-		var data = reader.result.split(/\r|\n/); // this regex is to make sure we don't run into the windows vs mac newline issue
-		for(var i = 0; i < data.length; i++){
-			try{
-				var points = data[i].split(',');
-				var to_a = parseFloat(points[0]);
-				var to_b = parseFloat(points[1]);
-				if(to_a && to_b){
-					lista.push(to_a);
-					listb.push(to_b);
-				}
-			}
-			catch(err){
-				console.log(err);
-				console.log('skipped line: '+data[i]);
-			}
-		}
-		// find the one that's going up or down by a consistent amount (assume it's the one where the point in the middle is closest to halfway between the start and end values. there's a very small chance this is wrong. TODO: fix this issue)
-		// span is the difference between the first and last values
-		var lista_span = lista[lista.length - 1] - lista[0]
-		var listb_span = listb[listb.length - 1] - listb[0]
-		// mid is the value in the middle
-		var lista_mid = lista[lista.length / 2]
-		var listb_mid = listb[listb.length / 2]
-		// gap is the difference between the mid and half the span
-		var lista_gap = Math.abs(lista_mid - (lista[0] + (lista_span/2)));
-		var listb_gap = Math.abs(listb_mid - (listb[0] + (listb_span/2)));
-		// the smaller gap is the wavenumbers
-		if(lista_gap < listb_gap){
-			wavs = lista;
-			counts = listb;
-		}
-		else{
-			wavs = listb;
-			counts = lista;
-		}
-		// check if wavs (and therefore both) need reversing
-		if(wavs[1] < wavs[0]){
-			wavs.reverse();
-			counts.reverse();
-		}
-		data = [wavs,counts];
-		// get name input and then send it to the plothandler
-
-		var specname = $('#modal_spec_name').val();
-		ph.addSpec(specname, data);
-		clearModal();
-		$('.modal_bg').hide();
-	}
-	var file = document.querySelector('#spec_upload_file').files[0];
-	reader.readAsText(file);
-});
-
-// returns a jquery html row, given a name and wavelength
-function modalDbRow(id, name, source, wv){
-	var wv_str;
-	var src_str;
-	var row = $('<tr>').addClass('modal_db_row');
-	row.append($('<td>').addClass('modal_db_id').html(id));
-	row.append($('<td>').addClass('modal_db_name').html(name));
-	if(source != null){
-		src_str = source;
-	}
-	else{
-		src_str = 'Unknown';
-	}
-	row.append($('<td>').addClass('modal_db_source').html(src_str));
-	if(wv != -1){
-		wv_str = wv+'nm';
-	}
-	else{
-		wv_str = 'Unknown';
-	}
-	row.append($('<td>').addClass('modal_db_wv').html(wv_str));
-	return row;
-}
-
-$('.tab').click(function(){
-	// set this tab class
-	$('.selected_tab').removeClass('selected_tab');
-	$(this).addClass('selected_tab');
-	// set the correct modal_option
-	$('.modal_option').hide();
-	if($(this).attr('id') == 'csv_tab'){
-		$('#modal_csv').show();
-	}
-	else{
-		$('#modal_db').show();
-	}
-});
-
-*/
 
 $(document).ready(function(){
 	// load database into modal_db_tbody at page load (for now)
@@ -647,15 +397,7 @@ $(document).ready(function(){
 
 // testing ground for new code
 
-/*
-$('#plot_holder').on('plotly_relayout',function(e){
-	console.log('yo!');
-	debugger;
-});
-*/
-
 // nothing below here matters if we're doing plotly (except for saving state sometime in the future)
-
 // pass form data as json
 $(function() {
 

@@ -29,20 +29,8 @@ class Point{
 
 // one field of a config (like figure width, or line color)
 class Field{
-	constructor(ident,label,input,defaults={}){
-		// default input type is text
-		if(valid_inputs.indexOf(input) == -1){input = 'text';}
-		this.identifier = ident;
-		this.label = label;
-		this.input = input;
-		if(typeof(defaults) === 'undefined'){
-			this.defaults = null;
-		}
-		else{
-			this.defaults = defaults;
-		}
-
-		this.element = null; // this is where the value in the element gets wired into the field itself (to be accessed by the specconfig via getValue() )
+	constructor(){
+		this.element = null;
 	}
 
 	bindTo(element){
@@ -71,32 +59,6 @@ class Field{
 			return true;
 		}
 		return false;
-	}
-
-
-	// generates html to represent this field as a table row
-	toTableRow(){
-		// return the field as a table row
-		var container = $('<tr>');
-		container.addClass('tool');
-		container.attr('id', this.identifier); // identifier is id of row and name of input
-		container.append($('<td>').addClass('tool_label').html(this.label));
-		var inputter = $('<input>').attr('type',this.input).attr('name',this.identifier);
-		
-		// wire in the moving parts
-		this.element = inputter;
-		
-		// number inputter should default to a step of any
-		if(this.input == 'number' && !('step' in this.defaults)){inputter.attr('step','any');}
-
-		// set the defaults based on the dictionary passed in
-		for(var key in this.defaults){
-			inputter.attr(key,this.defaults[key]);
-		}
-
-		var action = $('<td>').addClass('tool_action').append(inputter);
-		container.append(action);
-		return container;
 	}
 }
 
@@ -132,60 +94,8 @@ Preprocess.prototype.runProcess = function(data){
 	// otherwise, don't do anything and just return the data
 	return data;
 }
-/*
-Preprocess.prototype.generatePreprocessHtml = function(){
-	var _this = this;
 
-	// label the preprocess
-	var container = $('<div>').addClass('single_preproc');
-	var header = $('<h3>').addClass('preproc_name').addClass('collapser').html(this.name);
-	var tableWrapper = $('<div>').addClass('collapsible');
-	var table = $('<table>').addClass('preproc_table');
-
-	// add stuff to table
-	// start with a checkbox field for run_me (this could be a switch element eventually if we wanna be cute)
-	table.append(this.run_field.toTableRow());
-	// then iterate through the rest of the fields
-	for(f in this.fields){
-		table.append(this.fields[f].toTableRow());
-	}
-	tableWrapper.append(table);
-
-	// add functionality - click to collapse, toggle 'running' class on header based on 'run' checkbox
-	$(header).click(function(){
-		$('.collapsible').each(function(){
-			// $(this) is a jquery-fied version of the object we're iterating through. _this is the instance of the preprocess
-			if($(this).siblings('.preproc_name').html() != _this.name && $(this).css('display') == 'block'){
-				// holy cow this actually works. go me.
-				$(this).slideToggle('fast');
-			}
-		});
-		// collapse all others
-		$(tableWrapper).slideToggle('fast');
-	});
-	$(this.run_field.element).change(function(){
-		// actually checking seems safer than just toggling
-		if(_this.run_field.getValue()){
-			$(header).addClass('running_preproc');
-		}
-		else{
-			$(header).removeClass('running_preproc');
-		}
-	});
-
-	// start with the table hidden and only the title showing
-	$(tableWrapper).hide();
-
-	// put everything in the container to return a single item
-	container.append(header);
-	container.append(tableWrapper);
-
-	// TODO: add a handler to style running and not running differently and to update the values in the object when things change in the html
-	return container;
-}
-*/
-
-// these are the actually preprocesses
+// these are the actual preprocesses
 
 Normalization = function(){
 	// "parasitic inheritance" sounds like a thrash band
@@ -593,17 +503,10 @@ class SpecConfig{
 	}
 
 	getData(){
-		//wavs = JSON.parse(JSON.stringify(this.spec_data[0])); // fastest way to deep copy counts (we're gonna preprocess it so we need our own copy)
-		for(var p in this.preprocesses){
-			// preprocess run function handles checking the run_process flag
-			//data = this.preprocesses[p].runProcess(data);
-		}
 		var cur_data = JSON.parse(JSON.stringify(this.spec_data));
-		
 		for(var p in this.preprocesses){
 			cur_data = this.preprocesses[p].runProcess(cur_data);
 		}
-		
 		return cur_data;
 	}
 
@@ -612,11 +515,7 @@ class SpecConfig{
 		let row = $('<div>').addClass('table_row').attr('id',this.getRowId());
 		row.append($('<div>').addClass('text').html(this.spec_name));
 		row.append($('<div>').addClass('color').append($('<div>').addClass('color_patch').css({'background-color':'blue'})));
-		row.append($('<div>').addClass('showing').append($('<input>').attr('type','checkbox').attr('checked',true)));
-
-		// set css based on whether this is selected or not
-		//if(this.selected){row.addClass('selected_row');}
-		//else{row.addClass('unselected_row');}
+		row.append($('<div>').addClass('showing').append($('<input>').attr('type','checkbox').attr('checked',true).attr('disabled',true)));
 
 		// get the html id of the config table and the speclist row (we need them for the functions)
 		var configSel = this.getConfigSelector();
@@ -687,21 +586,6 @@ class SpecConfig{
 		this.fields['color'].setValue(randomColor());
 		this.updateColor();
 
-		/*
-		// all of the preprocessing divs will go in this
-		var preproc = $('<div>').addClass('spec_config_preprocs');
-
-		for(var p in this.preprocesses){
-			preproc.append(this.preprocesses[p].generatePreprocessHtml());
-		}
-
-
-		// this is the container for the table and the preprocessing that we're going to return at the end
-		var container = $('<div>').addClass('tools').attr('id',this.getConfigId());
-		container.append(table);
-		container.append(preproc);
-		*/
-
 		// show or hide to start (based, ultimately, whether or not there's one showing already, but here it's just based on a flag)
 		if(this.selected){
 			el.addClass('showing_config');
@@ -740,25 +624,18 @@ class PlotConfig{
 		this.fields = {};
 		this.fields['title'] = new Field();
 		this.fields['xlabel'] = new Field();
-		this.fields['ylabel'] = new Field('ylabel', 'Y-axis label', 'text', {'value': 'Intensity', 'title':'Label on y axis of plot'});
-		this.fields['xmin'] = new Field('xmin', 'x<sub>min</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Minimum value of x axis'}); // doesn't do anything yet
-		this.fields['xmax'] = new Field('xmax', 'x<sub>max</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Maximum value of x axis '}); // doesn't do anything yet
-		this.fields['ymin'] = new Field('ymin', 'y<sub>min</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Minimum value of y axis'}); // doesn't do anything yet
-		this.fields['ymax'] = new Field('ymax', 'y<sub>max</sub>', 'number', {'placeholder':'Auto', 'step':'.1', 'title':'Maximum value of y axis'}); // doesn't do anything yet
-		this.fields['show_legend'] = new Field('show_legend', 'Show legend', 'checkbox', {'checked':'true', 'title':'Show / hide legend'});
+		this.fields['ylabel'] = new Field();
+		this.fields['xmin'] = new Field();
+		this.fields['xmax'] = new Field();
+		this.fields['ymin'] = new Field();
+		this.fields['ymax'] = new Field();
+		this.fields['show_legend'] = new Field();
 		this.fields['show_grid'] = new Field()
+
+		// this stuff is next to get moved - and then it's time for the next release!
 		this.fields['quick_add'] = new Field('quick_add', 'Quick add from database', 'text', {'placeholder':'Try typing "qua"', 'title':'Start typing a mineral name and select the desired mineral from the dropdown list'});
 		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add', 'title':'Add spectrum, from file or database'});
 		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove', 'title':'Delete the curretly selected spectrum and its settings (this cannot be undone)'});
-		// TODO: create legend location
-		/*
-		// waiting on advanced options until we discuss separating js and html
-
-		this.ad_fields['left_margin'] = new Field('left_margin', 'Left margin', 'number', {'value':70, 'title':'Left margin (pixels)'});
-		this.ad_fields['right_margin'] = new Field('right_margin', 'Right margin', 'number', {'value':40, 'title':'Right margin (pixels)'});
-		this.ad_fields['top_margin'] = new Field('top_margin', 'Top margin', 'number', {'value':60, 'title':'Top margin (pixels)'});
-		this.ad_fields['bottom_margin'] = new Field('bottom_margin', 'Bottom margin', 'number', {'value':80, 'title':'Bottom margin (pixels)'});
-		*/
 
 	}
 
@@ -784,15 +661,6 @@ class PlotConfig{
 		this.fields['show_legend'].bindTo(finder('showlegend'));
 		this.fields['show_grid'].bindTo(finder('showgrid'));
 
-	}
-
-	// convert fields to html table
-	toTable(){
-		var table = $('<table>').addClass('tools_table');
-		for(var field in this.fields){
-			table.append(this.fields[field].toTableRow());
-		}
-		return table;
 	}
 
 	// returns the value of a field
@@ -835,9 +703,9 @@ class PlotHandler{
 			}
 */
 		];
+
 		// register preprocesses here to automatically add them to specconfigs
-		// unfortunately, the order here matters. this is the order in which, if used, preprocesses will be applied
-		// (actually, dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
+		// the order here matters. this is the order in which, if used, preprocesses will be applied (dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
 		this.preprocs = {
 			'Crop': Crop,
 			//'Baseline Removal': BaselineRemoval,
@@ -931,7 +799,7 @@ class PlotHandler{
 			pp.push(new this.preprocs[p]);
 		}
 		var sc = new SpecConfig(this.cur_spec_id, spec_name, spec_data, pp);
-		this.cur_spec_id++; // make sure each is unique (assume we never have over 2 gajillion spectra showing simultaneously)
+		this.cur_spec_id++; // make sure each is unique (assume we never have over 2 gajillion spectra showing simultaneously so no int overflow)
 		// append it to spec config list
 		this.specConfigList.push(sc);
 		// if it's the only specconfig, show & select it
@@ -991,14 +859,6 @@ class PlotHandler{
 		var to_xmax = parseFloat(this.plotConfig.valueOf('xmax'));
 		var to_ymin = parseFloat(this.plotConfig.valueOf('ymin'));
 		var to_ymax = parseFloat(this.plotConfig.valueOf('ymax'));
-
-		// update x and y range once it's plotted
-		// var xrange = this.getDivXRange();
-		// var yrange = this.getDivYRange();
-		// this.plotConfig.valueOf('xmin', xrange[0].toFixed(1));
-		// this.plotConfig.valueOf('xmax', xrange[1].toFixed(1));
-		// this.plotConfig.valueOf('ymin', yrange[0].toFixed(1));
-		// this.plotConfig.valueOf('ymax', yrange[1].toFixed(1));
 
 		// if only one in a pair (xmin vs xmax) is filled in, set other one to current value in plot
 		if(!isNaN(to_xmin) && isNaN(to_xmax)){
@@ -1095,6 +955,7 @@ class PlotHandler{
 	}
 
 	// adds an event listener to all .tool changes to update the plot
+	// TODO: move this to a single on function (see script in index.html)
 	addToolListeners(){
 		var _this = this;
 		this.updatePlot();
@@ -1102,19 +963,6 @@ class PlotHandler{
 			_this.updatePlot();
 		});
 	}
-
-	
-	// shows a modal window, handles getting the spectrum from it
-	showAddModal(){
-		$('.modal_bg').show();
-		// add a handler to the escape key to get rid of modal
-		$(document).keydown(function(e){
-			if(e.keyCode == 27){
-				$('.modal_bg').hide();
-			}
-		});
-	}
-
 	
 	// adds event listeners to the add and remove buttons
 	startAddRemove(){
@@ -1194,7 +1042,6 @@ class PlotHandler{
 
 	initialize(){
 		// insert plot configuration html
-		// this.insertPlotConfigHtml();
 		this.plotConfig.bindAll($('#global_tools'));
 		// add event listeners for plot updates
 		this.addToolListeners();
