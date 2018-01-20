@@ -790,7 +790,7 @@ class PlotHandler{
 		});
 	}
 
-	// adds a spectrum to the working set
+	// adds a spectrum with a given name and data (in the form [wavs, counts])
 	addSpec(spec_name, spec_data){
 		var _this = this;
 		// generate set of preprocesses at defaults
@@ -820,8 +820,67 @@ class PlotHandler{
 
 	}
 
+	// add a spectrum from a file (for now, just .csv)
+	addSpecFromFile(spec_name, file){
+		// parse csv, including checking that the domain is in output[0] and ordered low to high
+		// parse the data in a filereader (it's async and it's reeeeal ugly)
+		let _this = this;
+		let wavs, counts;
+		let lista = [];
+		let listb = [];
+		let reader = new FileReader;
+		reader.onload = function(){
+			// parse into lists
+			let data = reader.result.split(/\r|\n/); // this regex is to make sure we don't run into the windows vs mac newline issue
+			for(let i = 0; i < data.length; i++){
+				try{
+					let points = data[i].split(',');
+					let to_a = parseFloat(points[0]);
+					let to_b = parseFloat(points[1]);
+					if(to_a && to_b){
+						lista.push(to_a);
+						listb.push(to_b);
+					}
+				}
+				catch(err){
+					console.log(err);
+					console.log('skipped line: '+data[i]);
+				}
+			}
+			// find the one that's going up or down by a consistent amount (assume it's the one where the point in the middle is closest to halfway between the start and end values. there's a very small chance this is wrong. TODO: fix this issue)
+			// span is the difference between the first and last values
+			let lista_span = lista[lista.length - 1] - lista[0]
+			let listb_span = listb[listb.length - 1] - listb[0]
+			// mid is the value in the middle
+			let lista_mid = lista[lista.length / 2]
+			let listb_mid = listb[listb.length / 2]
+			// gap is the difference between the mid and half the span
+			let lista_gap = Math.abs(lista_mid - (lista[0] + (lista_span/2)));
+			let listb_gap = Math.abs(listb_mid - (listb[0] + (listb_span/2)));
+			// the smaller gap is the wavenumbers
+			if(lista_gap < listb_gap){
+				wavs = lista;
+				counts = listb;
+			}
+			else{
+				wavs = listb;
+				counts = lista;
+			}
+			// check if wavs (and therefore both) need reversing
+			if(wavs[1] < wavs[0]){
+				wavs.reverse();
+				counts.reverse();
+			}
+			data = [wavs,counts];
+
+			_this.addSpec(spec_name, data);
+		}
+
+		reader.readAsText(file);
+	}
+
 	addVl(){
-		var new_vl = new VertLine(this.cur_vl_id);
+		let new_vl = new VertLine(this.cur_vl_id);
 		this.vlList.push(new_vl);
 		this.cur_vl_id ++;
 

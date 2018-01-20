@@ -238,22 +238,23 @@
 					</div>
 
 					<div class="setting">
-						<label>Menu name</label>
-						<input class="disable_without_file" target="menu_name" readonly>
+						<label>Name</label>
+						<input class="readonly_without_file" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required" readonly>
+					</div>
+
+					<div class="setting">
+						<label>Wavelength</label>
+						<input class="readonly_without_file" type=number target="wavelength" title="wavelength of spectrum" readonly>
 					</div>
 
 					<div class="setting">
 						<label>Label</label>
-						<input class="disable_without_file" target="to_label" readonly>
+						<input class="readonly_without_file" target="to_label" title="Initial label in plot" readonly>
 					</div>
 
-					<script>
-						$('.disable_without_file[readonly]').click(function(){
-							alert('Menu name & label fields can only be set when a file has been selected');
-						});
-						
-					</script>
-
+					<div class="setting">
+						<button class="big_button" id="add_from_file" disabled>Add</button>
+					</div>
 
 				</div>
 				<!-- add from database (slim to start) -->
@@ -289,6 +290,7 @@
 
 
 <script>
+// handle all aesthetic properties & changes
 $(document).ready(function(){
 
 	// tab clicking functionality
@@ -356,6 +358,7 @@ $(document).ready(function(){
 
 
 <script>
+// non-aesthetic (functional) code
 
 var qz = 2481;	// quartz
 var al = 51;	// albite
@@ -373,6 +376,48 @@ ph.initialize();
 $(document).on("wheel", "input[type=number]", function (e) {
     $(this).blur();
 });
+
+
+
+// the .disable_without_file inputs are readonly (disabled but still propagating click events) until a spectrum is chosen
+$('.disable_without_file').click(function(){
+	if($(this).is('[readonly]')){
+		alert('Menu name, wavelength, and label fields can only be set when a file has been selected');
+	}
+});
+
+// handle what happens when a file is added to the file input
+$('[target=local_file]').change(function(){
+	let files = document.querySelector('input[target=local_file]').files;
+	// remove readonly if there's a file chosen
+	if(files.length){
+		$('.readonly_without_file').attr('readonly', false);
+		$('.disable_without_file').attr('disabled', false);
+	}
+	else{
+		$('.readonly_without_file').attr('readonly', true);
+		$('.disable_without_file').attr('disabled', true);
+	}
+});
+
+//  handle what happens when the button gets hit (TODO: check that file *is* uploaded, check that it's a csv, get name, get label, clear fields when done)
+$('#add_from_file').click(function(){
+	let file = document.querySelector('input[target=local_file]').files[0];
+	ph.addSpecFromFile('New spec!', file);
+});
+
+
+/*
+// modal window (a lot of this has bearing on adding from files)
+
+// set the default name to the file name when one is selected
+$('#spec_upload_file').change(function(){
+	var filename = $('#spec_upload_file').val().split('\\').reverse()[0];
+	var specname = filename.slice(0,-4);
+	$('#modal_spec_name').attr('value',specname);
+});
+
+*/
 
 $(document).ready(function(){
 	// load database into modal_db_tbody at page load (for now)

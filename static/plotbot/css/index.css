@@ -107,6 +107,7 @@ html{
 }
 input[type=number]{
 	width:5em;
+	text-align: right;
 }
 
 .col_title{
@@ -223,40 +224,10 @@ input[type=number]{
 .running_preproc:hover{
 }
 
-/*	
-.preprocesses{
-
+.big_button{
+	min-width:50%;
+	margin:auto;
 }
-.preprocess{
-
-}
-
-.preproc_name{
-	font-family: 'Roboto', sans-serif;
-	text-align:center;
-	margin:0;
-	border-bottom: 1px solid #c0c0c0;
-}
-.preprocess:first-child .preproc_name{
-	border-top: 1px solid #c0c0c0;
-}
-.preproc_name:hover{
-}
-
-.collapser{
-	cursor:pointer;
-}
-.collapser:hover{
-	background-color:#e0e0e0;
-}
-.running_preproc{
-	font-style:bold;
-	background-color:#d8d8ff;
-}
-.running_preproc:hover{
-	background-color:#d0d0f8;
-}
-*/
 
 
 
