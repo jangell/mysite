@@ -24,8 +24,8 @@
 	<div class="toolbar">
 		<ul class="tabs">
 			<li class="tab" for="global_tools" id="global_tab">Plot Settings</li>
-			<li class="tab default_tab" for="spec_tools" id="spec_tab">Spec Settings</li>
-			<li class="tab" for="add_tools" id="add_tab">Add Spec</li>
+			<li class="tab" for="spec_tools" id="spec_tab">Spec Settings</li>
+			<li class="tab default_tab" for="add_tools" id="add_tab">Add Spec</li>
 			<li class="tab" for="anno_tools" id="anno_tab">Annotations</li>
 		</ul>
 		
@@ -212,7 +212,57 @@
 			</div>
 
 			<div class="toolset" id="add_tools">
+				<!-- add from local file -->
+				<div class="tools_col">
 
+					<div class="setting">
+						<h4 class="col_title">Add from file</h4>
+					</div>
+
+					<!-- 
+					select file
+					
+					name in list (default: filename) (d)
+					label (default: none(?)) (d)
+					
+					add button
+					cancel button
+
+					TODO: Multi-add! list, where each item is a file and it changes css as it loads in, with filename and label as options
+					TODO: add-by-url
+					-->
+
+					<div class="setting">
+						<label>File</label>
+						<input type=file accept=".csv" target="local_file">
+					</div>
+
+					<div class="setting">
+						<label>Menu name</label>
+						<input class="disable_without_file" target="menu_name" readonly>
+					</div>
+
+					<div class="setting">
+						<label>Label</label>
+						<input class="disable_without_file" target="to_label" readonly>
+					</div>
+
+					<script>
+						$('.disable_without_file[readonly]').click(function(){
+							alert('Menu name & label fields can only be set when a file has been selected');
+						});
+						
+					</script>
+
+
+				</div>
+				<!-- add from database (slim to start) -->
+				<!-- quick add -->
+				<!-- explanatory text about managing slim vs full -->
+				<!-- load-full button with loading bar (actually, just fill up the button/div-as-button itself!) -->
+				<div class="tools_col">
+
+				</div>
 			</div>
 
 			<div class="toolset" id="anno_tools">
@@ -229,6 +279,7 @@
 			<div class="showing">Show</div>
 		</div>
 	</div>
+	<!-- put quick-add and remove at the bottom of the spec list div -->
 </div>
 
 <div id="plot_holder">
@@ -308,9 +359,11 @@ $(document).ready(function(){
 
 var qz = 2481;	// quartz
 var al = 51;	// albite
+var am = 100;	// amicite
 var startWith = []; // list of specIds to autopopulate chart
 startWith.push(qz);
 startWith.push(al);
+startWith.push(am);
 
 
 var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plot_holder'));
