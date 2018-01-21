@@ -223,7 +223,6 @@
 					select file
 					
 					name in list (default: filename) (d)
-					label (default: none(?)) (d)
 					
 					add button
 					cancel button
@@ -239,29 +238,25 @@
 
 					<div class="setting">
 						<label>Name</label>
-						<input class="readonly_without_file" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required" readonly>
+						<input class="readonly_without_file required wide_field" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required" readonly>
 					</div>
 
 					<div class="setting">
-						<label>Wavelength</label>
-						<input class="readonly_without_file" type=number target="wavelength" title="wavelength of spectrum" readonly>
-					</div>
-
-					<div class="setting">
-						<label>Label</label>
-						<input class="readonly_without_file" target="to_label" title="Initial label in plot" readonly>
-					</div>
-
-					<div class="setting">
-						<button class="big_button" id="add_from_file" disabled>Add</button>
+						<button class="add_button" id="add_from_file" disabled>Add</button>
+						<button class="add_button" id="cancel_add" disabled>Cancel</button>
 					</div>
 
 				</div>
+
 				<!-- add from database (slim to start) -->
 				<!-- quick add -->
 				<!-- explanatory text about managing slim vs full -->
 				<!-- load-full button with loading bar (actually, just fill up the button/div-as-button itself!) -->
 				<div class="tools_col">
+
+					<div class="setting">
+						<h4 class="col_title">Add from database</h4>
+					</div>
 
 				</div>
 			</div>
@@ -389,35 +384,105 @@ $('.disable_without_file').click(function(){
 // handle what happens when a file is added to the file input
 $('[target=local_file]').change(function(){
 	let files = document.querySelector('input[target=local_file]').files;
-	// remove readonly if there's a file chosen
+	// remove readonly & disabled if there's a file chosen
 	if(files.length){
 		$('.readonly_without_file').attr('readonly', false);
-		$('.disable_without_file').attr('disabled', false);
+		$('.add_button').attr('disabled', false);
+		// TODO: only enable add button if menu name is not empty
 	}
 	else{
 		$('.readonly_without_file').attr('readonly', true);
-		$('.disable_without_file').attr('disabled', true);
+		$('.add_button').attr('disabled', true);
 	}
+
+	// cool stuff - try and autofill name, wavelength, and label
+
+	// check that file actually _is_ uploaded
+	if(!(files.length)){
+		return;
+	}
+
+	let file = files[0];
+	let fname = file.name;
+
+	let namestring = fname.slice(0,-4); // name without extension
+
+	// try and parse name & wavelength out of it
+	let parts = namestring.split('_');
+	let name = '';
+	let wav = '';
+
+	// first option: one of the parts is {wavelength}nm, everything before is name
+	for(let i = 0; i < parts.length; i++){
+		if(parts[i].slice(-2,parts[i].length) === 'nm'){
+			// join all parts from 0 to i and convert to Title Case
+			let name_list = []
+			for(let j = 0; j < i; j++){
+				name_list.push(parts[j].charAt(0).toUpperCase() + parts[j].slice(1));
+				debugger;
+			}
+			name = name_list.join(' ');
+			wav = parts[i];
+			foundStrings = true;
+		}
+	}
+
+	// TODO: next option: one of the parts is {wavelength} (only 532 or 785), everything before is name
+
+	let to_str = name;
+	if(wav !== ''){
+		to_str += ' ('+wav+')';
+	}
+	$('[target=menu_name]').val(to_str);
+
 });
 
-//  handle what happens when the button gets hit (TODO: check that file *is* uploaded, check that it's a csv, get name, get label, clear fields when done)
+//  handle what happens when the button gets hit
 $('#add_from_file').click(function(){
-	let file = document.querySelector('input[target=local_file]').files[0];
-	ph.addSpecFromFile('New spec!', file);
+	let files = document.querySelector('input[target=local_file]').files;
+	
+	// check that file actually _is_ uploaded
+	if(!(files.length)){
+		alert('No file uploaded');
+		return;
+	}
+
+	let file = files[0];
+	let fname = file.name;
+
+	// check that it's a csv type
+	if(fname.slice(-4,fname.length) !== '.csv'){
+		alert('File must be .csv');
+		$('[target=local_file]').val('');	// clear the file that was there
+		return;
+	}
+
+	let menu_name = $('[target=menu_name]').val();
+	if(menu_name === ''){
+		alert('Name is a required field. Without it, the spectrum has nothing to identify it in the list.');
+		$('[target=menu_name]').focus();
+		return;
+	}
+
+	// actually add the thing
+	ph.addSpecFromFile(menu_name, file);
+
+	// clear the fields
+	$('[target=local_file]').val('');
+	$('[target=menu_name]').val('');
+
+	// fire change event for file input
+	$('[target=local_file]').change();
 });
 
-
-/*
-// modal window (a lot of this has bearing on adding from files)
-
-// set the default name to the file name when one is selected
-$('#spec_upload_file').change(function(){
-	var filename = $('#spec_upload_file').val().split('\\').reverse()[0];
-	var specname = filename.slice(0,-4);
-	$('#modal_spec_name').attr('value',specname);
+// handle the cancel button
+$('#cancel_add').click(function(){
+	$('[target=local_file]').val('');
+	$('[target=menu_name]').val('');
+	// fire change event for file input
+	$('[target=local_file]').change();
 });
 
-*/
 
 $(document).ready(function(){
 	// load database into modal_db_tbody at page load (for now)

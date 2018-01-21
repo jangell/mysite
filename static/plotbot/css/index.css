@@ -107,7 +107,9 @@ html{
 }
 input[type=number]{
 	width:5em;
-	text-align: right;
+}
+.wide_field{
+	width:14.4rem;
 }
 
 .col_title{
@@ -224,7 +226,7 @@ input[type=number]{
 .running_preproc:hover{
 }
 
-.big_button{
+.add_button{
 	min-width:50%;
 	margin:auto;
 }
