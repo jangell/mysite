@@ -630,7 +630,7 @@ class PlotConfig{
 		this.fields['ymin'] = new Field();
 		this.fields['ymax'] = new Field();
 		this.fields['show_legend'] = new Field();
-		this.fields['show_grid'] = new Field()
+		this.fields['show_grid'] = new Field();
 
 	}
 
@@ -874,6 +874,19 @@ class PlotHandler{
 		reader.readAsText(file);
 	}
 
+	removeSpecByRowId(row_id){
+		for(let i = 0; i < this.specConfigList.length; i++){
+			if(this.specConfigList[i].getRowId() === row_id){
+				let row = this.specConfigList[i];
+				let to_ret = {'success':true, 'row_sel':row.getRowSelector(), 'config_sel':row.getConfigSelector()};
+				this.specConfigList.splice(i,1);
+				this.updatePlot();
+				return to_ret;
+			}
+		}
+		return {'success':false};
+	}
+
 	addVl(){
 		let new_vl = new VertLine(this.cur_vl_id);
 		this.vlList.push(new_vl);
@@ -1012,96 +1025,17 @@ class PlotHandler{
 	// TODO: move this to a single on function (see script in index.html)
 	addToolListeners(){
 		var _this = this;
-		this.updatePlot();
 		$('.tool').change(function(){
 			_this.updatePlot();
-		});
-	}
-	
-	// adds event listeners to the add and remove buttons
-	startAddRemove(){
-		var _this = this;
-		// add spectrum
-		_this.plotConfig.fields['add_spec'].element.click(function(){
-			_this.showAddModal();
-		});
-
-		// quick add from db (autofill on quick_add)
-		$(_this.plotConfig.fields['quick_add'].element).autocomplete({
-			source: quick_add_list,
-			minLength: 3,
-			select: function(event, ui){
-				$(_this.plotConfig.fields['quick_add'].element).val('');
-				var selected = ui.item.value;
-				_this.addSpecByDbId(selected); // oh my god this is so cool and so easy
-				return false;
-			}
-		})
-
-		// remove spectrum
-		_this.plotConfig.fields['remove_spec'].element.click(function(){
-			// get which spectrum is currently selected
-			var selected_spec_index = _this.getSelectedSpecIndex();
-			// make sure it exists
-			if(selected_spec_index < 0){
-				console.log('attempted to remove spectrum that could not be found');
-				return false;
-			}
-			// get specConfig object
-			var sc = _this.specConfigList[selected_spec_index];
-			// remove html config
-			$(sc.getConfigSelector()).remove();
-			// remove html row
-			$(sc.getRowSelector()).remove();
-			// remove specConfig object
-			if(selected_spec_index > -1){
-				_this.specConfigList.splice(selected_spec_index,1);
-				_this.updatePlot();
-			}
-			// select next spec if it exists (just "click" on its row)
-			// try the index of the list we just deleted
-			if(_this.specConfigList.length > selected_spec_index){
-				$(_this.specConfigList[selected_spec_index].getRowSelector()).click();
-			}
-			// if that fails, try index 0
-			else if(_this.specConfigList.length > 0){
-				$(_this.specConfigList[0].getRowSelector()).click();
-			}
-			// so now we selected something valid the list is empty. ok. cool.
-			return true;
-		});
-	}
-	
-	// add key commands (up and down arrow) for navigating spec list
-	// up: 38
-	// down: 40
-	startArrowShortcuts(){
-		var _this = this;
-		$(document).keydown(function(e){
-			var ssi = _this.getSelectedSpecIndex();
-			if(e.keyCode == 38){
-				if(ssi != null && ssi > 0){
-					$(ph.specConfigList[ssi-1].getRowSelector()).click();
-					e.preventDefault();
-				}
-			}
-			else if(e.keyCode == 40){
-				if(ssi != null && ssi < (_this.specConfigList.length - 1)){
-					$(ph.specConfigList[ssi+1].getRowSelector()).click();
-					e.preventDefault();
-				}
-			}
 		});
 	}
 
 	initialize(){
 		// insert plot configuration html
 		this.plotConfig.bindAll($('#global_tools'));
-		// add event listeners for plot updates
+
+		// TODO: add event listeners for plot updates
 		this.addToolListeners();
-		// add event listeners to add & remove spectra and key commands
-		//this.startAddRemove();
-		this.startArrowShortcuts();
 
 		this.updatePlot();
 	}

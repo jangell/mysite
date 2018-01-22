@@ -549,20 +549,32 @@ $('#cancel_db_add').click(function(){
 	$('#cancel_db_add').attr('disabled', true);
 });
 
+/********************** other ******************************/
+// remove button
+$('#remove_selected_spec').click(function(){
+	let id = $('#spec_list').find('.selected_row').attr('id');
+	let ret_obj = ph.removeSpecByRowId(id);	// dictionary, containing boolean <success>, and optionally containing <row_sel> and <config_sel>
+	// only remove from list and specconfig if it worked
+	if(ret_obj['success']){
+		$(ret_obj['row_sel']).remove();
+		$(ret_obj['config_sel']).remove();
+		// select the last row, if it exists
+		$('#spec_list').find('.table_row:not(.head_row)').last().click();
+	}
+});
+
+
 $(document).ready(function(){
-	// load database into modal_db_tbody at page load (for now)
-	/*
-	{% for spec in specs %}
-	$('#modal_db_tbody').append(modalDbRow('{{spec.spec_id}}', '{{spec.name}}', '{{spec.source}}', '{{spec.wavelength}}'));
-	quick_add_list.push({'label':'{{spec.name}} - {{spec.wavelength}}nm','value':'{{spec.spec_id}}'});
-	{% endfor %}
-	// this has to go to the end because it's going to tie into plothandler and all those rows
-	$('.modal_db_row').click(function(){
-		var id = $(this).find('.modal_db_id').html();
-		console.log(id);
-		ph.addSpecByDbId(id);
-		$('.modal_bg').hide();
-		// add spectrum to plothandler
+	// quick add
+	$('#quick_add').autocomplete({
+		source: [ {% for spec in specs %}{'label':'{{spec.name}} - {{spec.wavelength}}nm', 'value':'{{spec.spec_id}}'},{% endfor %} ],
+		minLength: 3,
+		select: function(event, ui){
+			$(this).val('');
+			var selected = ui.item.value;
+			ph.addSpecByDbId(selected); // oh my god this is so cool and so easy
+			return false;
+		}
 	});
 
 	function updateFilters(){
@@ -612,7 +624,6 @@ $(document).ready(function(){
 		updateFilters();
 	});
 	
-	*/
 
 	// development tool: autopopulate
 	for(let i = 0; i < startWith.length; i++){
