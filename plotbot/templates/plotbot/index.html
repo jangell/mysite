@@ -24,8 +24,8 @@
 	<div class="toolbar">
 		<ul class="tabs">
 			<li class="tab" for="global_tools" id="global_tab">Plot Settings</li>
-			<li class="tab default_tab" for="spec_tools" id="spec_tab">Spec Settings</li>
-			<li class="tab" for="add_tools" id="add_tab">Add Spec</li>
+			<li class="tab" for="spec_tools" id="spec_tab">Spec Settings</li>
+			<li class="tab default_tab" for="add_tools" id="add_tab">Add Spec</li>
 			<li class="tab" for="anno_tools" id="anno_tab">Annotations</li>
 		</ul>
 		
@@ -259,7 +259,7 @@
 					</div>
 					
 					<!-- interactive list of all spectra -->
-					<div class="db_list">
+					<div id="db_list">
 						<div class="table_row head_row">
 							<div class="db_id">ID</div>
 							<div class="db_name">Name</div>
@@ -268,7 +268,7 @@
 						</div>
 						<div class="scrollable">
 						{% for spec in specs %}
-							<div class="table_row db_spec_row">
+							<div class="table_row db_spec_row" spec_id={{spec.spec_id}}>
 								<div class="db_id">{{spec.spec_id}}</div>
 								<div class="db_name">{{spec.name}}</div>
 								<div class="db_source">{{spec.source}}</div>
@@ -277,14 +277,6 @@
 						{% endfor %}
 						</div>
 					</div>
-
-					<script>
-						// select db row on click
-						$('.db_spec_row').click(function(){
-							$(this).siblings('.selected_row').removeClass('selected_row');
-							$(this).addClass('selected_row');
-						});
-					</script>
 
 					<div class="setting">
 						<button class="setting_button" id="add_from_db" disabled>Add</button>
@@ -400,12 +392,13 @@ startWith.push(am);
 var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plot_holder'));
 ph.initialize();
 
+
 // stop <input type=number> from changing on scroll
 $(document).on("wheel", "input[type=number]", function (e) {
     $(this).blur();
 });
 
-
+// ****************************** add from file *****************************************
 
 // the .disable_without_file inputs are readonly (disabled but still propagating click events) until a spectrum is chosen
 $('.disable_without_file').click(function(){
@@ -516,6 +509,33 @@ $('#cancel_add').click(function(){
 	$('[target=local_file]').change();
 });
 
+// ***************************** add from database *********************************
+// select db row on click
+$('.db_spec_row').click(function(){
+	$(this).siblings('.selected_row').removeClass('selected_row');
+	$(this).addClass('selected_row');
+	$('#add_from_db').attr('disabled', false);
+	$('#cancel_db_add').attr('disabled', false);
+});
+// add by db id on click (and unselect)
+$('#add_from_db').click(function(){
+	// add spec
+	let row = $('#db_list').find('.selected_row');
+	let id = row.attr('spec_id');
+	ph.addSpecByDbId(id);
+	// unselect spec and disable buttons
+	row.removeClass('selected_row');
+	$('#add_from_db').attr('disabled', true);
+	$('#cancel_db_add').attr('disabled', true);
+});
+
+// cancel - unselect selected row
+$('#cancel_db_add').click(function(){
+	$('#db_list').find('.selected_row').removeClass('selected_row');
+	// disable buttons
+	$('#add_from_db').attr('disabled', true);
+	$('#cancel_db_add').attr('disabled', true);
+});
 
 $(document).ready(function(){
 	// load database into modal_db_tbody at page load (for now)

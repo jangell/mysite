@@ -237,7 +237,7 @@ input[type=number]{
 
 /* flex table stying for db list */
 
-.db_list{
+#db_list{
 	width: 100%;
 	flex: 1;				-webkit-flex: 1;
 	display: flex;			-webkit-display: flex;
@@ -248,10 +248,10 @@ input[type=number]{
 	flex: 1;				-webkit-flex: 1;
 	overflow: scroll;
 }
-.db_list .head_row{
+#db_list .head_row{
 	cursor: default;
 }
-.db_list .table_row:not(.head_row){
+#db_list .table_row:not(.head_row){
 	cursor: pointer;
 }
 .db_id{
