@@ -40,14 +40,14 @@ html{
 	font-family: 'Roboto', sans-serif;
 	font-size:1.2rem;
 
-	border:1px solid #808080;
+	border:1px solid #a0a0a0;
 	border-left:none;
 	
 	cursor:pointer;
 	transition: .2s all; -webkit-transition: .2s all;
 }
 .tab:first-child{
-	border-left: 1px solid #808080;
+	border-left: 1px solid #a0a0a0;
 }
 .tab:not(.selected_tab):hover{
 	background:#e8e8e8;
@@ -58,7 +58,7 @@ html{
 	border-bottom-color:rgba(0,0,0,0);
 }
 .toolset_container{
-	border: 1px solid #808080;
+	border: 1px solid #a0a0a0;
 	border-top:0px;
 	flex:1;							-webkit-flex: 1;
 	display:flex;					-webkit-display: flex;
@@ -119,12 +119,34 @@ input[type=number]{
 	font-family: 'Roboto', sans-serif;
 }
 
+.right_box{
+	flex: 1;					-webkit-flex: 1;
+	display: flex;				-webkit-display: flex;
+	flex-direction: column;		-webkit-flex-direction: column;
+	border: 1px solid #a0a0a0;
+	border-left:0;
+	background-color: #f0f0f0;
+}
+
 .spec_list{
 	flex: 1;					-webkit-flex: 1;
-	background-color: #f0f0f0;
-	border: 1px solid #808080;
-	border-left:0;
+	display: flex;				-webkit-display: flex;
+	flex-direction: column;		-webkit-flex-direction: column;
 	font-family: 'Roboto', sans-serif;
+	border-bottom: 1px solid #c0c0c0;
+}
+
+.list_buttons{
+	background-color: #f0f0f0;
+	padding: 5px;
+	display:flex;					-webkit-display: flex;
+	flex-direction: row;			-webkit-flex-direction: row;
+	justify-content: space-around;	-webkit-justify-content: space-around;
+}
+
+.label_input{
+	font-family: 'Roboto', sans-serif;
+	white-space: nowrap;
 }
 
 .table_row{

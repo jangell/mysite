@@ -632,11 +632,6 @@ class PlotConfig{
 		this.fields['show_legend'] = new Field();
 		this.fields['show_grid'] = new Field()
 
-		// this stuff is next to get moved - and then it's time for the next release!
-		this.fields['quick_add'] = new Field('quick_add', 'Quick add from database', 'text', {'placeholder':'Try typing "qua"', 'title':'Start typing a mineral name and select the desired mineral from the dropdown list'});
-		this.fields['add_spec'] = new Field('add_spec', 'Add spectrum', 'button', {'value':'Add', 'title':'Add spectrum, from file or database'});
-		this.fields['remove_spec'] = new Field('remove_spec', 'Remove selected spectrum', 'button', {'value':'Remove', 'title':'Delete the curretly selected spectrum and its settings (this cannot be undone)'});
-
 	}
 
 	// binds the plotconfig to all of the target tools within a particular div (the given element)
@@ -678,7 +673,7 @@ class PlotConfig{
 class PlotHandler{
 	constructor(plot_config_target, spec_list_target, spec_config_target, plot_target, preprocesses){
 		this.plot_config_target = plot_config_target;
-		this.spec_list_target = $('#spec_list');
+		this.spec_list_target = $('#spec_list .scrollable');
 		this.spec_config_target = spec_config_target;
 		this.plot_target = plot_target;
 
