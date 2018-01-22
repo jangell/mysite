@@ -128,7 +128,6 @@ input[type=number]{
 }
 
 .table_row{
-	width:100%;
 	display: flex;				-webkit-display: flex;
 	flex-direction: row;		-webkit-flex-direction: row;
 	flex-grow: 0;				-webkit-flex-grow: 0;
@@ -277,16 +276,7 @@ input[type=number]{
 	width: 30px;
 }
 
-.db_spec_row{
-	transition: background-color .2s ease;
-}
-.selected_db_spec_row{
-	background-color: ;
-}
-
 /* end of flex table styling */
-
-
 
 
 

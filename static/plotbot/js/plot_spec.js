@@ -524,7 +524,7 @@ class SpecConfig{
 		// function for when this spec is clicked on in the list
 		row.on('click',function(){
 			// hide showing config(s) (the $(this).find is necessary because there are selected rows in other tables (like the add-from-db table))
-			$(this).siblings('.showing_config').removeClass('showing_config').addClass('hidden_config');
+			$('.showing_config').removeClass('showing_config').addClass('hidden_config');
 			// show the one that was clicked
 			$(configSel).removeClass('hidden_config').addClass('showing_config');
 			// unselect all rows (the $(this).find is necessary because there are selected rows in other tables (like the add-from-db table))
