@@ -81,7 +81,9 @@ html{
 	flex-direction: row;	-webkit-flex-direction: row;
 }
 .tools_col{
-	flex:1;				-webkit-flex: 1;
+	flex:1;					-webkit-flex: 1;
+	display: flex;			-webkit-display: flex;
+	flex-direction: column;	-webkit-flex-direction: column;
 	padding:10px;
 }
 
@@ -130,7 +132,7 @@ input[type=number]{
 	display: flex;				-webkit-display: flex;
 	flex-direction: row;		-webkit-flex-direction: row;
 	flex-grow: 0;				-webkit-flex-grow: 0;
-	align-items:center;
+	align-items:center;			-webkit-align-items: center;
 	border-collapse: collapse;
 	border-bottom: 1px solid #c0c0c0;
 }
@@ -155,8 +157,10 @@ input[type=number]{
 	background-color:rgba(128,128,128,.3);
 }
 
+
+/* flex table styling for spec list */
 .text{
-	flex: 3;				-webkit-flex: 3;
+	flex: 3;					-webkit-flex: 3;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -180,12 +184,13 @@ input[type=number]{
 	width:50px;
 	margin-right:10px;
 }
+/* end of flex table styling */
 
 .showing_config{
-	display:flex;
+	display:flex;		-webkit-display: flex;
 }
 .hidden_config{
-	display:none;
+	display:none;		-webkit-display: none;
 }
 
 /* preprocessing */
@@ -226,327 +231,82 @@ input[type=number]{
 .running_preproc:hover{
 }
 
-.add_button{
+.setting_button{
 	min-width:50%;
 	margin:auto;
 }
 
+/* flex table stying for db list */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-.toolset{
-	background-color:#ddd;
-	margin:5px;
-	min-width:400px;
-	flex:1;
-	border:1px solid #808080;
-	box-shadow:3px 3px 1px #808080;
-	overflow:scroll;
+.db_list{
+	width: 100%;
+	flex: 1;				-webkit-flex: 1;
+	display: flex;			-webkit-display: flex;
+	flex-direction: column;	-webkit-flex-direction: column;
+	border: 1px solid #a0a0a0;
 }
-*/
-.toolset_title{
-	font-family: 'Roboto', sans-serif;
-	font-size:1.4rem;
-	text-align:center;
-	margin:0;
-	background-color:#bbb;
-	border-bottom:1px solid #909090;
+.scrollable{
+	flex: 1;				-webkit-flex: 1;
+	overflow: scroll;
 }
-.toolset_content{
-	margin:0;
+.db_list .head_row{
+	cursor: default;
 }
-.tools_table{
-	width:100%;
-	border-collapse:collapse;
+.db_list .table_row:not(.head_row){
+	cursor: pointer;
 }
-/* applied in javascript-based html generation */
-/*.tool{
-	border-bottom:1px solid #aaa;
+.db_id{
+	flex: 1;				-webkit-flex: 1;
+	width:20px;
 }
-*/
-.tool_label{
-	padding-left:20px;
-	font-weight:bold;
+.db_name{
+	flex: 3;				-webkit-flex: 3;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	padding-right: 5px;
+	padding-left:5px;
+	width:100px;
 }
-.tool_action{
-	display:inline-block;
-	float:right;
-	padding-right:20px;
+.db_source{
+	flex: 2;				-webkit-flex: 2;
+	width: 40px;
+}
+.db_wav{
+	flex: 1;				-webkit-flex: 1;
+	width: 30px;
 }
 
-/* spec list */
-
-.spec_table_holder{
-	margin-top:none;
-	margin:20px;
-	border:1px solid #888;
-	border-radius:2px;
-	overflow:hidden;
+.db_spec_row{
+	transition: background-color .2s ease;
 }
-.spec_table{
-	width:100%;
-	border-collapse:collapse;
-	background:white;
-}
-.spec_table_head{
-	border-bottom:1px solid #888;
-	display:table;
-	width:100%;
-	table-layout:fixed;
-}
-.spec_table_body{
-	display:block;
-	max-height:100px;
-	overflow-y:auto;
-}
-.spec_table_row{
-	display:table;
-	width:100%;
-	table-layout:fixed;
-	border-top:1px solid #ccc;
-}
-.spec_table_row:first-child{
-	border-top:0px;
-}
-.spec_row_name{
-	overflow:auto;
-}
-.spec_row_color{
-	width:20%;
-}
-.spec_row_show{
-	width:20%;
- 	text-align:center;
+.selected_db_spec_row{
+	background-color: ;
 }
 
-/* preprocessing */
-
-/* the div containing a single preprocess */
-/*
-.single_preproc{
-	width: 95%;
-	margin: 5px auto;
-	background-color: #f8f8f8;
-	border:1px solid #bbb;
-	border-radius: 5px;
-	overflow:hidden;
-}
-*/
-
-/* title of that div */
-.table_expanded{
-}
-
-.collapser{
-	cursor:pointer;
-}
-.collapser:hover{
-}
-
-/* preprocess args table */
-.preproc_table{
-	width:100%;
-}
+/* end of flex table styling */
 
 
-/* selected vs unselected row actions */
 
 
-/* spec configs that are showing or hidden (only shows 1 at a time, in the same space) */
-
-.spec_button{
-	flex:1;
-	font-size:2rem;
-	border:1px solid #888;
-	border-radius:5px;
-	margin:5px;
-	font-family: 'Open Sans', sans-serif;
-	cursor:pointer;
-	text-align:center;
-}
-.spec_button:focus{
-	outline:none;
-}
-
-/* add and remove spec rows */
-#add_spec{
-	background-color: #77ee77;
-}
-#remove_spec{
-	background-color: #ffb2b2;
-}
-
-#plot_holder{
-	margin:5px;
-	height:50vh; /* default */
-	display:flex;
-	flex-direction:column;
-	justify-content:center;
-	background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-}
-#plot_placeholder{
-	text-align:center;
-	font-size:2rem;
-}
-.loading_text{
-	margin:0;
-}
 
 
-/* modal window */
-.modal_bg{
-	position:absolute;
-	width:100%;
-	height:100%;
-	background:rgba(0,0,0,.7);
-	display:flex;
-	flex-direction:column;
-	align-items:center;
-	justify-content:center;
-	z-index:11000;
-}
-.modal{
-	display:flex;
-	flex-direction:column;
-	justify-content:center;
-	background:#bbb;
-	border-radius:5px;
-	overflow:hidden;
-	min-width:70vw;
-}
-.modal_title{
-	text-align:center;
-	width:100%;
-	background:#999;
-	padding:5px;
-	margin-top:0;
-	margin-bottom:0;
-}
-#modal_spec_name{
-	min-width:15rem;
-}
-.modal_content{
-	padding: 20px;
-}
-#cancel_modal{
-	margin:5px;
-	float:right;
-}
 
 
-.modal_subtitle{
-	margin: 5px;
-}
-.modal_option{
-	background:#ddd;
-	border:1px solid #888;
-	border-top-right-radius: 5px;
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 5px;
-	padding:10px;
-	position:relative;
-}
-/* this one starts hidden */
-#modal_db{
-	display:none;
-}
-
-.db_table_holder{
-	position:relative;
-	overflow:hidden;
-	border-radius:5px;
-	border:1px solid #888;
-}
 
 
-#filter_loading{
-	display:none;
-	position:absolute;
-	background:rgba(100,100,100,.5);
-	width:100%;
-	height:100%;
-	text-align:center;
-}
-.database_table{
-	width:100%;
-	border-collapse:collapse;
-}
-
-#modal_db_thead{
-	display:block;
-	width:100%;
-	background-color:#444;
-	color:#eee;
-}
-#modal_db_tbody{
-	display:block;
-	width:calc(100% - 2px);
-	max-height:50vh;
-	overflow:auto;
-}
 
 
-.modal_db_headrow{
-	display:table;
-	width:100%;
-	cursor:pointer;
-	border-bottom:1px solid #ccc;
-	text-align:center;
-}
-.modal_db_row{
-	display:table;
-	width:100%;
-	cursor:pointer;
-	background:#fff;
-	border-bottom:1px solid #ccc;
-	text-align:center;
-}
-.modal_db_row:hover{
-	background:#ccc;
-}
-.modal_db_id{
-	width:10%;
-}
-.modal_db_name{
-}
-.modal_db_source{
-	width:20%;
-}
-.modal_db_wv{
-	width:20%;
-}
 
-.filter{
-	margin:5px;
-	display:inline-block;
-}
+
+
+
+
+
+
+
+
+
+
+
+

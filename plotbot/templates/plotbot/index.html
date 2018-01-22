@@ -232,18 +232,18 @@
 					-->
 
 					<div class="setting">
-						<label>File</label>
+						<label>File Input</label>
 						<input type=file accept=".csv" target="local_file">
 					</div>
 
 					<div class="setting">
-						<label>Name</label>
+						<label>Spec Name</label>
 						<input class="readonly_without_file required wide_field" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required" readonly>
 					</div>
 
 					<div class="setting">
-						<button class="add_button" id="add_from_file" disabled>Add</button>
-						<button class="add_button" id="cancel_add" disabled>Cancel</button>
+						<button class="setting_button" id="add_from_file" disabled>Add</button>
+						<button class="setting_button" id="cancel_add" disabled>Cancel</button>
 					</div>
 
 				</div>
@@ -256,6 +256,39 @@
 
 					<div class="setting">
 						<h4 class="col_title">Add from database</h4>
+					</div>
+					
+					<!-- interactive list of all spectra -->
+					<div class="db_list">
+						<div class="table_row head_row">
+							<div class="db_id">ID</div>
+							<div class="db_name">Name</div>
+							<div class="db_source">Source</div>
+							<div class="db_wav">&lambda;</div>
+						</div>
+						<div class="scrollable">
+						{% for spec in specs %}
+							<div class="table_row db_spec_row">
+								<div class="db_id">{{spec.spec_id}}</div>
+								<div class="db_name">{{spec.name}}</div>
+								<div class="db_source">{{spec.source}}</div>
+								<div class="db_wav">{{spec.wavelength}}</div>
+							</div>
+						{% endfor %}
+						</div>
+					</div>
+
+					<script>
+						// select db row on click
+						$('.db_spec_row').click(function(){
+							$(this).siblings('.selected_row').removeClass('selected_row');
+							$(this).addClass('selected_row');
+						});
+					</script>
+
+					<div class="setting">
+						<button class="setting_button" id="add_from_db" disabled>Add</button>
+						<button class="setting_button" id="cancel_db_add" disabled>Cancel</button>
 					</div>
 
 				</div>

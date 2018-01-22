@@ -523,12 +523,12 @@ class SpecConfig{
 
 		// function for when this spec is clicked on in the list
 		row.on('click',function(){
-			// hide showing config(s)
-			$('.showing_config').removeClass('showing_config').addClass('hidden_config');
+			// hide showing config(s) (the $(this).find is necessary because there are selected rows in other tables (like the add-from-db table))
+			$(this).siblings('.showing_config').removeClass('showing_config').addClass('hidden_config');
 			// show the one that was clicked
 			$(configSel).removeClass('hidden_config').addClass('showing_config');
-			// unselect all rows
-			$('.selected_row').removeClass('selected_row').addClass('unselected_row');
+			// unselect all rows (the $(this).find is necessary because there are selected rows in other tables (like the add-from-db table))
+			$(this).siblings('.selected_row').removeClass('selected_row').addClass('unselected_row');
 			// select this one
 			$(rowSel).removeClass('unselected_row').addClass('selected_row');
 		});
@@ -750,7 +750,7 @@ class PlotHandler{
 
 	getSelectedSpecIndex(){
 		var _this = this;
-		if($('.selected_row').length){
+		if($('#spec_list').find('.selected_row').length){
 			var selected_spec_id = $('.selected_row').attr('id').split('_')[1];
 			var ssi = _this.getSpecIndexById(selected_spec_id);
 			return ssi;
