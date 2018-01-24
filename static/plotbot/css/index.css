@@ -300,7 +300,13 @@ input[type=number]{
 
 /* end of flex table styling */
 
-
+.text_block{
+	
+}
+.text_in_block{
+	font-size: .8rem;
+	text-align:justify;
+}
 
 
 

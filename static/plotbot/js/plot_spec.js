@@ -678,7 +678,7 @@ class PlotHandler{
 		this.plot_target = plot_target;
 
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
-		this.cur_vl_id = 0; // same deal but with vertical lines
+		this.cur_annotation_id = 0; // same deal but with vertical lines
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
 		this.vlList = [];
@@ -887,6 +887,38 @@ class PlotHandler{
 		return {'success':false};
 	}
 
+	// this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
+	/*
+	{
+		x: 1,
+		y: 1,
+		xref: 'x',
+		yref: 'y',
+		text: 'test annotation',
+		showarrow: 'true',
+		arrowhead: 7,
+		ax: 0,
+		ay: -40
+	}
+	*/
+
+	addTextAnnotation(){
+		// put it in the middle
+		let element = this.getElement();
+		let xcenter = element.layout.xaxis.range.reduce((a,b) => a+b)/2.;	// this takes the average of the length-two array
+		let ycenter = element.layout.yaxis.range.reduce((a,b) => a+b)/2.;
+		let to_an = {
+			id: this.cur_annotation_id,
+			x: xcenter,
+			y: ycenter,
+			text: 'test annotation',
+			showarrow: false,
+		};
+		this.cur_annotation_id ++;
+		this.annotationsList.push(to_an);
+		Plotly.relayout(this.getElement(), {annotations: this.annotationsList});
+	}
+
 	addVl(){
 		let new_vl = new VertLine(this.cur_vl_id);
 		this.vlList.push(new_vl);
@@ -1033,9 +1065,6 @@ class PlotHandler{
 	initialize(){
 		// insert plot configuration html
 		this.plotConfig.bindAll($('#global_tools'));
-
-		// TODO: add event listeners for plot updates
-		this.addToolListeners();
 
 		this.updatePlot();
 	}

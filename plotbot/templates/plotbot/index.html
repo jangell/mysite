@@ -25,14 +25,14 @@
 		<ul class="tabs">
 			<li class="tab" for="global_tools" id="global_tab">Plot Settings</li>
 			<li class="tab" for="spec_tools" id="spec_tab">Spec Settings</li>
-			<li class="tab default_tab" for="add_tools" id="add_tab">Add Spec</li>
-			<li class="tab" for="anno_tools" id="anno_tab">Annotations</li>
+			<li class="tab" for="add_tools" id="add_tab">Add Spec</li>
+			<li class="tab default_tab" for="anno_tools" id="anno_tab">Annotations</li>
 		</ul>
 		
 		<div class="toolset_container">
-			<div class="toolset" id="global_tools">
-				<!-- binding inputs for global tools -->
 
+
+			<div class="toolset" id="global_tools">
 				<div class="tools_col">
 					<div class="setting">
 						<label>Title</label>
@@ -65,7 +65,6 @@
 				</div>
 
 				<div class="tools_col">
-
 					<div class="setting">
 						<label>Show Legend</label>
 						<input type=checkbox class="right" target="show_legend" checked>
@@ -74,7 +73,6 @@
 						<label>Show Grid</label>
 						<input type=checkbox class="right" target="show_grid" checked>
 					</div>
-
 				</div>
 
 				<div class="tools_col">
@@ -95,13 +93,11 @@
 						<label>Bottom Margin</label>
 						<input type=number class="right" target="bottom_margin" value=80>
 					</div>
-
 				</div>
-
 			</div>
 
+
 			<div class="toolset" id="spec_tools">
-				
 				<div id="spec_config_example" class="spec_config showing_config">
 
 					<div class="tools_col">
@@ -206,10 +202,9 @@
 							</div>
 						</div>
 					</div>
-
 				</div>
-
 			</div>
+
 
 			<div class="toolset" id="add_tools">
 				<!-- add from local file -->
@@ -218,19 +213,10 @@
 					<div class="setting">
 						<h4 class="col_title">Add from file</h4>
 					</div>
-
 					<!-- 
-					select file
-					
-					name in list (default: filename) (d)
-					
-					add button
-					cancel button
-
 					TODO: Multi-add! list, where each item is a file and it changes css as it loads in, with filename and label as options
 					TODO: add-by-url
 					-->
-
 					<div class="setting">
 						<label>File Input</label>
 						<input type=file accept=".csv" target="local_file">
@@ -277,18 +263,39 @@
 						{% endfor %}
 						</div>
 					</div>
-
 					<div class="setting">
 						<button class="setting_button" id="add_from_db" disabled>Add</button>
 						<button class="setting_button" id="cancel_db_add" disabled>Cancel</button>
 					</div>
-
 				</div>
 			</div>
 
+
 			<div class="toolset" id="anno_tools">
 
+				<div class="tools_col">
+					<div class="text_block">
+						<p class="text_in_block">
+							Add a text or arrow annotation by clicking on the appropriate button below. Move the annotation by dragging it around, and click on it to edit. For arrow annotations, move the arrow by dragging the arrow, and move the text by dragging the text - the tail of the arrow will move to follow the text, while keeping the arrowhead in place.
+						</p>
+					</div>
+					<div class="setting">
+						<button id="add_text_annotation">Add Text</button>
+					</div>
+				</div>
+
+				<div class="tools_col">
+				</div>
+
+
 			</div>
+
+			<script>
+				$('#add_text_annotation').click(function(){
+					ph.addTextAnnotation();
+				});
+			</script>
+
 
 		</div>
 	</div>
@@ -392,7 +399,6 @@ $(document).ready(function(){
 <script>
 // non-aesthetic (functional) code
 
-/*
 var qz = 2481;	// quartz
 var al = 51;	// albite
 var am = 100;	// amicite
@@ -400,7 +406,6 @@ var startWith = []; // list of specIds to autopopulate chart
 startWith.push(qz);
 startWith.push(al);
 startWith.push(am);
-*/
 
 var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plot_holder'));
 ph.initialize();
