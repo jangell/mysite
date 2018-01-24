@@ -732,6 +732,14 @@ class PlotHandler{
 		var yr = this.getDivLayout().yaxis.range;
 		return yr;
 	}
+	// returns the center of the current plot
+	getCenter(){
+		let element = this.element;
+		let to_ret = {};
+		to_ret.x = this.getDivXRange().reduce((a,b) => a+b) / 2.; // take the average of the length-two array <range>
+		to_ret.y = this.getDivYRange().reduce((a,b) => a+b) / 2.;
+		return to_ret;
+	}
 
 	// get the index of a spectrum in specConfigList based on its spec id
 	getSpecIndexById(id){
@@ -904,15 +912,31 @@ class PlotHandler{
 
 	addTextAnnotation(){
 		// put it in the middle
-		let element = this.getElement();
-		let xcenter = element.layout.xaxis.range.reduce((a,b) => a+b)/2.;	// this takes the average of the length-two array
-		let ycenter = element.layout.yaxis.range.reduce((a,b) => a+b)/2.;
+		let center = this.getCenter();
 		let to_an = {
 			id: this.cur_annotation_id,
-			x: xcenter,
-			y: ycenter,
-			text: 'test annotation',
+			x: center.x,
+			y: center.y,
+			text: 'text annotation',
 			showarrow: false,
+		};
+		this.cur_annotation_id ++;
+		this.annotationsList.push(to_an);
+		Plotly.relayout(this.getElement(), {annotations: this.annotationsList});
+	}
+
+	addArrowAnnotation(){
+		// put the arrowhead in the middle
+		let center = this.getCenter();
+		let to_an = {
+			id: this.cur_annotation_id,
+			x: center.x,
+			y: center.y,
+			text: 'arrow annotation',
+			showarrow: true,
+			arrowhead: 1,
+			ax: 40,
+			ay: -30,
 		};
 		this.cur_annotation_id ++;
 		this.annotationsList.push(to_an);

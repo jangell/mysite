@@ -282,6 +282,9 @@
 					<div class="setting">
 						<button id="add_text_annotation">Add Text</button>
 					</div>
+					<div class="setting">
+						<button id="add_arrow_annotation">Add Arrow</button>
+					</div>
 				</div>
 
 				<div class="tools_col">
@@ -293,6 +296,9 @@
 			<script>
 				$('#add_text_annotation').click(function(){
 					ph.addTextAnnotation();
+				});
+				$('#add_arrow_annotation').click(function(){
+					ph.addArrowAnnotation();
 				});
 			</script>
 
