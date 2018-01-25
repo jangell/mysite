@@ -273,12 +273,15 @@
 
 			<div class="toolset" id="anno_tools">
 
+				<!-- add new annotations -->
 				<div class="tools_col">
+					<!--
 					<div class="text_block">
 						<p class="text_in_block">
 							Add a text or arrow annotation by clicking on the appropriate button below. Move the annotation by dragging it around, and click on it to edit. For arrow annotations, move the arrow by dragging the arrow, and move the text by dragging the text - the tail of the arrow will move to follow the text, while keeping the arrowhead in place.
 						</p>
 					</div>
+					-->
 					<div class="setting">
 						<button id="add_text_annotation">Add Text</button>
 					</div>
@@ -287,7 +290,36 @@
 					</div>
 				</div>
 
+				<!-- this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
+				{
+					x: 1,
+					y: 1,
+					xref: 'x',
+					yref: 'y',
+					text: 'test annotation',
+					showarrow: 'true',
+					arrowhead: 7,
+					ax: 0,
+					ay: -40
+				}
+				-->
+
+				<!-- edit or delete existing annotations -->
 				<div class="tools_col">
+					<div class="setting">
+						<h4 class="col_title" id="annotation_name roboto">Click annotation to select</h4>
+					</div>
+					<div class="setting">
+						<label>Font size</label>
+						<input type=number min=1 max=100 target="anno_fontsize">
+					</div>
+					<div class="setting">
+						<label>Font color</label>
+						<input type=color target="anno_fontcolor">
+					</div>
+					<div class="setting">
+						<button id="anno_remove" target="anno_remove">Remove</button>
+					</div>
 				</div>
 
 
@@ -300,6 +332,7 @@
 				$('#add_arrow_annotation').click(function(){
 					ph.addArrowAnnotation();
 				});
+
 			</script>
 
 
@@ -421,6 +454,17 @@ ph.initialize();
 $(document).on("wheel", "input[type=number]", function (e) {
     $(this).blur();
 });
+
+// ********************************************* annotations *****************************************
+// select annotation if it's edited or moved (by filling it in to annotation target)
+document.getElementById('plot_holder').on('plotly_relayout', function(eventdata){
+	debugger;
+});
+
+// select annotation if it's clicked
+
+
+// TODO: (also select annotation when it's added)
 
 // ****************************** add from file *****************************************
 

@@ -672,10 +672,11 @@ class PlotConfig{
 // handler for plot config and all spec configs for a given page
 class PlotHandler{
 	constructor(plot_config_target, spec_list_target, spec_config_target, plot_target, preprocesses){
-		this.plot_config_target = plot_config_target;
+		this.plot_config_target = $('#global_tools');
 		this.spec_list_target = $('#spec_list .scrollable');
 		this.spec_config_target = spec_config_target;
 		this.plot_target = plot_target;
+		this.annotations_target = $('#anno_tools');
 
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
 		this.cur_annotation_id = 0; // same deal but with vertical lines
@@ -910,6 +911,7 @@ class PlotHandler{
 	}
 	*/
 
+	// create a new text annotation in the middle of the plot
 	addTextAnnotation(){
 		// put it in the middle
 		let center = this.getCenter();
@@ -925,6 +927,7 @@ class PlotHandler{
 		Plotly.relayout(this.getElement(), {annotations: this.annotationsList});
 	}
 
+	// create a new arrow annotation in the middle of the plot
 	addArrowAnnotation(){
 		// put the arrowhead in the middle
 		let center = this.getCenter();
@@ -943,6 +946,17 @@ class PlotHandler{
 		Plotly.relayout(this.getElement(), {annotations: this.annotationsList});
 	}
 
+	// returns the annotation with the given ID or <null> if no annotation exists with that ID
+	getAnnotationById(id){
+		for(let i = 0; i < this.annotationsList.length; i++){
+			if(this.annotationsList[i].id === id){
+				return this.annotationsList[i];
+			}
+		}
+		return null;
+	}
+
+	/*
 	addVl(){
 		let new_vl = new VertLine(this.cur_vl_id);
 		this.vlList.push(new_vl);
@@ -954,7 +968,7 @@ class PlotHandler{
 		this.addToolListeners();
 		this.updatePlot();
 	}
-
+	*/
 
 	// updates the plot drawing -> move this to startPlot and only have it start the plot
 	updatePlot(){
@@ -1042,10 +1056,27 @@ class PlotHandler{
 		Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false, editable:true});
 
 		// hook in a function to update settings on zoom / pan, or annotation(s) change
+		
 		plot_div.on('plotly_relayout',function(eventdata){
 			// set annotations
-
 			_this.annotationsList = _this.getElement().layout.annotations;
+
+			// set selected annotation if annotations get a mention
+			console.log('Running relayout with the following eventdata:');
+			console.log(eventdata);
+			//debugger;
+
+			// catch relayout events on editable fields, like title, xaxis, yaxis, 
+			if('title' in eventdata){_this.plot_config_target.find('[target=title]').val(eventdata['title']);}
+			if('xaxis.title' in eventdata){_this.plot_config_target.find('[target=xlabel]').val(eventdata['xaxis.title']);}
+			if('yaxis.title' in eventdata){_this.plot_config_target.find('[target=ylabel]').val(eventdata['yaxis.title']);}
+			
+
+			if(eventdata.annotations && eventdata.annotations.length){
+				// just use the first one in the dictionary. we're probably only ever changing one at a time
+				let to_bind = eventdata.annotations[0];
+				//debugger;
+			}
 
 			var nDigits = 2;
 			// eventdata is either dragmode, autorange, or x-/y-axis ranges
