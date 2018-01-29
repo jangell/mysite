@@ -512,7 +512,7 @@ class SpecConfig{
 
 	// generates a row with name and show/don't-show checkbox
 	generateSpecListHtml(){
-		let row = $('<div>').addClass('table_row').attr('id',this.getRowId());
+		let row = $('<div>').addClass('table_row').addClass('speclist_row').attr('id',this.getRowId());
 		row.append($('<div>').addClass('text').html(this.spec_name));
 		row.append($('<div>').addClass('color').append($('<div>').addClass('color_patch').css({'background-color':'blue'})));
 		row.append($('<div>').addClass('showing').append($('<input>').attr('type','checkbox').attr('checked',true).attr('disabled',true)));
@@ -1066,14 +1066,6 @@ class PlotHandler{
 				let new_name = eventdata[0]['name'];
 				sc.fields['label'].setValue(new_name);
 			}
-			// check for visible (show) update
-			if('visible' in eventdata[0]){
-				let sc_ind = eventdata[1][0];
-				let sc = _this.specConfigList[sc_ind];
-				let new_show = eventdata[0]['visible'];
-				sc.fields['show'].setValue(new_show);
-				//sc.fields['show'].element.change(); // this pushes the change to the speclist show checkbox as well ... actually this line gets things mad out of sync
-			}
 			//debugger;
 		});
 
@@ -1082,8 +1074,8 @@ class PlotHandler{
 			_this.annotationsList = _this.getElement().layout.annotations;
 
 			// set selected annotation if annotations get a mention
-			console.log('Running relayout with the following eventdata:');
-			console.log(eventdata);
+			//console.log('Running relayout with the following eventdata:');
+			//console.log(eventdata);
 			//debugger;
 
 			// catch relayout events on editable fields, like title, xaxis, yaxis, 
