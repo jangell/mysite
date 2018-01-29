@@ -1057,7 +1057,27 @@ class PlotHandler{
 
 		// hook in a function to update settings on zoom / pan, or annotation(s) change
 		
-		plot_div.on('plotly_relayout',function(eventdata){
+		plot_div.on('plotly_restyle', function(eventdata){
+			// an update is going to be a length-two array, with the first item being a dictionary {name: '<name>'} and the second being a list with the index of the spectrum
+			// check for name (label) update
+			if('name' in eventdata[0]){
+				let sc_ind = eventdata[1][0];
+				let sc = _this.specConfigList[sc_ind];
+				let new_name = eventdata[0]['name'];
+				sc.fields['label'].setValue(new_name);
+			}
+			// check for visible (show) update
+			if('visible' in eventdata[0]){
+				let sc_ind = eventdata[1][0];
+				let sc = _this.specConfigList[sc_ind];
+				let new_show = eventdata[0]['visible'];
+				sc.fields['show'].setValue(new_show);
+				sc.fields['show'].element.change(); // this pushes the change to the speclist show checkbox as well
+			}
+			//debugger;
+		});
+
+		plot_div.on('plotly_relayout', function(eventdata){
 			// set annotations
 			_this.annotationsList = _this.getElement().layout.annotations;
 
@@ -1070,7 +1090,7 @@ class PlotHandler{
 			if('title' in eventdata){_this.plot_config_target.find('[target=title]').val(eventdata['title']);}
 			if('xaxis.title' in eventdata){_this.plot_config_target.find('[target=xlabel]').val(eventdata['xaxis.title']);}
 			if('yaxis.title' in eventdata){_this.plot_config_target.find('[target=ylabel]').val(eventdata['yaxis.title']);}
-			
+
 
 			if(eventdata.annotations && eventdata.annotations.length){
 				// just use the first one in the dictionary. we're probably only ever changing one at a time
