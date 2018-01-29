@@ -1072,7 +1072,7 @@ class PlotHandler{
 				let sc = _this.specConfigList[sc_ind];
 				let new_show = eventdata[0]['visible'];
 				sc.fields['show'].setValue(new_show);
-				sc.fields['show'].element.change(); // this pushes the change to the speclist show checkbox as well
+				//sc.fields['show'].element.change(); // this pushes the change to the speclist show checkbox as well ... actually this line gets things mad out of sync
 			}
 			//debugger;
 		});
