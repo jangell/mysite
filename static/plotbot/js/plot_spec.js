@@ -677,14 +677,28 @@ class PlotHandler{
 		this.spec_config_target = spec_config_target;
 		this.plot_target = plot_target;
 		this.annotations_target = $('#anno_tools');
-		this.anno_template_element = $('#example_annotation').attr('id',null);
 
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
 		this.cur_annotation_id = 0; // same deal but with vertical lines
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
 		this.vlList = [];
-		this.annotationsList = [];
+		this.annotationsList = [
+/*
+			// this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
+			{
+				x: 1,
+				y: 1,
+				xref: 'x',
+				yref: 'y',
+				text: 'test annotation',
+				showarrow: 'true',
+				arrowhead: 7,
+				ax: 0,
+				ay: -40
+			}
+*/
+		];
 
 		// register preprocesses here to automatically add them to specconfigs
 		// the order here matters. this is the order in which, if used, preprocesses will be applied (dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
@@ -882,6 +896,21 @@ class PlotHandler{
 		return {'success':false};
 	}
 
+	// this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
+	/*
+	{
+		x: 1,
+		y: 1,
+		xref: 'x',
+		yref: 'y',
+		text: 'test annotation',
+		showarrow: 'true',
+		arrowhead: 7,
+		ax: 0,
+		ay: -40
+	}
+	*/
+
 	// create a new text annotation in the middle of the plot
 	// things like font size and color are there as explicit defaults to fill in fields in selected_annotation
 	addTextAnnotation(){
@@ -893,17 +922,16 @@ class PlotHandler{
 			y: center.y,
 			text: 'text annotation',
 			showarrow: false,
-			opacity: 1.,
-			color: '#000000',
+
 			font: {
 				size: 15,
+				color: '#000000'
 			},
+			opacity: 1,
 
 		};
 		this.cur_annotation_id ++;
 		this.annotationsList.push(to_an);
-		// handle html generation and binding here
-		//this.annotations_target.append(this.generateAnnotationHtml(to_an));
 		Plotly.relayout(this.getElement(), {annotations: this.annotationsList});
 	}
 
@@ -920,11 +948,6 @@ class PlotHandler{
 			arrowhead: 1,
 			ax: 40,
 			ay: -30,
-			color: '#000000',
-			opacity: 1.,
-			font: {
-				size: 15,
-			},
 		};
 		this.cur_annotation_id ++;
 		this.annotationsList.push(to_an);
@@ -955,34 +978,23 @@ class PlotHandler{
 	}
 	*/
 
-	// generates annotation html for <anno> and binds it using bindAnnotation
-	generateAnnotationHtml(anno){
-		let _this = this;
-		let id = 'annotation_'+anno.id;
-
-		// show it to start with - hide any other .showing_annotation by removing the class and then give this the class
-		$('.showing_annotation').removeClass('showing_annotation');
-		let el = this.anno_template_element.clone().addClass('showing_annotation');
-
-		this.annotations_target.append(el);
-		this.bindAnnotation(anno, el);
-
-		return el;
-	}
-
 	// binds annotation <anno> to the annotation settings
-	bindAnnotation(anno, target){
+	bindAnnotations(anno){
 		let _this = this;
 
+		let target = this.annotations_target;
 		// get the index of the selected annotation
 		let anno_ids = this.getElement().layout.annotations.map(function(e){return e.id;});
+		console.log(anno_ids);
 		let anno_ind = anno_ids.indexOf(anno.id);
+		console.log(anno_ind);
 		let anno_str = 'annotations['+anno_ind+']';
 
+		//debugger;
 		// set tools to current values
 		target.find('[target=anno_text]').val(anno.text ? anno.text : '');
 		target.find('[target=anno_fontsize]').val(anno.font && anno.font.size ? anno.font.size : '');
-		target.find('[target=anno_color]').val(anno.color && anno.color ? anno.color : '#000000'); // default to black
+		target.find('[target=anno_fontcolor]').val(anno.font && anno.font.color ? anno.font.color : '#000000'); // default to black
 		target.find('[target=anno_opacity]').val(anno.opacity ? anno.opacity : 1); // default to completely opaque
 		
 		// update functions trigger a relayout event
@@ -1114,6 +1126,7 @@ class PlotHandler{
 				let new_name = eventdata[0]['name'];
 				sc.fields['label'].setValue(new_name);
 			}
+			//debugger;
 		});
 
 		plot_div.on('plotly_relayout', function(eventdata){
@@ -1123,8 +1136,19 @@ class PlotHandler{
 			// set selected annotation if annotations get a mention
 			// console.log('Running relayout with the following eventdata:');
 			// console.log(eventdata);
+			// debugger;
 
-			// TODO: select a newly created or edited annotation by html (and hide all others)
+			// this selects a newly added annotation
+			if(eventdata.annotations && eventdata.annotations){
+				// just use the first one in the dictionary. we're probably only ever changing one at a time
+				let selected = eventdata.annotations[eventdata.annotations.length-1];
+				// bind all the settings of the selected annotation to the annotation settings target
+				_this.bindAnnotations(selected);
+				//debugger;
+			}
+
+			// this selectes an edited or moved annotation (make sure it isn't already selected, because update events from a selected spectrum get routed here)
+			// TODO
 
 			// catch relayout events on editable fields, like title, xaxis, yaxis, 
 			if('title' in eventdata){_this.plot_config_target.find('[target=title]').val(eventdata['title']);}
