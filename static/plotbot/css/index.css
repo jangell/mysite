@@ -321,17 +321,17 @@ input[type=number]{
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-#anno_remove{
+.anno_remove{
 	margin:auto;
 }
 
-.annotation{
+.annotation_tool{
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 	display: none;
 }
-.showing_annotation{
+.showing_annotation_tool{
 	display: flex;
 }
 

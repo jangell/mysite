@@ -308,8 +308,8 @@
 				-->
 
 				<!-- edit or delete existing annotations -->
-				<div class="tools_col">
-					<div class="annotation showing_annotation" id="example_annotation">
+				<div class="tools_col" id="anno_list">
+					<div class="annotation_tool showing_annotation_tool" id="example_annotation_tool">
 						<div class="setting">
 							<h4 class="col_title" id="annotation_name">Click annotation to select</h4>
 						</div>
@@ -330,7 +330,7 @@
 							<input type=number target="anno_opacity" min=0 max=1 step=any default=1>
 						</div>
 						<div class="setting">
-							<button id="anno_remove" target="anno_remove">Remove</button>
+							<button class="anno_remove" target="anno_remove">Remove</button>
 						</div>
 					</div>
 				</div>
@@ -704,7 +704,7 @@ $(document).ready(function(){
 
 	// development tool: autopopulate
 	for(let i = 0; i < startWith.length; i++){
-		ph.addSpecByDbId(startWith[i]);	
+		//ph.addSpecByDbId(startWith[i]);	
 	}
 
 

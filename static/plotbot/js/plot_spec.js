@@ -676,7 +676,8 @@ class PlotHandler{
 		this.spec_list_target = $('#spec_list .scrollable');
 		this.spec_config_target = spec_config_target;
 		this.plot_target = plot_target;
-		this.annotations_target = $('#anno_tools');
+		this.annotations_target = $('#anno_list');
+		this.annotation_template = $('#example_annotation_tool').attr('id', null);
 
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
 		this.cur_annotation_id = 0; // same deal but with vertical lines
@@ -911,6 +912,15 @@ class PlotHandler{
 	}
 	*/
 
+	generateAnnotationHtml(anno){
+		let el = this.annotation_template.clone().attr('id', 'annotation_'+anno.id);
+		// hide any other showing annotation(s)
+		$('.showing_annotation_tool').removeClass('showing_annotation_tool');
+		this.bindAnnotation(anno, el);
+		el.addClass('showing_annotation_tool');
+		return el;
+	}
+
 	// create a new text annotation in the middle of the plot
 	// things like font size and color are there as explicit defaults to fill in fields in selected_annotation
 	addTextAnnotation(){
@@ -922,14 +932,15 @@ class PlotHandler{
 			y: center.y,
 			text: 'text annotation',
 			showarrow: false,
-
 			font: {
-				size: 15,
-				color: '#000000'
-			},
-			opacity: 1,
-
+				color: '#ff0000',
+				size: 15
+			}
 		};
+
+		// generate html (with bindings) and push it onto the page
+		this.annotations_target.append(this.generateAnnotationHtml(to_an));
+
 		this.cur_annotation_id ++;
 		this.annotationsList.push(to_an);
 		Plotly.relayout(this.getElement(), {annotations: this.annotationsList});
@@ -946,9 +957,18 @@ class PlotHandler{
 			text: 'arrow annotation',
 			showarrow: true,
 			arrowhead: 1,
+			arrowcolor: '#0000ff',
 			ax: 40,
 			ay: -30,
+			font: {
+				color: '#0000ff',
+				size: 15
+			}
 		};
+
+		// generate html (with bindings) and push it onto the page
+		this.annotations_target.append(this.generateAnnotationHtml(to_an));
+
 		this.cur_annotation_id ++;
 		this.annotationsList.push(to_an);
 		Plotly.relayout(this.getElement(), {annotations: this.annotationsList});
@@ -979,18 +999,9 @@ class PlotHandler{
 	*/
 
 	// binds annotation <anno> to the annotation settings
-	bindAnnotations(anno){
+	bindAnnotation(anno, target){
 		let _this = this;
 
-		let target = this.annotations_target;
-		// get the index of the selected annotation
-		let anno_ids = this.getElement().layout.annotations.map(function(e){return e.id;});
-		console.log(anno_ids);
-		let anno_ind = anno_ids.indexOf(anno.id);
-		console.log(anno_ind);
-		let anno_str = 'annotations['+anno_ind+']';
-
-		//debugger;
 		// set tools to current values
 		target.find('[target=anno_text]').val(anno.text ? anno.text : '');
 		target.find('[target=anno_fontsize]').val(anno.font && anno.font.size ? anno.font.size : '');
@@ -1000,7 +1011,11 @@ class PlotHandler{
 		// update functions trigger a relayout event
 		// they're all separate, which ties back to the idea of the plot being the single source of truth
 
+		// get anno_ind at the change function
+
 		target.find('[target=anno_text]').change(function(){
+			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id;}).indexOf(anno.id);
+			let anno_str = 'annotations['+anno_ind+']';
 			let anno_key = anno_str + '.text';
 			let update = {};
 			update[anno_key] = $(this).val();	// dear future reader: $(this) is a jquery selector based on the target.find function at the beginning of this loop. _this refers to the plothandler object. I'm so, so sorry
@@ -1008,6 +1023,8 @@ class PlotHandler{
 		});
 
 		target.find('[target=anno_fontsize]').change(function(){
+			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id;}).indexOf(anno.id);
+			let anno_str = 'annotations['+anno_ind+']';
 			let anno_key = anno_str + '.font.size';
 			let update = {};
 			update[anno_key] = $(this).val();
@@ -1015,17 +1032,32 @@ class PlotHandler{
 		});
 
 		target.find('[target=anno_fontcolor]').change(function(){
-			let anno_key = anno_str + '.font.color';
+			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id;}).indexOf(anno.id);
+			let anno_str = 'annotations['+anno_ind+']';
+			let font_anno_key = anno_str + '.font.color';
+			let arrow_anno_key = anno_str + '.arrowcolor';
+			let update = {};
+			update[font_anno_key] = $(this).val();
+			update[arrow_anno_key] = $(this).val();
+			Plotly.relayout(_this.getElement(), update);
+		});
+
+		target.find('[target=anno_opacity]').change(function(){
+			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id;}).indexOf(anno.id);
+			let anno_str = 'annotations['+anno_ind+']';
+			let anno_key = anno_str + '.opacity';
 			let update = {};
 			update[anno_key] = $(this).val();
 			Plotly.relayout(_this.getElement(), update);
 		});
 
-		target.find('[target=anno_opacity]').change(function(){
-			let anno_key = anno_str + '.opacity';
-			let update = {};
-			update[anno_key] = $(this).val();
-			Plotly.relayout(_this.getElement(), update);
+		// this never deletes the example annotation because it never binds to it
+		target.find('[target=anno_remove]').click(function(){
+			$(this).closest('.annotation_tool').remove(); 								// remove html
+			$('.annotation_tool').last().addClass('showing_annotation_tool');			// show annotation. if no other annotations, show example annotation
+			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id}).indexOf(anno.id);
+			_this.annotationsList.splice(anno_ind, 1);									// remove from annotations list
+			_this.updatePlot();															// refresh to get rid of this annotation
 		});
 
 	}
@@ -1133,22 +1165,26 @@ class PlotHandler{
 			// set annotations
 			_this.annotationsList = _this.getElement().layout.annotations;
 
-			// set selected annotation if annotations get a mention
-			// console.log('Running relayout with the following eventdata:');
-			// console.log(eventdata);
-			// debugger;
-
-			// this selects a newly added annotation
-			if(eventdata.annotations && eventdata.annotations){
-				// just use the first one in the dictionary. we're probably only ever changing one at a time
-				let selected = eventdata.annotations[eventdata.annotations.length-1];
-				// bind all the settings of the selected annotation to the annotation settings target
-				_this.bindAnnotations(selected);
-				//debugger;
+			// check if this relayout is happening because of a change to an annotation. if so, select that annotation
+			if(Object.keys(eventdata).reduce((a,b) => ''+a+b).indexOf('annotations') != -1){
+				let anno_ind;
+				let made_selection = false;
+				for(let k in eventdata){
+					// select a moved / edited annotation
+					if(k.indexOf('annotations[') != -1 && !made_selection){
+						let anno_ind = k.split('annotations[')[1].split(']')[0]; // this gets the index of the annotation in the plot-held list
+						let anno_selector = '#annotation_' + _this.getElement().layout.annotations[anno_ind].id;
+						$('.showing_annotation_tool').removeClass('showing_annotation_tool');
+						$(anno_selector).addClass('showing_annotation_tool');
+						made_selection = true;	// we done!
+					}
+					// check for text update to push upstream
+					if(k.indexOf('annotations[') != -1 && k.indexOf('text') != -1){
+						let anno_ind = k.split('annotations[')[1].split(']')[0]; // see above
+						$('#annotation_'+anno_ind).find('[target=anno_text]').val(eventdata[k]);
+					}
+				}
 			}
-
-			// this selectes an edited or moved annotation (make sure it isn't already selected, because update events from a selected spectrum get routed here)
-			// TODO
 
 			// catch relayout events on editable fields, like title, xaxis, yaxis, 
 			if('title' in eventdata){_this.plot_config_target.find('[target=title]').val(eventdata['title']);}
