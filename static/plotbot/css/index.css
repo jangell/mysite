@@ -313,13 +313,27 @@ input[type=number]{
 	text-align:justify;
 }
 
+#cur_sel{
+	display:block;
+	max-width:200px;
+	margin:0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
 #anno_remove{
-	width:50%;
 	margin:auto;
 }
 
-
-
+.annotation{
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	display: none;
+}
+.showing_annotation{
+	display: flex;
+}
 
 
 

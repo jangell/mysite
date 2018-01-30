@@ -677,28 +677,14 @@ class PlotHandler{
 		this.spec_config_target = spec_config_target;
 		this.plot_target = plot_target;
 		this.annotations_target = $('#anno_tools');
+		this.anno_template_element = $('#example_annotation').attr('id',null);
 
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
 		this.cur_annotation_id = 0; // same deal but with vertical lines
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
 		this.vlList = [];
-		this.annotationsList = [
-/*
-			// this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
-			{
-				x: 1,
-				y: 1,
-				xref: 'x',
-				yref: 'y',
-				text: 'test annotation',
-				showarrow: 'true',
-				arrowhead: 7,
-				ax: 0,
-				ay: -40
-			}
-*/
-		];
+		this.annotationsList = [];
 
 		// register preprocesses here to automatically add them to specconfigs
 		// the order here matters. this is the order in which, if used, preprocesses will be applied (dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
@@ -896,22 +882,8 @@ class PlotHandler{
 		return {'success':false};
 	}
 
-	// this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
-	/*
-	{
-		x: 1,
-		y: 1,
-		xref: 'x',
-		yref: 'y',
-		text: 'test annotation',
-		showarrow: 'true',
-		arrowhead: 7,
-		ax: 0,
-		ay: -40
-	}
-	*/
-
 	// create a new text annotation in the middle of the plot
+	// things like font size and color are there as explicit defaults to fill in fields in selected_annotation
 	addTextAnnotation(){
 		// put it in the middle
 		let center = this.getCenter();
@@ -921,9 +893,17 @@ class PlotHandler{
 			y: center.y,
 			text: 'text annotation',
 			showarrow: false,
+			opacity: 1.,
+			color: '#000000',
+			font: {
+				size: 15,
+			},
+
 		};
 		this.cur_annotation_id ++;
 		this.annotationsList.push(to_an);
+		// handle html generation and binding here
+		//this.annotations_target.append(this.generateAnnotationHtml(to_an));
 		Plotly.relayout(this.getElement(), {annotations: this.annotationsList});
 	}
 
@@ -940,6 +920,11 @@ class PlotHandler{
 			arrowhead: 1,
 			ax: 40,
 			ay: -30,
+			color: '#000000',
+			opacity: 1.,
+			font: {
+				size: 15,
+			},
 		};
 		this.cur_annotation_id ++;
 		this.annotationsList.push(to_an);
@@ -969,6 +954,69 @@ class PlotHandler{
 		this.updatePlot();
 	}
 	*/
+
+	// generates annotation html for <anno> and binds it using bindAnnotation
+	generateAnnotationHtml(anno){
+		let _this = this;
+		let id = 'annotation_'+anno.id;
+
+		// show it to start with - hide any other .showing_annotation by removing the class and then give this the class
+		$('.showing_annotation').removeClass('showing_annotation');
+		let el = this.anno_template_element.clone().addClass('showing_annotation');
+
+		this.annotations_target.append(el);
+		this.bindAnnotation(anno, el);
+
+		return el;
+	}
+
+	// binds annotation <anno> to the annotation settings
+	bindAnnotation(anno, target){
+		let _this = this;
+
+		// get the index of the selected annotation
+		let anno_ids = this.getElement().layout.annotations.map(function(e){return e.id;});
+		let anno_ind = anno_ids.indexOf(anno.id);
+		let anno_str = 'annotations['+anno_ind+']';
+
+		// set tools to current values
+		target.find('[target=anno_text]').val(anno.text ? anno.text : '');
+		target.find('[target=anno_fontsize]').val(anno.font && anno.font.size ? anno.font.size : '');
+		target.find('[target=anno_color]').val(anno.color && anno.color ? anno.color : '#000000'); // default to black
+		target.find('[target=anno_opacity]').val(anno.opacity ? anno.opacity : 1); // default to completely opaque
+		
+		// update functions trigger a relayout event
+		// they're all separate, which ties back to the idea of the plot being the single source of truth
+
+		target.find('[target=anno_text]').change(function(){
+			let anno_key = anno_str + '.text';
+			let update = {};
+			update[anno_key] = $(this).val();	// dear future reader: $(this) is a jquery selector based on the target.find function at the beginning of this loop. _this refers to the plothandler object. I'm so, so sorry
+			Plotly.relayout(_this.getElement(), update);
+		});
+
+		target.find('[target=anno_fontsize]').change(function(){
+			let anno_key = anno_str + '.font.size';
+			let update = {};
+			update[anno_key] = $(this).val();
+			Plotly.relayout(_this.getElement(), update);
+		});
+
+		target.find('[target=anno_fontcolor]').change(function(){
+			let anno_key = anno_str + '.font.color';
+			let update = {};
+			update[anno_key] = $(this).val();
+			Plotly.relayout(_this.getElement(), update);
+		});
+
+		target.find('[target=anno_opacity]').change(function(){
+			let anno_key = anno_str + '.opacity';
+			let update = {};
+			update[anno_key] = $(this).val();
+			Plotly.relayout(_this.getElement(), update);
+		});
+
+	}
 
 	// updates the plot drawing -> move this to startPlot and only have it start the plot
 	updatePlot(){
@@ -1066,7 +1114,6 @@ class PlotHandler{
 				let new_name = eventdata[0]['name'];
 				sc.fields['label'].setValue(new_name);
 			}
-			//debugger;
 		});
 
 		plot_div.on('plotly_relayout', function(eventdata){
@@ -1074,21 +1121,15 @@ class PlotHandler{
 			_this.annotationsList = _this.getElement().layout.annotations;
 
 			// set selected annotation if annotations get a mention
-			//console.log('Running relayout with the following eventdata:');
-			//console.log(eventdata);
-			//debugger;
+			// console.log('Running relayout with the following eventdata:');
+			// console.log(eventdata);
+
+			// TODO: select a newly created or edited annotation by html (and hide all others)
 
 			// catch relayout events on editable fields, like title, xaxis, yaxis, 
 			if('title' in eventdata){_this.plot_config_target.find('[target=title]').val(eventdata['title']);}
 			if('xaxis.title' in eventdata){_this.plot_config_target.find('[target=xlabel]').val(eventdata['xaxis.title']);}
 			if('yaxis.title' in eventdata){_this.plot_config_target.find('[target=ylabel]').val(eventdata['yaxis.title']);}
-
-
-			if(eventdata.annotations && eventdata.annotations.length){
-				// just use the first one in the dictionary. we're probably only ever changing one at a time
-				let to_bind = eventdata.annotations[0];
-				//debugger;
-			}
 
 			var nDigits = 2;
 			// eventdata is either dragmode, autorange, or x-/y-axis ranges
