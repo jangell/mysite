@@ -47,6 +47,7 @@ html{
 	border-left:none;
 	
 	cursor:pointer;
+	
 	transition: .2s all; -webkit-transition: .2s all;
 }
 .tab:first-child{

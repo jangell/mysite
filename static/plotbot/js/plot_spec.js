@@ -1145,7 +1145,7 @@ class PlotHandler{
 			annotations: this.annotationsList,
 		}
 
-		Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false, editable:true});
+		Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false, editable:true, modeBarButtonsToRemove: ['sendDataToCloud']});
 
 		// hook in a function to update settings on zoom / pan, or annotation(s) change
 		

@@ -23,10 +23,10 @@
 <div class="all_tools">
 	<div class="toolbar">
 		<ul class="tabs">
-			<li class="tab" for="global_tools" id="global_tab">Plot Settings</li>
+			<li class="tab default_tab" for="global_tools" id="global_tab">Plot Settings</li>
 			<li class="tab" for="spec_tools" id="spec_tab">Spec Settings</li>
 			<li class="tab" for="add_tools" id="add_tab">Add Spec</li>
-			<li class="tab default_tab" for="anno_tools" id="anno_tab">Annotations</li>
+			<li class="tab" for="anno_tools" id="anno_tab">Annotations</li>
 		</ul>
 		
 		<div class="toolset_container">
@@ -704,7 +704,7 @@ $(document).ready(function(){
 
 	// development tool: autopopulate
 	for(let i = 0; i < startWith.length; i++){
-		//ph.addSpecByDbId(startWith[i]);	
+		ph.addSpecByDbId(startWith[i]);	
 	}
 
 
