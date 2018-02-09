@@ -20,7 +20,7 @@
 
 <style>
 </style>
-<div class="all_tools">
+<div class="all_tools" id="all_tools">
 	<div class="toolbar">
 		<ul class="tabs">
 			<li class="tab default_tab" for="global_tools" id="global_tab">Plot Settings</li>
@@ -30,7 +30,6 @@
 		</ul>
 		
 		<div class="toolset_container">
-
 
 			<div class="toolset" id="global_tools">
 				<div class="tools_col">
@@ -338,16 +337,6 @@
 
 			</div>
 
-			<script>
-				$('#add_text_annotation').click(function(){
-					ph.addTextAnnotation();
-				});
-				$('#add_arrow_annotation').click(function(){
-					ph.addArrowAnnotation();
-				});
-
-			</script>
-
 
 		</div>
 	</div>
@@ -371,7 +360,9 @@
 			<button id="remove_selected_spec" title="Delete the curretly selected spectrum and its settings (this cannot be undone)">Remove</button>
 		</div>
 	</div>
-	<!-- put quick-add and remove at the bottom of the spec list div -->
+</div>
+<div id="collapser">
+	<h5 id="collapse_text">Collapse tools</h5>
 </div>
 
 <div id="plot_holder">
@@ -383,6 +374,53 @@
 <script>
 // handle all aesthetic properties & changes
 $(document).ready(function(){
+
+	// gets extra height in a jquery element
+	function getExtraHeight(el){
+		let to_height = el.height();
+		el.children(':visible').each(function(i, k){
+			to_height -= $(k).height();
+		});
+		return to_height;
+	}
+
+	// collapsible toolbar
+	var collapsed_text = 'Expand tools';
+	var expanded_text = 'Collapse tools';
+	$('#collapser').click(function(){
+		let tools = $('#all_tools');
+		let plot = $('#plot_holder');
+		let plot_el = document.getElementById('plot_holder');
+		let started_showing = tools.is(':visible');
+		if(started_showing){
+			tools.hide();
+			$('#collapse_text').html(collapsed_text);
+			// resize (make it the right size)
+			plot.hide();
+			let to_height = getExtraHeight($('#body_content'));
+			plot.show();
+			Plotly.relayout(plot_el, {height: to_height})
+		}
+		else{
+			// height will be total height of body content minus everything that isn't plot_holder
+			plot.hide();
+			tools.show();
+			let to_height = getExtraHeight($('#body_content'));
+			plot.show();
+			Plotly.relayout(plot_el, {height:to_height})
+			$('#collapse_text').html(expanded_text);
+			// resize (make it really small and for some reason it works)
+			
+		}
+		// make the plot fill up the rest of the space
+		
+		/*
+		let update = {
+			height: $('#plot_holder').height()
+		}
+		Plotly.relayout(document.getElementById('plot_holder'), update);
+		*/
+	});
 
 	// tab clicking functionality
 	$('.tab').click(function(){
@@ -481,10 +519,13 @@ document.getElementById('plot_holder').on('plotly_relayout', function(eventdata)
 	debugger;
 });
 
-// select annotation if it's clicked
-
-
-// TODO: (also select annotation when it's added)
+// handle adding annotations
+$('#add_text_annotation').click(function(){
+	ph.addTextAnnotation();
+});
+$('#add_arrow_annotation').click(function(){
+	ph.addArrowAnnotation();
+});
 
 // ****************************** add from file *****************************************
 
