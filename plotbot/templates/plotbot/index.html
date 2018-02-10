@@ -488,15 +488,26 @@ $(document).ready(function(){
 
 <script>
 
+Plotly.plot(document.getElementById('plot_holder'))/*.then(function(gd){
+    return Plotly.downloadImage({
+        filename: 'myspecialplot',
+        format: 'png', //also can use 'jpeg', 'webp', 'svg'
+        height: 500,
+        width: 700
+    });
+})*/.then(function(filename){
+    console.log(filename);
+});
+
 // non-aesthetic (functional) code
 
 var qz = 2481;	// quartz
 var al = 51;	// albite
 var am = 100;	// amicite
 var startWith = []; // list of specIds to autopopulate chart
-startWith.push(qz);
-startWith.push(al);
-startWith.push(am);
+//startWith.push(qz);
+//startWith.push(al);
+//startWith.push(am);
 
 var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plot_holder'));
 ph.initialize();
