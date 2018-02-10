@@ -370,7 +370,10 @@ input[type=number]{
 
 
 
-
+/* override plotly defaults */
+.modebar{
+	z-index: 0 !important;
+}
 
 
 
