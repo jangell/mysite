@@ -164,6 +164,14 @@ input[type=number]{
 	white-space: nowrap;
 }
 
+/* every table is made up of table rows. either zero or one is .selected_row */
+
+.head_row{
+	height:23px;
+	padding:3px;
+	border-bottom: 2px solid #a0a0a0;
+	background: #e0e0e0;
+}
 .table_row{
 	display: flex;				-webkit-display: flex;
 	flex-direction: row;		-webkit-flex-direction: row;
@@ -171,29 +179,22 @@ input[type=number]{
 	align-items:center;			-webkit-align-items: center;
 	border-collapse: collapse;
 	border-bottom: 1px solid #c0c0c0;
+	transition: background-color .2s ease;
 }
-.table_row:not(.head_row):last-child{
-	border-bottom:0;
-}
-.head_row{
-	height:23px;
-	padding:3px;
-	border-bottom: 1px solid #a0a0a0;
-	background: #e0e0e0;
-}
-
-/* unselected / selected row refers to unselected / selected in spec list */
-.unselected_row{
-	transition: background-color .2s ease
-}
-.unselected_row:hover{
-	cursor:pointer;
+.table_row:not(.selected_row):hover{
+	cursor: pointer;
 	background-color:rgba(128,128,128,.15);
 }
 .selected_row{
 	background-color:rgba(128,128,128,.3);
 	cursor:default;
 }
+
+/*
+.table_row:not(.head_row):last-child{
+	border-bottom:0;
+}
+*/
 
 #collapser{
 	width:100vw;
@@ -293,23 +294,26 @@ input[type=number]{
 	margin:auto;
 }
 
-/* flex table stying for db list */
+/* flex table styling for db list */
 
-#db_list{
+.tools_list{
 	width: 100%;
 	flex: 1;				-webkit-flex: 1;
 	display: flex;			-webkit-display: flex;
 	flex-direction: column;	-webkit-flex-direction: column;
 	border: 1px solid #a0a0a0;
 }
+#db_list{
+	
+}
 .scrollable{
 	flex: 1;				-webkit-flex: 1;
 	overflow: scroll;
 }
-#db_list .head_row{
+.tools_list .head_row{
 	cursor: default;
 }
-#db_list .table_row:not(.head_row){
+.tools_list .table_row:not(.head_row){
 	cursor: pointer;
 }
 .db_id{

@@ -23,9 +23,9 @@
 <div class="all_tools" id="all_tools">
 	<div class="toolbar">
 		<ul class="tabs">
-			<li class="tab default_tab" for="global_tools" id="global_tab">Plot Settings</li>
+			<li class="tab" for="global_tools" id="global_tab">Plot Settings</li>
 			<li class="tab" for="spec_tools" id="spec_tab">Spec Settings</li>
-			<li class="tab" for="add_tools" id="add_tab">Add Spec</li>
+			<li class="tab default_tab" for="add_tools" id="add_tab">Add Spec</li>
 			<li class="tab" for="anno_tools" id="anno_tab">Annotations</li>
 		</ul>
 		
@@ -223,12 +223,12 @@
 
 					<div class="setting">
 						<label>Spec Name</label>
-						<input class="readonly_without_file required wide_field" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required" readonly>
+						<input class="add_file_setting required wide_field" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required" readonly>
 					</div>
 
 					<div class="setting">
-						<button class="setting_button" id="add_from_file" disabled>Add</button>
-						<button class="setting_button" id="cancel_add" disabled>Cancel</button>
+						<button class="setting_button add_file_setting" id="add_from_file" disabled>Add</button>
+						<button class="setting_button add_file_setting" id="cancel_add" disabled>Cancel</button>
 					</div>
 
 				</div>
@@ -244,7 +244,7 @@
 					</div>
 					
 					<!-- interactive list of all spectra -->
-					<div id="db_list">
+					<div class="tools_list" id="db_list">
 						<div class="table_row head_row">
 							<div class="db_id">ID</div>
 							<div class="db_name">Name</div>
@@ -290,24 +290,11 @@
 					<div class="setting">
 						<button id="add_arrow_annotation">Add Arrow</button>
 					</div>
+
 				</div>
 
-				<!-- this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
-				{
-					x: 1,
-					y: 1,
-					xref: 'x',
-					yref: 'y',
-					text: 'test annotation',
-					showarrow: 'true',
-					arrowhead: 7,
-					ax: 0,
-					ay: -40
-				}
-				-->
-
 				<!-- edit or delete existing annotations -->
-				<div class="tools_col" id="anno_list">
+				<div class="tools_col" id="anno_config">
 					<div class="annotation_tool showing_annotation_tool" id="example_annotation_tool">
 						<div class="setting">
 							<h4 class="col_title" id="annotation_name">Click annotation to select</h4>
@@ -330,6 +317,23 @@
 						</div>
 						<div class="setting">
 							<button class="anno_remove" target="anno_remove">Remove</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- list to see & select annotations -->
+				<div class="tools_col">
+					<div class="tools_list">
+						<div class="table_row head_row">
+							<div class="anno_list_text">Annotations</div>
+						</div>
+						<div class="scrollable">
+							<div class="table_row">
+								<div class="anno_list_text">Hi</div>
+							</div>
+							<div class="table_row">
+								<div class="anno_list_text">Sup</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -505,9 +509,9 @@ var qz = 2481;	// quartz
 var al = 51;	// albite
 var am = 100;	// amicite
 var startWith = []; // list of specIds to autopopulate chart
-//startWith.push(qz);
-//startWith.push(al);
-//startWith.push(am);
+startWith.push(qz);
+startWith.push(al);
+startWith.push(am);
 
 var ph = new PlotHandler($('#pc_target'),$('#sl_target'),$('#sc_target'),$('#plot_holder'));
 ph.initialize();
@@ -518,18 +522,28 @@ $(document).on('wheel', 'input[type=number]', function(e){
     $(this).blur();
 });
 
+// turn on preprocess when editing it (if it isn't turned on already) (unless it's the box itself - that would be silly)
+$(document).on('change', '.preproc_settings .tool', function(){
+	// if the changed thing is the 'run' checkbox, ignore this whole thing
+	if($(this).attr('target') == 'run'){
+		return;
+	}
+	let box = $(this).closest('.preproc_settings').find('[target=run]');
+	let on = box.is(':checked');
+	if(!on){
+		// clicking here fires all of the change events and everything
+		box.click();
+	}
+});
+
 // ******************************************* handle spec list stuff **************************************
 // show the spec settings tab when a spec gets selected (clicked on or added)
 
 $(document).on('click', '.speclist_row', function(){
-	//$('#spec_tab').click();
+	$('#spec_tab').click();
 });
 
 // ********************************************* annotations *****************************************
-// select annotation if it's edited or moved (by filling it in to annotation target)
-document.getElementById('plot_holder').on('plotly_relayout', function(eventdata){
-	debugger;
-});
 
 // handle adding annotations
 $('#add_text_annotation').click(function(){
@@ -552,20 +566,14 @@ $('.disable_without_file').click(function(){
 $('[target=local_file]').change(function(){
 	let files = document.querySelector('input[target=local_file]').files;
 	// remove readonly & disabled if there's a file chosen
-	if(files.length){
-		$('.readonly_without_file').attr('readonly', false);
-		$('.add_button').attr('disabled', false);
-		// TODO: only enable add button if menu name is not empty
-	}
-	else{
-		$('.readonly_without_file').attr('readonly', true);
-		$('.add_button').attr('disabled', true);
-	}
+	$('.add_file_setting').attr('disabled', files.length === 0)
 
 	// cool stuff - try and autofill name, wavelength, and label
 
 	// check that file actually _is_ uploaded
 	if(!(files.length)){
+		// clear text
+		$('[target=menu_name]').val('');
 		return;
 	}
 
@@ -586,7 +594,6 @@ $('[target=local_file]').change(function(){
 			let name_list = []
 			for(let j = 0; j < i; j++){
 				name_list.push(parts[j].charAt(0).toUpperCase() + parts[j].slice(1));
-				debugger;
 			}
 			name = name_list.join(' ');
 			wav = parts[i];

@@ -676,7 +676,8 @@ class PlotHandler{
 		this.spec_list_target = $('#spec_list .scrollable');
 		this.spec_config_target = spec_config_target;
 		this.plot_target = plot_target;
-		this.annotations_target = $('#anno_list');
+		this.annotations_target = $('#anno_config');
+		this.annotations_list_target = $('#anno_list');
 		this.annotation_template = $('#example_annotation_tool').attr('id', null);
 
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
