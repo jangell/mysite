@@ -898,21 +898,7 @@ class PlotHandler{
 		return {'success':false};
 	}
 
-	// this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
 	/*
-	{
-		x: 1,
-		y: 1,
-		xref: 'x',
-		yref: 'y',
-		text: 'test annotation',
-		showarrow: 'true',
-		arrowhead: 7,
-		ax: 0,
-		ay: -40
-	}
-	*/
-
 	generateAnnotationHtml(anno){
 		let el = this.annotation_template.clone().attr('id', 'annotation_'+anno.id);
 		// hide any other showing annotation(s)
@@ -921,6 +907,7 @@ class PlotHandler{
 		el.addClass('showing_annotation_tool');
 		return el;
 	}
+	*/
 
 	// create a new text annotation in the middle of the plot
 	// things like font size and color are there as explicit defaults to fill in fields in selected_annotation
@@ -933,18 +920,15 @@ class PlotHandler{
 			y: center.y,
 			text: 'text annotation',
 			showarrow: false,
+			opacity: 1.,
 			font: {
 				color: '#ff0000',
 				size: 15
 			}
 		};
-
-		// generate html (with bindings) and push it onto the page
-		this.annotations_target.append(this.generateAnnotationHtml(to_an));
-
 		this.cur_annotation_id ++;
-		this.annotationsList.push(to_an);
-		Plotly.relayout(this.getElement(), {annotations: this.annotationsList});
+		Plotly.relayout(this.getElement(), {annotations: this.getElement().layout.annotations.push(to_an)});
+		this.refreshAnnotationMarkup();
 	}
 
 	// create a new arrow annotation in the middle of the plot
@@ -957,6 +941,7 @@ class PlotHandler{
 			y: center.y,
 			text: 'arrow annotation',
 			showarrow: true,
+			opacity: 1.,
 			arrowhead: 1,
 			arrowcolor: '#0000ff',
 			ax: 40,
@@ -966,13 +951,9 @@ class PlotHandler{
 				size: 15
 			}
 		};
-
-		// generate html (with bindings) and push it onto the page
-		this.annotations_target.append(this.generateAnnotationHtml(to_an));
-
 		this.cur_annotation_id ++;
-		this.annotationsList.push(to_an);
-		Plotly.relayout(this.getElement(), {annotations: this.annotationsList});
+		Plotly.relayout(this.getElement(), {annotations: this.getElement().layout.annotations.push(to_an)});
+		this.refreshAnnotationMarkup();
 	}
 
 	// returns the annotation with the given ID or <null> if no annotation exists with that ID
@@ -1058,9 +1039,49 @@ class PlotHandler{
 			$('.annotation_tool').last().addClass('showing_annotation_tool');			// show annotation. if no other annotations, show example annotation
 			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id}).indexOf(anno.id);
 			_this.annotationsList.splice(anno_ind, 1);									// remove from annotations list
-			_this.updatePlot();															// refresh to get rid of this annotation
+			_this.updatePlot();	
+			_this.refreshAnnotationMarkup();														// refresh to get rid of this annotation
 		});
 
+		return target;
+
+	}
+
+	refreshAnnotationMarkup(){
+		// clear existing annotations markup
+		this.annotations_target.html('');
+		this.annotations_list_target.html('');
+
+		// add new annotations markup
+		let annos = this.getElement().layout.annotations;
+		let last_row = null;
+		for(let i = 0; i < annos.length; i++){
+			let row = $('<div>').addClass('table_row').append($('<div>').addClass('anno_list_text').html(annos[i].text));
+			last_row = row;
+			let config = this.bindAnnotation(annos[i], this.annotation_template.clone());
+			// connect row to config
+			row.click(function(){
+				// select row
+				$('#anno_list').find('.selected_row').removeClass('selected_row');
+				row.addClass('selected_row');
+				// select config
+				$('.showing_annotation_tool').removeClass('showing_annotation_tool');
+				config.addClass('showing_annotation_tool');
+			});
+
+			// bind config to annotation
+			this.annotations_target.append(config);
+			this.annotations_list_target.append(row);
+		}
+
+		// fill in example config if annotations list is empty
+		if(last_row === null){
+			this.annotations_target.append(this.annotation_template.clone().addClass());
+		}
+		// otherwise, 'click' on the last one
+		else{
+			last_row.click();
+		}
 	}
 
 	// updates the plot drawing -> move this to startPlot and only have it start the plot
@@ -1164,6 +1185,7 @@ class PlotHandler{
 
 		plot_div.on('plotly_relayout', function(eventdata){
 			// set annotations
+			/*
 			_this.annotationsList = _this.getElement().layout.annotations;
 
 			// check if this relayout is happening because of a change to an annotation. if so, select that annotation
@@ -1186,6 +1208,7 @@ class PlotHandler{
 					}
 				}
 			}
+			*/
 
 			// catch relayout events on editable fields, like title, xaxis, yaxis, 
 			if('title' in eventdata){_this.plot_config_target.find('[target=title]').val(eventdata['title']);}

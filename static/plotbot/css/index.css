@@ -197,15 +197,14 @@ input[type=number]{
 */
 
 #collapser{
-	width:100vw;
+	width: 100vw;
 	display: flex;				-webkit-display: flex;
 	align-items: center;		-webkit-align-items: center;
 	justify-content: center;	-webkit-justify-content: center;
 	background-color: #e0e0e0;
 	transition: .2s all;
 	cursor: pointer;
-	border: 1px solid #a0a0a0;
-	border-top: 0px;
+	border-bottom: 1px solid #a0a0a0;
 }
 #collapser:hover{
 	background-color: #d0d0d0;
@@ -369,7 +368,12 @@ input[type=number]{
 .showing_annotation_tool{
 	display: flex;
 }
-
+.anno_list_text{
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	padding: 0 5px;
+}
 
 
 
