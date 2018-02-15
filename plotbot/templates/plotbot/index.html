@@ -25,8 +25,8 @@
 		<ul class="tabs">
 			<li class="tab" for="global_tools" id="global_tab">Plot Settings</li>
 			<li class="tab" for="spec_tools" id="spec_tab">Spec Settings</li>
-			<li class="tab default_tab" for="add_tools" id="add_tab">Add Spec</li>
-			<li class="tab" for="anno_tools" id="anno_tab">Annotations</li>
+			<li class="tab" for="add_tools" id="add_tab">Add Spec</li>
+			<li class="tab default_tab" for="anno_tools" id="anno_tab">Annotations</li>
 		</ul>
 		
 		<div class="toolset_container">
@@ -329,10 +329,7 @@
 						</div>
 						<div class="scrollable" id="anno_list">
 							<div class="table_row">
-								<div class="anno_list_text">Hi</div>
-							</div>
-							<div class="table_row">
-								<div class="anno_list_text">Sup</div>
+								<div class="anno_list_text">No annotations</div>
 							</div>
 						</div>
 					</div>
@@ -428,6 +425,7 @@ $(document).ready(function(){
 
 	// tab clicking functionality
 	$('.tab').click(function(){
+		console.log('yo');
 		// toggle tab css
 		$('.selected_tab').removeClass('selected_tab');
 		$(this).addClass('selected_tab');

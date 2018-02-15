@@ -993,8 +993,6 @@ class PlotHandler{
 		// update functions trigger a relayout event
 		// they're all separate, which ties back to the idea of the plot being the single source of truth
 
-		// get anno_ind at the change function
-
 		target.find('[target=anno_text]').change(function(){
 			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id;}).indexOf(anno.id);
 			let anno_str = 'annotations['+anno_ind+']';
@@ -1056,9 +1054,12 @@ class PlotHandler{
 		let annos = this.getElement().layout.annotations;
 		let last_row = null;
 		for(let i = 0; i < annos.length; i++){
+
+			// create row and config markup
 			let row = $('<div>').addClass('table_row').append($('<div>').addClass('anno_list_text').html(annos[i].text));
 			last_row = row;
 			let config = this.bindAnnotation(annos[i], this.annotation_template.clone());
+			
 			// connect row to config
 			row.click(function(){
 				// select row
@@ -1068,8 +1069,11 @@ class PlotHandler{
 				$('.showing_annotation_tool').removeClass('showing_annotation_tool');
 				config.addClass('showing_annotation_tool');
 			});
+			config.find('[target=anno_text]').change(function(){
+				row.find('.anno_list_text').html($(this).val());
+			});
 
-			// bind config to annotation
+			// insert into page
 			this.annotations_target.append(config);
 			this.annotations_list_target.append(row);
 		}
@@ -1184,31 +1188,24 @@ class PlotHandler{
 		});
 
 		plot_div.on('plotly_relayout', function(eventdata){
-			// set annotations
-			/*
-			_this.annotationsList = _this.getElement().layout.annotations;
 
-			// check if this relayout is happening because of a change to an annotation. if so, select that annotation
-			if(Object.keys(eventdata).reduce((a,b) => ''+a+b).indexOf('annotations') != -1){
+			// check if this relayout is happening because of a change to an annotation. if so, and annotation text has been edited, change it in the html too
+			let regex = /annotations\[.+\]\.text/;
+			if(Object.keys(eventdata).reduce((a,b) => ''+a+b).search(regex) != -1){
+				debugger;
 				let anno_ind;
-				let made_selection = false;
 				for(let k in eventdata){
-					// select a moved / edited annotation
-					if(k.indexOf('annotations[') != -1 && !made_selection){
-						let anno_ind = k.split('annotations[')[1].split(']')[0]; // this gets the index of the annotation in the plot-held list
-						let anno_selector = '#annotation_' + _this.getElement().layout.annotations[anno_ind].id;
-						$('.showing_annotation_tool').removeClass('showing_annotation_tool');
-						$(anno_selector).addClass('showing_annotation_tool');
-						made_selection = true;	// we done!
-					}
 					// check for text update to push upstream
-					if(k.indexOf('annotations[') != -1 && k.indexOf('text') != -1){
-						let anno_ind = k.split('annotations[')[1].split(']')[0]; // see above
-						$('#annotation_'+anno_ind).find('[target=anno_text]').val(eventdata[k]);
+					if(k.indexOf('annotations[') != -1){
+						let anno_ind = k.split('annotations[')[1].split(']')[0]; // this gets the index of the annotation in the plot-held list
+						let target_config = $(_this.annotations_target.children()[anno_ind]);
+						let target_row = $(_this.annotations_list_target.children()[anno_ind]);
+						target_config.find('[target=anno_text]').val(eventdata[k]);
+						target_row.find('.anno_list_text').html(eventdata[k]);
 					}
 				}
 			}
-			*/
+			
 
 			// catch relayout events on editable fields, like title, xaxis, yaxis, 
 			if('title' in eventdata){_this.plot_config_target.find('[target=title]').val(eventdata['title']);}
