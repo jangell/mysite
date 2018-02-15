@@ -1189,19 +1189,25 @@ class PlotHandler{
 
 		plot_div.on('plotly_relayout', function(eventdata){
 
-			// check if this relayout is happening because of a change to an annotation. if so, and annotation text has been edited, change it in the html too
-			let regex = /annotations\[.+\]\.text/;
-			if(Object.keys(eventdata).reduce((a,b) => ''+a+b).search(regex) != -1){
-				debugger;
+			// check if this relayout is happening because of a change to an annotation. if so, select it
+			let text_regex = /annotations\[.+\]\.text/;
+			let searcher = Object.keys(eventdata).reduce((a,b) => ''+a+b);
+			// this checks whether annotations[ is *anywhere* in the update dictionary
+			if(searcher.indexOf('annotations[') != -1){
 				let anno_ind;
 				for(let k in eventdata){
 					// check for text update to push upstream
 					if(k.indexOf('annotations[') != -1){
 						let anno_ind = k.split('annotations[')[1].split(']')[0]; // this gets the index of the annotation in the plot-held list
-						let target_config = $(_this.annotations_target.children()[anno_ind]);
 						let target_row = $(_this.annotations_list_target.children()[anno_ind]);
-						target_config.find('[target=anno_text]').val(eventdata[k]);
-						target_row.find('.anno_list_text').html(eventdata[k]);
+						target_row.click();
+						// if annotation text has been edited, change it in the html (config and list row)
+						debugger;
+						if(k.search(text_regex) != -1){
+							let target_config = $(_this.annotations_target.children()[anno_ind]);
+							target_config.find('[target=anno_text]').val(eventdata[k]);
+							target_row.find('.anno_list_text').html(eventdata[k]);
+						}
 					}
 				}
 			}
