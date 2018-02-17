@@ -914,7 +914,7 @@ class PlotHandler{
 			}
 		};
 		this.cur_annotation_id ++;
-		Plotly.relayout(this.getElement(), {annotations: this.getElement().layout.annotations.push(to_an)});
+		Plotly.relayout(this.getElement(), {'annotations[0]': to_an});
 		this.refreshAnnotationMarkup();
 	}
 
@@ -1031,12 +1031,13 @@ class PlotHandler{
 
 		// this never deletes the example annotation because it never binds to it
 		target.find('[target=anno_remove]').click(function(){
-			$(this).closest('.annotation_tool').remove(); 								// remove html
-			$('.annotation_tool').last().addClass('showing_annotation_tool');			// show annotation. if no other annotations, show example annotation
-			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id}).indexOf(anno.id);
-			_this.annotationsList.splice(anno_ind, 1);									// remove from annotations list
-			_this.updatePlot();	
-			_this.refreshAnnotationMarkup();														// refresh to get rid of this annotation
+			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id;}).indexOf(anno.id);
+			let anno_str = 'annotations['+anno_ind+']';
+			let anno_key = anno_str;
+			let update = {};
+			update[anno_key] = null;
+			Plotly.relayout(_this.getElement(), update);
+			_this.refreshAnnotationMarkup();
 		});
 
 		return target;
@@ -1106,13 +1107,14 @@ class PlotHandler{
 		});
 
 		// this never deletes the example annotation because it never binds to it
-		target.find('[target=anno_remove]').click(function(){
-			$(this).closest('.annotation_tool').remove(); 								// remove html
-			$('.annotation_tool').last().addClass('showing_annotation_tool');			// show annotation. if no other annotations, show example annotation
-			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id}).indexOf(vl.id);
-			_this.annotationsList.splice(shp_ind, 1);									// remove from annotations list
-			_this.updatePlot();
-			_this.refreshAnnotationMarkup();														// refresh to get rid of this annotation
+		target.find('[target=vl_remove]').click(function(){
+			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_str = 'shapes['+shp_ind+']';
+			let shp_key = shp_str;
+			let update = {};
+			update[shp_key] = null;
+			Plotly.relayout(_this.getElement(), update);
+			_this.refreshAnnotationMarkup();													// refresh to get rid of this annotation
 		});
 
 		return target;
@@ -1125,8 +1127,8 @@ class PlotHandler{
 		this.annotations_list_target.html('');
 
 		// add new annotations markup
-		let annos = this.getElement().layout.annotations;
-		let shapes = this.getElement().layout.shapes;
+		let annos = this.getElement().layout.annotations ? this.getElement().layout.annotations : [];
+		let shapes = this.getElement().layout.shapes ? this.getElement().layout.shapes : [];
 		let last_row = null;
 
 		// this isn't great, because it lists *all* the annotations and then *all* the shapes, instead of going by add order
