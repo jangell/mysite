@@ -679,28 +679,15 @@ class PlotHandler{
 		this.annotations_target = $('#anno_config');
 		this.annotations_list_target = $('#anno_list');
 		this.annotation_template = $('#example_annotation_tool').attr('id', null);
+		this.vl_template = $('#example_vl_tool').attr('id', null);
 
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
 		this.cur_annotation_id = 0; // same deal but with vertical lines
 		this.plotConfig = new PlotConfig();
 		this.specConfigList = [];
 		this.vlList = [];
-		this.annotationsList = [
-/*
-			// this creates one (editable) annotation, but at the moment I haven't developed a good way to add or remove annotations, so for this push I'm leaving it out
-			{
-				x: 1,
-				y: 1,
-				xref: 'x',
-				yref: 'y',
-				text: 'test annotation',
-				showarrow: 'true',
-				arrowhead: 7,
-				ax: 0,
-				ay: -40
-			}
-*/
-		];
+		this.shapesList = [];
+		this.annotationsList = [];
 
 		// register preprocesses here to automatically add them to specconfigs
 		// the order here matters. this is the order in which, if used, preprocesses will be applied (dictionaries don't necessarily preserve order in js, but for virtually all practical applications they will)
@@ -952,7 +939,32 @@ class PlotHandler{
 			}
 		};
 		this.cur_annotation_id ++;
-		Plotly.relayout(this.getElement(), {annotations: this.getElement().layout.annotations.push(to_an)});
+		Plotly.relayout(this.getElement(), {'annotations[0]': to_an});
+		this.refreshAnnotationMarkup();
+	}
+
+	// vertical lines are shapes that go from 0 to 1 in y (yref: paper) at a particular value of x
+	addVertLine(){
+		// start in center of the x-range
+		let center = this.getCenter();
+		let to_shape = {
+			id: this.cur_annotation_id,
+			name: 'Spike ('+this.cur_annotation_id+')',
+			type: 'rect',
+			xref: 'x',
+			yref: 'paper',
+			x0: center.x,
+			x1: center.x,
+			y0: 0,
+			y1: 1,
+			line: {
+				color: '#4227ff',
+				opacity: 1.,
+				width: 1,
+			},
+		}
+		this.cur_annotation_id ++;
+		Plotly.relayout(this.getElement(), {'shapes[0]': to_shape});
 		this.refreshAnnotationMarkup();
 	}
 
@@ -965,20 +977,6 @@ class PlotHandler{
 		}
 		return null;
 	}
-
-	/*
-	addVl(){
-		let new_vl = new VertLine(this.cur_vl_id);
-		this.vlList.push(new_vl);
-		this.cur_vl_id ++;
-
-		// abstract this to a plothandler constructor variable
-		$('#annotations_target').append(new_vl.vlHtml());
-
-		this.addToolListeners();
-		this.updatePlot();
-	}
-	*/
 
 	// binds annotation <anno> to the annotation settings
 	bindAnnotation(anno, target){
@@ -1045,6 +1043,82 @@ class PlotHandler{
 
 	}
 
+	// binds annotation <anno> to the annotation settings
+	// all of these updates are taking changes to the <input> divs and pushing them into the plot
+	bindVL(vl, target){
+		let _this = this;
+
+		// set tools to current values
+		target.find('[target=vl_name]').val(vl.name ? vl.name : '');
+		target.find('[target=vl_pos]').val(vl.x0 && vl.x0 ? vl.x0 : '');
+		target.find('[target=vl_width]').val(vl.line.width ? vl.line.width : '')
+		target.find('[target=vl_color]').val(vl.line.color && vl.line.color ? vl.line.color : '#000000'); // default to black
+		target.find('[target=vl_opacity]').val(vl.line.opacity ? vl.line.opacity : 1); // default to completely opaque
+		
+		// update functions trigger a relayout event
+		// they're all separate, which ties back to the idea of the plot being the single source of truth
+
+		target.find('[target=vl_name]').change(function(){
+			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_str = 'shapes['+shp_ind+']';
+			let shp_key = shp_str + '.name';
+			let update = {};
+			update[shp_key] = $(this).val();
+			Plotly.relayout(_this.getElement(), update);
+		});
+
+		target.find('[target=vl_pos]').change(function(){
+			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_str = 'shapes['+shp_ind+']';
+			let lo_key = shp_str + '.x0';
+			let hi_key = shp_str + '.x1';
+			let update = {};
+			update[lo_key] = $(this).val();
+			update[hi_key] = $(this).val();
+			Plotly.relayout(_this.getElement(), update);
+		});
+
+		target.find('[target=vl_width]').change(function(){
+			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_str = 'shapes['+shp_ind+']';
+			let shp_key = shp_str + '.line.width';
+			let update = {};
+			update[shp_key] = $(this).val();
+			Plotly.relayout(_this.getElement(), update);
+		});
+
+		target.find('[target=vl_color]').change(function(){
+			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_str = 'shapes['+shp_ind+']';
+			let shp_key = shp_str + '.line.color';
+			let update = {};
+			update[shp_key] = $(this).val();
+			Plotly.relayout(_this.getElement(), update);
+		});
+
+		target.find('[target=vl_opacity]').change(function(){
+			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_str = 'shapes['+shp_ind+']';
+			let shp_key = shp_str + '.opacity';
+			let update = {};
+			update[shp_key] = $(this).val();
+			Plotly.relayout(_this.getElement(), update);
+		});
+
+		// this never deletes the example annotation because it never binds to it
+		target.find('[target=anno_remove]').click(function(){
+			$(this).closest('.annotation_tool').remove(); 								// remove html
+			$('.annotation_tool').last().addClass('showing_annotation_tool');			// show annotation. if no other annotations, show example annotation
+			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id}).indexOf(vl.id);
+			_this.annotationsList.splice(shp_ind, 1);									// remove from annotations list
+			_this.updatePlot();
+			_this.refreshAnnotationMarkup();														// refresh to get rid of this annotation
+		});
+
+		return target;
+
+	}
+
 	refreshAnnotationMarkup(){
 		// clear existing annotations markup
 		this.annotations_target.html('');
@@ -1052,7 +1126,12 @@ class PlotHandler{
 
 		// add new annotations markup
 		let annos = this.getElement().layout.annotations;
+		let shapes = this.getElement().layout.shapes;
 		let last_row = null;
+
+		// this isn't great, because it lists *all* the annotations and then *all* the shapes, instead of going by add order
+		// TODO: change this to order by id
+		
 		for(let i = 0; i < annos.length; i++){
 
 			// create row and config markup
@@ -1078,11 +1157,36 @@ class PlotHandler{
 			this.annotations_list_target.append(row);
 		}
 
-		// fill in example config if annotations list is empty
-		if(last_row === null){
-			this.annotations_target.append(this.annotation_template.clone().addClass());
+		// add shapes markup for vertical lines
+		for(let i = 0; i < shapes.length; i++){
+			// create row and config markup
+			let row = $('<div>').addClass('table_row').append($('<div>').addClass('anno_list_text').html(shapes[i].name));
+			last_row = row;
+			let config = this.bindVL(shapes[i], this.vl_template.clone());
+			
+			// connect row to config
+			row.click(function(){
+				// select row
+				$('#anno_list').find('.selected_row').removeClass('selected_row');
+				row.addClass('selected_row');
+				// select config
+				$('.showing_annotation_tool').removeClass('showing_annotation_tool');
+				config.addClass('showing_annotation_tool');
+			});
+			config.find('[target=vl_name]').change(function(){
+				row.find('.anno_list_text').html($(this).val());
+			});
+
+			// insert into page
+			this.annotations_target.append(config);
+			this.annotations_list_target.append(row);
 		}
-		// otherwise, 'click' on the last one
+
+		// fill in example config if annotations list is empty (and disable everything)
+		if(last_row === null){
+			this.annotations_target.append(this.annotation_template.clone());
+		}
+		// otherwise, 'click' on the last one (and un-disable everything)
 		else{
 			last_row.click();
 		}
@@ -1169,6 +1273,7 @@ class PlotHandler{
 			},
 			showlegend: this.plotConfig.valueOf('show_legend'),
 			annotations: this.annotationsList,
+			shapes: this.shapesList,
 		}
 
 		Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false, editable:true, modeBarButtonsToRemove: ['sendDataToCloud']});
@@ -1202,7 +1307,6 @@ class PlotHandler{
 						let target_row = $(_this.annotations_list_target.children()[anno_ind]);
 						target_row.click();
 						// if annotation text has been edited, change it in the html (config and list row)
-						debugger;
 						if(k.search(text_regex) != -1){
 							let target_config = $(_this.annotations_target.children()[anno_ind]);
 							target_config.find('[target=anno_text]').val(eventdata[k]);

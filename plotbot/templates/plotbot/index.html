@@ -290,14 +290,18 @@
 					<div class="setting">
 						<button id="add_arrow_annotation">Add Arrow</button>
 					</div>
+					<div class="setting">
+						<button id="add_vert_line">Add Vertical Line</button>
+					</div>
 
 				</div>
 
 				<!-- edit or delete existing annotations -->
 				<div class="tools_col" id="anno_config">
-					<div class="annotation_tool showing_annotation_tool" id="example_annotation_tool">
+
+					<div class="annotation_tool" id="example_annotation_tool">
 						<div class="setting">
-							<h4 class="col_title" id="annotation_name">Click annotation to select</h4>
+							<h4 class="col_title" id="annotation_name">Selected annotation</h4>
 						</div>
 						<div class="setting">
 							<label>Text</label>
@@ -319,6 +323,36 @@
 							<button class="anno_remove" target="anno_remove">Remove</button>
 						</div>
 					</div>
+
+					<div class="annotation_tool showing_annotation_tool" id="example_vl_tool">
+						<div class="setting">
+							<h4 class="col_title" id="annotation_name">Selected annotation</h4>
+						</div>
+						<div class="setting">
+							<label>Menu name</label>
+							<input target="vl_name">
+						</div>
+						<div class="setting">
+							<label>Position</label>
+							<input type=number step=.1 target="vl_pos">
+						</div>
+						<div class="setting">
+							<label>Line width</label>
+							<input type=number step=.1 target="vl_width">
+						</div>
+						<div class="setting">
+							<label>Color</label>
+							<input type=color target="vl_color">
+						</div>
+						<div class="setting">
+							<label>Opacity</label>
+							<input type=number target="vl_opacity" min=0 max=1 step=any default=1>
+						</div>
+						<div class="setting">
+							<button class="vl_remove" target="anno_remove">Remove</button>
+						</div>
+					</div>
+
 				</div>
 
 				<!-- list to see & select annotations -->
@@ -548,6 +582,9 @@ $('#add_text_annotation').click(function(){
 });
 $('#add_arrow_annotation').click(function(){
 	ph.addArrowAnnotation();
+});
+$('#add_vert_line').click(function(){
+	ph.addVertLine();
 });
 
 // ****************************** add from file *****************************************
