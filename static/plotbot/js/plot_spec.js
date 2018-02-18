@@ -707,6 +707,14 @@ class PlotHandler{
 	getElement(){
 		return document.getElementById(this.getElementId());
 	}
+
+	getAnnotations(){
+		return this.getElement().layout.annotations;
+	}
+	getShapes(){
+		return this.getElement().layout.shapes;
+	}
+
 	getDivData(){
 		// plot_target is a jquery object, so we need to pull the native DOM out of it
 		return this.plot_target[0].data;
@@ -946,15 +954,15 @@ class PlotHandler{
 	// vertical lines are shapes that go from 0 to 1 in y (yref: paper) at a particular value of x
 	addVertLine(){
 		// start in center of the x-range
-		let center = this.getCenter();
+		let pos = Math.floor(this.getCenter().x * 10) / 10.;	// round to nearest .1
 		let to_shape = {
 			id: this.cur_annotation_id,
-			name: 'Spike ('+this.cur_annotation_id+')',
+			name: 'Spike ('+pos+')',
 			type: 'rect',
 			xref: 'x',
 			yref: 'paper',
-			x0: center.x,
-			x1: center.x,
+			x0: pos,
+			x1: pos,
 			y0: 0,
 			y1: 1,
 			line: {
@@ -970,9 +978,19 @@ class PlotHandler{
 
 	// returns the annotation with the given ID or <null> if no annotation exists with that ID
 	getAnnotationById(id){
-		for(let i = 0; i < this.annotationsList.length; i++){
-			if(this.annotationsList[i].id === id){
-				return this.annotationsList[i];
+		let anno_list = this.getAnnotations();
+		for(let i = 0; i < anno_list.length; i++){
+			if(anno_list.id === id){
+				return anno_list[i];
+			}
+		}
+		return null;
+	}
+	getShapeById(id){
+		let shape_list = this.getShapes();
+		for(let i = 0; i < shape_list.length; i++){
+			if(shape_list.id === id){
+				return shape_list[i]
 			}
 		}
 		return null;
@@ -992,7 +1010,7 @@ class PlotHandler{
 		// they're all separate, which ties back to the idea of the plot being the single source of truth
 
 		target.find('[target=anno_text]').change(function(){
-			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id;}).indexOf(anno.id);
+			let anno_ind = _this.getAnnotations().map(function(e){return e.id;}).indexOf(anno.id);
 			let anno_str = 'annotations['+anno_ind+']';
 			let anno_key = anno_str + '.text';
 			let update = {};
@@ -1001,7 +1019,7 @@ class PlotHandler{
 		});
 
 		target.find('[target=anno_fontsize]').change(function(){
-			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id;}).indexOf(anno.id);
+			let anno_ind = _this.getAnnotations().map(function(e){return e.id;}).indexOf(anno.id);
 			let anno_str = 'annotations['+anno_ind+']';
 			let anno_key = anno_str + '.font.size';
 			let update = {};
@@ -1010,7 +1028,7 @@ class PlotHandler{
 		});
 
 		target.find('[target=anno_fontcolor]').change(function(){
-			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id;}).indexOf(anno.id);
+			let anno_ind = _this.getAnnotations().map(function(e){return e.id;}).indexOf(anno.id);
 			let anno_str = 'annotations['+anno_ind+']';
 			let font_anno_key = anno_str + '.font.color';
 			let arrow_anno_key = anno_str + '.arrowcolor';
@@ -1021,7 +1039,7 @@ class PlotHandler{
 		});
 
 		target.find('[target=anno_opacity]').change(function(){
-			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id;}).indexOf(anno.id);
+			let anno_ind = _this.getAnnotations().map(function(e){return e.id;}).indexOf(anno.id);
 			let anno_str = 'annotations['+anno_ind+']';
 			let anno_key = anno_str + '.opacity';
 			let update = {};
@@ -1031,7 +1049,7 @@ class PlotHandler{
 
 		// this never deletes the example annotation because it never binds to it
 		target.find('[target=anno_remove]').click(function(){
-			let anno_ind = _this.getElement().layout.annotations.map(function(e){return e.id;}).indexOf(anno.id);
+			let anno_ind = _this.getAnnotations().map(function(e){return e.id;}).indexOf(anno.id);
 			let anno_str = 'annotations['+anno_ind+']';
 			let anno_key = anno_str;
 			let update = {};
@@ -1044,13 +1062,18 @@ class PlotHandler{
 
 	}
 
+	// checks whether a vertical line still has the default name (Spike (<pos>))
+	hasDefaultName(vl){
+		return vl.name.search(/Spike \(\d+\.?\d*\)/) != -1;
+	}
+
 	// binds annotation <anno> to the annotation settings
 	// all of these updates are taking changes to the <input> divs and pushing them into the plot
 	bindVL(vl, target){
 		let _this = this;
 
 		// set tools to current values
-		target.find('[target=vl_name]').val(vl.name ? vl.name : '');
+		target.find('[target=vl_name]').val(vl.name ? vl.name : 'Spike ('+vl.x0+')');
 		target.find('[target=vl_pos]').val(vl.x0 && vl.x0 ? vl.x0 : '');
 		target.find('[target=vl_width]').val(vl.line.width ? vl.line.width : '')
 		target.find('[target=vl_color]').val(vl.line.color && vl.line.color ? vl.line.color : '#000000'); // default to black
@@ -1060,7 +1083,7 @@ class PlotHandler{
 		// they're all separate, which ties back to the idea of the plot being the single source of truth
 
 		target.find('[target=vl_name]').change(function(){
-			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_ind = _this.getShapes().map(function(e){return e.id;}).indexOf(vl.id);
 			let shp_str = 'shapes['+shp_ind+']';
 			let shp_key = shp_str + '.name';
 			let update = {};
@@ -1069,18 +1092,27 @@ class PlotHandler{
 		});
 
 		target.find('[target=vl_pos]').change(function(){
-			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_ind = _this.getShapes().map(function(e){return e.id;}).indexOf(vl.id);
 			let shp_str = 'shapes['+shp_ind+']';
 			let lo_key = shp_str + '.x0';
 			let hi_key = shp_str + '.x1';
+			let name_key = shp_str + '.name';
 			let update = {};
+			let need_refresh = false;
 			update[lo_key] = $(this).val();
 			update[hi_key] = $(this).val();
+			// only update name if still the default
+			if(_this.hasDefaultName(vl)){
+				update[name_key] = 'Spike ('+$(this).val()+')';
+				need_refresh = true;
+			}
 			Plotly.relayout(_this.getElement(), update);
+			// refresh here if we changed the name
+			if(need_refresh){_this.refreshAnnotationMarkup();}
 		});
 
 		target.find('[target=vl_width]').change(function(){
-			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_ind = _this.getShapes().map(function(e){return e.id;}).indexOf(vl.id);
 			let shp_str = 'shapes['+shp_ind+']';
 			let shp_key = shp_str + '.line.width';
 			let update = {};
@@ -1089,7 +1121,7 @@ class PlotHandler{
 		});
 
 		target.find('[target=vl_color]').change(function(){
-			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_ind = _this.getShapes().map(function(e){return e.id;}).indexOf(vl.id);
 			let shp_str = 'shapes['+shp_ind+']';
 			let shp_key = shp_str + '.line.color';
 			let update = {};
@@ -1098,7 +1130,7 @@ class PlotHandler{
 		});
 
 		target.find('[target=vl_opacity]').change(function(){
-			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_ind = _this.getShapes().map(function(e){return e.id;}).indexOf(vl.id);
 			let shp_str = 'shapes['+shp_ind+']';
 			let shp_key = shp_str + '.opacity';
 			let update = {};
@@ -1108,7 +1140,7 @@ class PlotHandler{
 
 		// this never deletes the example annotation because it never binds to it
 		target.find('[target=vl_remove]').click(function(){
-			let shp_ind = _this.getElement().layout.shapes.map(function(e){return e.id;}).indexOf(vl.id);
+			let shp_ind = _this.getShapes().map(function(e){return e.id;}).indexOf(vl.id);
 			let shp_str = 'shapes['+shp_ind+']';
 			let shp_key = shp_str;
 			let update = {};
@@ -1137,9 +1169,9 @@ class PlotHandler{
 		for(let i = 0; i < annos.length; i++){
 
 			// create row and config markup
-			let row = $('<div>').addClass('table_row').append($('<div>').addClass('anno_list_text').html(annos[i].text));
+			let row = $('<div>').addClass('table_row').attr('id', 'anno_row_'+annos[i].id).append($('<div>').addClass('anno_list_text').html(annos[i].text));
 			last_row = row;
-			let config = this.bindAnnotation(annos[i], this.annotation_template.clone());
+			let config = this.bindAnnotation(annos[i], this.annotation_template.clone()).attr('id', 'anno_config_'+annos[i].id);
 			
 			// connect row to config
 			row.click(function(){
@@ -1162,9 +1194,9 @@ class PlotHandler{
 		// add shapes markup for vertical lines
 		for(let i = 0; i < shapes.length; i++){
 			// create row and config markup
-			let row = $('<div>').addClass('table_row').append($('<div>').addClass('anno_list_text').html(shapes[i].name));
+			let row = $('<div>').addClass('table_row').attr('id', 'anno_row_'+shapes[i].id).append($('<div>').addClass('anno_list_text').html(shapes[i].name));
 			last_row = row;
-			let config = this.bindVL(shapes[i], this.vl_template.clone());
+			let config = this.bindVL(shapes[i], this.vl_template.clone()).attr('id', 'anno_config_'+shapes[i].id);
 			
 			// connect row to config
 			row.click(function(){
@@ -1297,29 +1329,45 @@ class PlotHandler{
 		plot_div.on('plotly_relayout', function(eventdata){
 
 			// check if this relayout is happening because of a change to an annotation. if so, select it
-			let text_regex = /annotations\[.+\]\.text/;
-			let searcher = Object.keys(eventdata).reduce((a,b) => ''+a+b);
-			// this checks whether annotations[ is *anywhere* in the update dictionary
-			if(searcher.indexOf('annotations[') != -1){
-				let anno_ind;
-				for(let k in eventdata){
-					// check for text update to push upstream
-					if(k.indexOf('annotations[') != -1){
-						let anno_ind = k.split('annotations[')[1].split(']')[0]; // this gets the index of the annotation in the plot-held list
-						let target_row = $(_this.annotations_list_target.children()[anno_ind]);
-						target_row.click();
-						// if annotation text has been edited, change it in the html (config and list row)
-						if(k.search(text_regex) != -1){
-							let target_config = $(_this.annotations_target.children()[anno_ind]);
-							target_config.find('[target=anno_text]').val(eventdata[k]);
-							target_row.find('.anno_list_text').html(eventdata[k]);
-						}
+			let anno_text_regex = /annotations\[.+\]\.text/;
+			let vl_pos_regex = /shapes\[.+\]\.x0/;
+
+			// UP NEXT ::::::: update objects instead of html and then refresh everything, THEN find the row and click it
+
+			for(let k in eventdata){
+				// check for text update to push upstream and get anno id to actually click the thing
+				if(k.indexOf('annotations[') != -1){
+					// only refresh markup if text was changed
+					if(k.search(anno_text_regex) != -1){
+						_this.refreshAnnotationMarkup();
 					}
+					let anno_ind = k.split('annotations[')[1].split(']')[0]; // this gets the index of the annotation in the plot-held list
+					let id = _this.getAnnotations()[anno_ind].id;
+					let target_row = $('#anno_row_'+id);
+					target_row.click();
+				}
+				else if(k.indexOf('shapes[') != -1){
+					let shp_ind = k.split('shapes[')[1].split(']')[0];
+					let shp = _this.getShapes()[shp_ind];
+					let id = _this.getShapes()[shp_ind].id;
+					// if the position was changed with a drag, change the name in the config and the row
+					if(k.search(vl_pos_regex) != -1){
+						// round down to nearest .1
+						let pos = Math.floor(shp.x0 * 10) / 10.;
+						shp.x0 = pos;
+						shp.x1 = pos;
+						// if the name follows the default form, it should be changed here. Otherwise, leave it
+						if(_this.hasDefaultName(shp)){
+							shp.name = 'Spike ('+pos+')';
+						}
+						_this.refreshAnnotationMarkup();
+					}
+					let target_row = $('#anno_row_'+id);
+					target_row.click();
 				}
 			}
-			
 
-			// catch relayout events on editable fields, like title, xaxis, yaxis, 
+			// catch relayout events on plot-wide editable fields, like title, xaxis, yaxis, 
 			if('title' in eventdata){_this.plot_config_target.find('[target=title]').val(eventdata['title']);}
 			if('xaxis.title' in eventdata){_this.plot_config_target.find('[target=xlabel]').val(eventdata['xaxis.title']);}
 			if('yaxis.title' in eventdata){_this.plot_config_target.find('[target=ylabel]').val(eventdata['yaxis.title']);}
