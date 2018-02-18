@@ -924,6 +924,7 @@ class PlotHandler{
 		this.cur_annotation_id ++;
 		Plotly.relayout(this.getElement(), {'annotations[0]': to_an});
 		this.refreshAnnotationMarkup();
+		this.annotations_list_target.last().click();
 	}
 
 	// create a new arrow annotation in the middle of the plot
@@ -949,6 +950,7 @@ class PlotHandler{
 		this.cur_annotation_id ++;
 		Plotly.relayout(this.getElement(), {'annotations[0]': to_an});
 		this.refreshAnnotationMarkup();
+		this.annotations_list_target.last().click();
 	}
 
 	// vertical lines are shapes that go from 0 to 1 in y (yref: paper) at a particular value of x
@@ -974,6 +976,7 @@ class PlotHandler{
 		this.cur_annotation_id ++;
 		Plotly.relayout(this.getElement(), {'shapes[0]': to_shape});
 		this.refreshAnnotationMarkup();
+		this.annotations_list_target.last().click();
 	}
 
 	// returns the annotation with the given ID or <null> if no annotation exists with that ID
@@ -1154,6 +1157,9 @@ class PlotHandler{
 	}
 
 	refreshAnnotationMarkup(){
+		// get currently selected id
+		let selected_before = this.annotations_list_target.find('.selected_row').attr('id');
+
 		// clear existing annotations markup
 		this.annotations_target.html('');
 		this.annotations_list_target.html('');
@@ -1162,15 +1168,18 @@ class PlotHandler{
 		let annos = this.getElement().layout.annotations ? this.getElement().layout.annotations : [];
 		let shapes = this.getElement().layout.shapes ? this.getElement().layout.shapes : [];
 		let last_row = null;
+		let rows = [];
+		let configs = [];
 
 		// this isn't great, because it lists *all* the annotations and then *all* the shapes, instead of going by add order
 		// TODO: change this to order by id
 		
+
 		for(let i = 0; i < annos.length; i++){
 
 			// create row and config markup
 			let row = $('<div>').addClass('table_row').attr('id', 'anno_row_'+annos[i].id).append($('<div>').addClass('anno_list_text').html(annos[i].text));
-			last_row = row;
+			//last_row = row;
 			let config = this.bindAnnotation(annos[i], this.annotation_template.clone()).attr('id', 'anno_config_'+annos[i].id);
 			
 			// connect row to config
@@ -1187,15 +1196,17 @@ class PlotHandler{
 			});
 
 			// insert into page
-			this.annotations_target.append(config);
-			this.annotations_list_target.append(row);
+			// this.annotations_target.append(config);
+			// this.annotations_list_target.append(row);
+			rows.push(row);
+			configs.push(config);
 		}
 
 		// add shapes markup for vertical lines
 		for(let i = 0; i < shapes.length; i++){
 			// create row and config markup
 			let row = $('<div>').addClass('table_row').attr('id', 'anno_row_'+shapes[i].id).append($('<div>').addClass('anno_list_text').html(shapes[i].name));
-			last_row = row;
+			//last_row = row;
 			let config = this.bindVL(shapes[i], this.vl_template.clone()).attr('id', 'anno_config_'+shapes[i].id);
 			
 			// connect row to config
@@ -1212,17 +1223,33 @@ class PlotHandler{
 			});
 
 			// insert into page
-			this.annotations_target.append(config);
-			this.annotations_list_target.append(row);
+			// this.annotations_target.append(config);
+			// this.annotations_list_target.append(row);
+			rows.push(row);
+			configs.push(config);
 		}
 
 		// fill in example config if annotations list is empty (and disable everything)
-		if(last_row === null){
+		if(rows.length == 0){
 			this.annotations_target.append(this.annotation_template.clone());
 		}
-		// otherwise, 'click' on the last one (and un-disable everything)
+		// otherwise, sort and append rows and configs, and click on the last one
 		else{
-			last_row.click();
+			rows.sort(function(a,b){
+				let aa = a.attr('id').split('_');
+				let bb = b.attr('id').split('_');
+				return aa[aa.length-1] - bb[bb.length-1];
+			});
+			configs.sort(function(a,b){
+				return a.attr('id').split('_')[-1] - b.attr('id').split('_')[-1];
+			});
+			for(let i in rows){
+				this.annotations_list_target.append(rows[i]);
+			}
+			for(let i in configs){
+				this.annotations_target.append(configs[i]);
+			}
+			$('#'+selected_before).click();
 		}
 	}
 
