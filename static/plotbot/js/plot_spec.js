@@ -966,7 +966,7 @@ class PlotHandler{
 			x0: pos,
 			x1: pos,
 			y0: 0,
-			y1: 1,
+			y1: 1,	// go from bottom to top of plot part of window
 			line: {
 				color: '#4227ff',
 				opacity: 1.,
@@ -1359,7 +1359,6 @@ class PlotHandler{
 			let anno_text_regex = /annotations\[.+\]\.text/;
 			let vl_pos_regex = /shapes\[.+\]\.x0/;
 
-			// UP NEXT ::::::: update objects instead of html and then refresh everything, THEN find the row and click it
 
 			for(let k in eventdata){
 				// check for text update to push upstream and get anno id to actually click the thing
@@ -1377,6 +1376,17 @@ class PlotHandler{
 					let shp_ind = k.split('shapes[')[1].split(']')[0];
 					let shp = _this.getShapes()[shp_ind];
 					let id = _this.getShapes()[shp_ind].id;
+
+					// make sure the line goes 0 to 1 (calling a relayout within a relayout feels dirty, but ya gotta do what ya gotta do)
+					if(shp.y0 != 0){
+						shp.y0 = 0;
+						shp.y1 = 1;
+						let update = {}
+						update['shapes['+shp_ind+'].y0'] = 0;
+						update['shapes['+shp_ind+'].y1'] = 1;
+						Plotly.relayout(_this.getElement(), update);
+					}
+
 					// if the position was changed with a drag, change the name in the config and the row
 					if(k.search(vl_pos_regex) != -1){
 						// round down to nearest .1
