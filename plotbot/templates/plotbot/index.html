@@ -95,7 +95,6 @@
 				</div>
 			</div>
 
-
 			<div class="toolset" id="spec_tools">
 				<div id="spec_config_example" class="spec_config showing_config">
 
@@ -153,6 +152,10 @@
 								<label>x<sub>max</sub></label>
 								<input type=number target="xmax" value=1200>
 							</div>
+							<div class="setting">
+								<label>Apply to all</label>
+								<input type=checkbox target="apply_to_all">
+							</div>
 						</div>
 
 						<div class="preproc_settings" name="savgol">
@@ -166,6 +169,10 @@
 							<div class="setting">
 								<label>Window Size</label>
 								<input type=number target="window" value=5 min=5 max=11 step=2>
+							</div>
+							<div class="setting">
+								<label>Apply to all</label>
+								<input type=checkbox target="apply_to_all">
 							</div>
 						</div>
 
@@ -185,6 +192,10 @@
 								<label>Upper Limit</label>
 								<input type=number step=any target="upper" value=1>
 							</div>
+							<div class="setting">
+								<label>Apply to all</label>
+								<input type=checkbox target="apply_to_all">
+							</div>
 						</div>
 
 						<div class="preproc_settings" name="offset">
@@ -198,6 +209,10 @@
 							<div class="setting">
 								<label>Offset</label>
 								<input type=number value=1 step=any target="offset" value=1>
+							</div>
+							<div class="setting">
+								<label>Apply to all</label>
+								<input type=checkbox target="apply_to_all">
 							</div>
 						</div>
 					</div>
@@ -368,8 +383,6 @@
 						</div>
 					</div>
 				</div>
-
-
 			</div>
 
 
@@ -564,6 +577,52 @@ $(document).on('change', '.preproc_settings .tool', function(){
 	if(!on){
 		// clicking here fires all of the change events and everything
 		box.click();
+	}
+});
+
+// apply_to_all functionality
+$(document).on('change', '[target=apply_to_all]', function(){
+	// get preprocess name
+	let original = $(this).closest('.preproc_settings');
+	let pp_name = original.attr('name');
+	let pp_sel = '.preproc_settings[name='+pp_name+']';
+	if(this.checked){
+		// set all the <name> preprocs to have the same variables as this one
+		$(pp_sel).find('input').each(function(){
+
+			// if it's a checkbox, get and set with prop. otherwise, get and set val() (why is jquery inconsistent there)
+			let cur_input = original.find('[target=' + $(this).attr('target') + ']');
+			if(cur_input.attr('type') == 'checkbox'){
+				$(this).prop('checked', $(cur_input).prop('checked'));
+			}
+			else{
+				$(this).val($(cur_input).val());
+			}
+
+		});
+		// redraw explicitly, because these changes don't fire change events, and therefore not redraw events (explicitly adding change events would cause an infinite loop because of the [target=apply_to_all] change listener)
+		ph.updatePlot();
+		
+		$(pp_sel).find('input').each(function(){
+			// find all inputs, and when any is changed, change all of its equivalents to the same thing automatically (this should mean that unchecking any "apply_to_all" checkbox should uncheck all of them, which is kinda cute)
+			$(this).bind('change.changeAll', function(){
+				// same deal with checkboxes - we have to handle them separately
+				let input_sel = 'input[target='+$(this).attr('target')+']';
+				if($(this).attr('type') == 'checkbox'){
+					$(pp_sel).find(input_sel).prop('checked', $(this).prop('checked'));
+				}
+				else{
+					$(pp_sel).find(input_sel).val($(this).val());
+				}
+				ph.updatePlot();
+			});
+		});
+	}
+	else{
+		// unhook all the listeners
+		$(pp_sel).find('input').each(function(){
+			$(this).unbind('change.changeAll');
+		})
 	}
 });
 
