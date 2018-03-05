@@ -288,65 +288,10 @@
 					</div>
 					<div class="setting">
 
-						<style>
-						#loader_div{
-							flex: 1;					-webkit-flex: 1;
-							border: 1px solid grey;
-							border-radius: 3px;
-							background-color: #e0e0e0;
-							display: flex;				-webkit-display: flex;
-							flex-direction: row;		-webkit-flex-direction: row;
-							align-items: center;		-webkit-align-items: center;
-							justify-content: center;	-webkit-justify-content: center;
-							cursor: pointer;
-						}
-						#loader_div:hover{
-							background-color: #d0d0e0;
-						}
-						</style>
-
-
-						<div id="loader_div">
-							Load full library
+						<div id="loader_click" class="loader_div">
+							<div id="loader_bar"></div>
+							<h4 id="loader_text">Load full library</h4>
 						</div>
-
-
-						<script>
-							$('#loader_div').click(function(){
-								// get all the names and info of the spectral items and add them to the table and the quick-add list
-								$.get({
-									url: 'getNonSlim',
-									success: function(response){
-										let target = $('#db_list').find('.scrollable');
-										for(let i = 0; i < response.length; i++){
-											// add each response to the quick add list
-											full_list.push({'label': response[i].name + ' - ' + response[i].wv + 'nm', 'value': response[i].id})
-											// add each response to the db table
-											let new_row = $('#template_db_spec_row').clone().attr('id', null).attr('spec_id', response[i].id);
-											new_row.find('.db_id').html(response[i].id);
-											new_row.find('.db_name').html(response[i].name);
-											new_row.find('.db_source').html(response[i].source);
-											new_row.find('.db_wav').html(response[i].wv);
-											target.append(new_row);
-										}
-										let kids = target.children();
-										// reorder the db table (alphabetical order)
-										kids.sort(function(a,b){
-											let aName = $(a).find('.db_name').html();
-											let bName = $(b).find('.db_name').html();
-											if(aName !== bName)
-												return aName > bName ? 1 : -1;
-											else
-												// tiebreaker goes to wavelength
-												return $(a).find('.db_wav').html() > $(b).find('.db_wav').html();
-										});
-										// replace the old db list html with the new
-										target.html(kids);
-									}
-								});
-							});
-
-						</script>
 
 					</div>
 				</div>
@@ -858,6 +803,65 @@ $('#cancel_db_add').click(function(){
 	// disable buttons
 	$('#add_from_db').attr('disabled', true);
 	$('#cancel_db_add').attr('disabled', true);
+});
+
+/********************** load full library ***********************************/
+// load full library
+$('#loader_click').click(function(){
+	// set text to 'loading...'
+	let loadbar = $('#loader_bar');
+	let loadtext = $('#loader_text');
+	let curload = 0;
+	loadtext.html('Loading..');
+	function setLoadText(){
+		let new_str = $('#loader_text').html()+'.';
+		if(new_str.match(/\.{7}/)){
+			new_str = 'Loading.';
+		}
+		$('#loader_text').html(new_str);
+	}
+	let interval = window.setInterval(setLoadText, 500);
+	// get all the names and info of the spectral items and add them to the table and the quick-add list
+	$.get({
+		url: 'getNonSlim',
+		success: function(response){
+			let target = $('#db_list').find('.scrollable');
+			// about 40% done
+			loadbar.css('width', '40%');
+			for(let i = 0; i < response.length; i++){
+				// add each response to the quick add list
+				full_list.push({'label': response[i].name + ' - ' + response[i].wv + 'nm', 'value': response[i].id})
+				// add each response to the db table
+				let new_row = $('#template_db_spec_row').clone().attr('id', null).attr('spec_id', response[i].id);
+				new_row.find('.db_id').html(response[i].id);
+				new_row.find('.db_name').html(response[i].name);
+				new_row.find('.db_source').html(response[i].source);
+				new_row.find('.db_wav').html(response[i].wv);
+				target.append(new_row);
+				loadbar.css('width', 40+55*(parseFloat(i)/response.length));
+			}
+			// about 95% done
+			let kids = target.children();
+			// reorder the db table (alphabetical order)
+			kids.sort(function(a,b){
+				let aName = $(a).find('.db_name').html();
+				let bName = $(b).find('.db_name').html();
+				if(aName !== bName)
+					return aName > bName ? 1 : -1;
+				else
+					// tiebreaker goes to wavelength
+					return $(a).find('.db_wav').html() > $(b).find('.db_wav').html();
+			});
+			// replace the old db list html with the new
+			target.html(kids);
+			// 100% done
+			loadbar.css('width', '100%');
+			window.clearInterval(interval);
+			loadtext.html('Full library loaded');
+			// remove the class from loader div to make it no longer interactive
+			$('#loader_click').attr('id', null);
+		}
+	});
 });
 
 /********************** other ******************************/

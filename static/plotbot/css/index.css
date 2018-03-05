@@ -340,6 +340,37 @@ input[type=number]{
 	width: 30px;
 }
 
+/* full library loader */
+.loader_div{
+	flex: 1;					-webkit-flex: 1;
+	border: 1px solid grey;
+	border-radius: 3px;
+	background-color: #e0e0e0;
+	display: flex;				-webkit-display: flex;
+	flex-direction: row;		-webkit-flex-direction: row;
+	align-items: center;		-webkit-align-items: center;
+	justify-content: center;	-webkit-justify-content: center;
+	position: relative;
+}
+#loader_click{
+	cursor: pointer;
+}
+#loader_click: hover{
+	background-color: #d0d0e0;
+}
+#loader_text{
+	margin: 0px;
+	z-index: 2;
+}
+#loader_bar{
+	position: absolute;
+	height: 100%;
+	width: 0%;
+	left: 0;
+	background-color: #90a8ff;
+	z-index: 1;
+}
+
 /* end of flex table styling */
 
 .text_block{
