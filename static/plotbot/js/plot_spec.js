@@ -453,7 +453,7 @@ class SpecConfig{
 		this.fields['opacity'] = new Field();
 
 		this.target_element = $('#spec_tools');
-		this.template_element = $('#spec_config_example');
+		this.template_element = $('#spec_config_example').clone().removeClass('spec_config_example');
 
 	}
 
@@ -562,7 +562,7 @@ class SpecConfig{
 		var rowSel = this.getRowSelector();
 
 		// div for spec tools
-		var el = this.template_element.clone().removeClass('spec_config_example').attr('id',this.getConfigId());
+		var el = this.template_element.clone().attr('id',this.getConfigId());
 
 		// append el to the spec_tools (and hide all others and show this)
 		this.target_element.append(el);
@@ -678,8 +678,8 @@ class PlotHandler{
 		this.plot_target = plot_target;
 		this.annotations_target = $('#anno_config');
 		this.annotations_list_target = $('#anno_list');
-		this.annotation_template = $('#example_annotation_tool').attr('id', null);
-		this.vl_template = $('#example_vl_tool').attr('id', null);
+		this.annotation_template = $('#example_annotation_tool').clone().attr('id', null);
+		this.vl_template = $('#example_vl_tool').clone().attr('id', null);
 
 		this.cur_spec_id = 0; // use this as spec ids as you go, to make sure they're identifiable
 		this.cur_annotation_id = 0; // same deal but with vertical lines

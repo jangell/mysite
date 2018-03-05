@@ -566,7 +566,7 @@ $(document).on('wheel', 'input[type=number]', function(e){
     $(this).blur();
 });
 
-// turn on preprocess when editing it (if it isn't turned on already) (unless it's the box itself - that would be silly)
+// turn on preprocess when editing its attribute values (if it isn't turned on already) (unless it's the box itself - that would be silly)
 $(document).on('change', '.preproc_settings .tool', function(){
 	// if the changed thing is the 'run' checkbox, ignore this whole thing
 	if($(this).attr('target') == 'run'){
@@ -580,51 +580,63 @@ $(document).on('change', '.preproc_settings .tool', function(){
 	}
 });
 
-// apply_to_all functionality
-$(document).on('change', '[target=apply_to_all]', function(){
-	// get preprocess name
-	let original = $(this).closest('.preproc_settings');
-	let pp_name = original.attr('name');
-	let pp_sel = '.preproc_settings[name='+pp_name+']';
-	if(this.checked){
-		// set all the <name> preprocs to have the same variables as this one
-		$(pp_sel).find('input').each(function(){
+// rewriting the apply-to-all thing as a document.on for each spec config input, that always checks whether to apply to all when an input is changed
+$(document).on('change', '.preproc_settings input', function(event){
+	// check if apply-to-all is a thing right now for this preprocess name
+	let origin = $(event.target);
+	let pp_settings = origin.closest('.preproc_settings');
+	let name = pp_settings.attr('name');
+	let target = origin.attr('target');
+	let pp_sel = '.preproc_settings[name='+name+']';
+	let handler_sel = '.preproc_selector[for='+name+']';
+	let input_sel = pp_sel + ' input[target='+target+']';
 
-			// if it's a checkbox, get and set with prop. otherwise, get and set val() (why is jquery inconsistent there)
-			let cur_input = original.find('[target=' + $(this).attr('target') + ']');
-			if(cur_input.attr('type') == 'checkbox'){
-				$(this).prop('checked', $(cur_input).prop('checked'));
-			}
-			else{
-				$(this).val($(cur_input).val());
-			}
-
-		});
-		// redraw explicitly, because these changes don't fire change events, and therefore not redraw events (explicitly adding change events would cause an infinite loop because of the [target=apply_to_all] change listener)
-		ph.updatePlot();
-		
-		$(pp_sel).find('input').each(function(){
-			// find all inputs, and when any is changed, change all of its equivalents to the same thing automatically (this should mean that unchecking any "apply_to_all" checkbox should uncheck all of them, which is kinda cute)
-			$(this).bind('change.changeAll', function(){
-				// same deal with checkboxes - we have to handle them separately
-				let input_sel = 'input[target='+$(this).attr('target')+']';
-				if($(this).attr('type') == 'checkbox'){
-					$(pp_sel).find(input_sel).prop('checked', $(this).prop('checked'));
+	if(target == 'apply_to_all'){
+		// if apply_to_all was just checked, update all the inputs (including apply_to_all) of all the corresponding .preproc_settings name
+		if(origin.prop('checked')){
+			pp_settings.find('input').each(function(i, l){
+				let el = $(l);
+				let el_targ = el.attr('target');
+				let el_sel = pp_sel+' input[target='+el_targ+']';
+				if(el.attr('type') == 'checkbox'){
+					let ch = el.prop('checked');
+					$(el_sel).prop('checked', ch);
+					if(el.attr('target') == 'run'){
+						ch ? $(handler_sel).addClass('running_preproc') : $(handler_sel).removeClass('running_preproc');
+					}
 				}
 				else{
-					$(pp_sel).find(input_sel).val($(this).val());
+					$(el_sel).val(el.val());
 				}
-				ph.updatePlot();
 			});
-		});
+		}
+		// if apply_to_all was just unchecked, uncheck all of them for the corresponding .preproc_settings name
+		else{
+			$(input_sel).prop('checked', false);
+		}
+		ph.updatePlot();
 	}
-	else{
-		// unhook all the listeners
-		$(pp_sel).find('input').each(function(){
-			$(this).unbind('change.changeAll');
-		})
+
+	// else if apply-to-all is checked, take that event and apply it to every .preproc_settings
+	else if(pp_settings.find('[target=apply_to_all]').prop('checked') || target == 'apply_to_all'){
+		// check boxes are different from other inputs
+		if(origin.attr('type') == 'checkbox'){
+			let ch = origin.prop('checked');
+			$(input_sel).prop('checked', ch);
+			if(origin.attr('target') == 'run'){
+				ch ? $(handler_sel).addClass('running_preproc') : $(handler_sel).removeClass('running_preproc');
+			}
+		}
+		else{
+			$(input_sel).val(origin.val());
+		}
+		// do this explicitly, after all the values have been updated (because doing the updates in jquery doesn't fire change events)
+		ph.updatePlot();
 	}
+
+	// otherwise, do nothing
 });
+
 
 // ******************************************* handle spec list stuff **************************************
 // show the spec settings tab when a spec gets selected (clicked on or added)
