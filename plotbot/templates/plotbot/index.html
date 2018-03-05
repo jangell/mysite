@@ -25,8 +25,8 @@
 		<ul class="tabs">
 			<li class="tab" for="global_tools" id="global_tab">Plot Settings</li>
 			<li class="tab" for="spec_tools" id="spec_tab">Spec Settings</li>
-			<li class="tab" for="add_tools" id="add_tab">Add Spec</li>
-			<li class="tab default_tab" for="anno_tools" id="anno_tab">Annotations</li>
+			<li class="tab default_tab" for="add_tools" id="add_tab">Add Spec</li>
+			<li class="tab" for="anno_tools" id="anno_tab">Annotations</li>
 		</ul>
 		
 		<div class="toolset_container">
@@ -249,7 +249,6 @@
 				</div>
 
 				<!-- add from database (slim to start) -->
-				<!-- quick add -->
 				<!-- explanatory text about managing slim vs full -->
 				<!-- load-full button with loading bar (actually, just fill up the button/div-as-button itself!) -->
 				<div class="tools_col">
@@ -267,6 +266,12 @@
 							<div class="db_wav">&lambda;</div>
 						</div>
 						<div class="scrollable">
+							<div class="table_row db_spec_row" id="template_db_spec_row">
+								<div class="db_id">{{spec.spec_id}}</div>
+								<div class="db_name">{{spec.name}}</div>
+								<div class="db_source">{{spec.source}}</div>
+								<div class="db_wav">{{spec.wavelength}}</div>
+							</div>
 						{% for spec in specs %}
 							<div class="table_row db_spec_row" spec_id={{spec.spec_id}}>
 								<div class="db_id">{{spec.spec_id}}</div>
@@ -281,7 +286,71 @@
 						<button class="setting_button" id="add_from_db" disabled>Add</button>
 						<button class="setting_button" id="cancel_db_add" disabled>Cancel</button>
 					</div>
+					<div class="setting">
+
+						<style>
+						#loader_div{
+							flex: 1;					-webkit-flex: 1;
+							border: 1px solid grey;
+							border-radius: 3px;
+							background-color: #e0e0e0;
+							display: flex;				-webkit-display: flex;
+							flex-direction: row;		-webkit-flex-direction: row;
+							align-items: center;		-webkit-align-items: center;
+							justify-content: center;	-webkit-justify-content: center;
+							cursor: pointer;
+						}
+						#loader_div:hover{
+							background-color: #d0d0e0;
+						}
+						</style>
+
+
+						<div id="loader_div">
+							Load full library
+						</div>
+
+
+						<script>
+							$('#loader_div').click(function(){
+								// get all the names and info of the spectral items and add them to the table and the quick-add list
+								$.get({
+									url: 'getNonSlim',
+									success: function(response){
+										let target = $('#db_list').find('.scrollable');
+										for(let i = 0; i < response.length; i++){
+											// add each response to the quick add list
+											full_list.push({'label': response[i].name + ' - ' + response[i].wv + 'nm', 'value': response[i].id})
+											// add each response to the db table
+											let new_row = $('#template_db_spec_row').clone().attr('id', null).attr('spec_id', response[i].id);
+											new_row.find('.db_id').html(response[i].id);
+											new_row.find('.db_name').html(response[i].name);
+											new_row.find('.db_source').html(response[i].source);
+											new_row.find('.db_wav').html(response[i].wv);
+											target.append(new_row);
+										}
+										let kids = target.children();
+										// reorder the db table (alphabetical order)
+										kids.sort(function(a,b){
+											let aName = $(a).find('.db_name').html();
+											let bName = $(b).find('.db_name').html();
+											if(aName !== bName)
+												return aName > bName ? 1 : -1;
+											else
+												// tiebreaker goes to wavelength
+												return $(a).find('.db_wav').html() > $(b).find('.db_wav').html();
+										});
+										// replace the old db list html with the new
+										target.html(kids);
+									}
+								});
+							});
+
+						</script>
+
+					</div>
 				</div>
+
 			</div>
 
 
@@ -765,9 +834,9 @@ $('#cancel_add').click(function(){
 
 // ***************************** add from database *********************************
 // select db row on click
-$('.db_spec_row').click(function(){
-	$(this).siblings('.selected_row').removeClass('selected_row');
-	$(this).addClass('selected_row');
+$(document).on('click', '.db_spec_row', function(evt){
+	$(evt.target).closest('.db_spec_row').siblings('.selected_row').removeClass('selected_row');
+	$(evt.target).closest('.db_spec_row').addClass('selected_row');
 	$('#add_from_db').attr('disabled', false);
 	$('#cancel_db_add').attr('disabled', false);
 });
@@ -806,10 +875,11 @@ $('#remove_selected_spec').click(function(){
 });
 
 
+var full_list = [ {% for spec in specs %} {'label': '{{spec.name}} - {{spec.wavelength}}nm', 'value':'{{spec.spec_id}}'}, {% endfor %} ]
 $(document).ready(function(){
 	// quick add
 	$('#quick_add').autocomplete({
-		source: [ {% for spec in specs %}{'label':'{{spec.name}} - {{spec.wavelength}}nm', 'value':'{{spec.spec_id}}'},{% endfor %} ],
+		source: full_list,
 		minLength: 3,
 		select: function(event, ui){
 			$(this).val('');

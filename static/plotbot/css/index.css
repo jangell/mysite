@@ -309,6 +309,9 @@ input[type=number]{
 	flex: 1;				-webkit-flex: 1;
 	overflow: scroll;
 }
+#template_db_spec_row{
+	display:none;
+}
 .tools_list .head_row{
 	cursor: default;
 }

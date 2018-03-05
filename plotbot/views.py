@@ -26,6 +26,14 @@ def getSpec(request):
 	spec_dict['data'] = spec.getPoints()
 	return http.HttpResponse(json.dumps(spec_dict), content_type='application/json')
 
+# AJAX function to return the entire spectral library as a JSON object
+def getNonSlim(request):
+	objs = Spec.objects.filter(slim=False)
+	specs = []
+	for o in objs:
+		specs.append({'id':o.spec_id, 'name':o.name, 'source':o.source.name, 'wv':o.wavelength})
+	return http.HttpResponse(json.dumps(specs), content_type='application/json')
+
 # manage what parts of the database are and aren't slim
 # TODO: restrict access to superusers only
 def manageSlim(request):
