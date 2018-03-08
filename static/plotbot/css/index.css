@@ -20,11 +20,12 @@ html{
 	display:flex;		display: -webkit-flex;
 	flex-direction:row;	-webkit-flex-direction: row;
 	height:40vh;
+	white-space: nowrap;
 }
 
 .toolbar{
 	background: #f0f0f0;
-	width:100%;
+	width: 70vw;
 	flex:2;					-webkit-flex:2;
 	display:flex;			display: -webkit-flex;
 	flex-direction:column;	-webkit-flex-direction: column;
@@ -271,9 +272,6 @@ input[type=number]{
 }
 .selected_preproc{
 	background: #fafafa;
-}
-.selected_preproc:hover{
-	background: #f6f6f6;
 }
 .preproc_name{
 	margin: 0;

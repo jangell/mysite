@@ -529,7 +529,8 @@ $(document).ready(function(){
 		// toggle settings css
 		let target_sel = '[name=' + $(this).attr('for') + ']';
 		// search through tree, because each specConfig (the other ones are hidden) has the same layout
-		$('.selected_preproc_settings').removeClass('selected_preproc_settings');
+		// only hide the other preproc settings for this spec
+		$(this).closest('.spec_config').find('.selected_preproc_settings').removeClass('selected_preproc_settings');
 		$(this).closest('.spec_config').find(target_sel).addClass('selected_preproc_settings');
 	});
 
