@@ -653,8 +653,8 @@ class PlotConfig{
 		this.fields['xmax'].bindTo(finder('xmax'));
 		this.fields['ymin'].bindTo(finder('ymin'));
 		this.fields['ymax'].bindTo(finder('ymax'));
-		this.fields['show_legend'].bindTo(finder('showlegend'));
-		this.fields['show_grid'].bindTo(finder('showgrid'));
+		this.fields['show_legend'].bindTo(finder('show_legend'));
+		this.fields['show_grid'].bindTo(finder('show_grid'));
 
 	}
 

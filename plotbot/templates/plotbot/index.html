@@ -887,14 +887,27 @@ $('#loader_click').click(function(){
 /********************** other ******************************/
 // remove button
 $('#remove_selected_spec').click(function(){
-	let id = $('#spec_list').find('.selected_row').attr('id');
+	let sr = $('#spec_list').find('.selected_row');
+	let padre = sr.parent();
+	let id = sr.attr('id');
+	let next_ind = sr.index() - 1;
 	let ret_obj = ph.removeSpecByRowId(id);	// dictionary, containing boolean <success>, and optionally containing <row_sel> and <config_sel>
 	// only remove from list and specconfig if it worked
 	if(ret_obj['success']){
 		$(ret_obj['row_sel']).remove();
 		$(ret_obj['config_sel']).remove();
-		// select the last row, if it exists
-		$('#spec_list').find('.table_row:not(.head_row)').last().click();
+		// select the previous row, if it isn't -1
+		if(next_ind >= 0){
+			padre.children()[next_ind].click();
+		}
+		// otherwise, it was the first row, so select the *new* first row
+		else if(padre.children().length != 0){
+			padre.children()[0].click();
+		}
+		// otherwise, sorry fam, list's kicked. let the user know
+		else{
+			$('#spec_tools').append($('<div>').addClass('showing_config').html('Plot is currently empty'));
+		}
 	}
 });
 
