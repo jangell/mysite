@@ -1455,10 +1455,5 @@ class PlotHandler{
 		this.updatePlot();
 	}
 
-	dumpToUrl(){
-		// get entire plotly plot object and literally just chuck it in a url
-		let plot = this.getElement();
-		debugger;
-	}
 
 }

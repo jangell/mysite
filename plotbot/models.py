@@ -78,6 +78,34 @@ class Spec(models.Model):
 			return '{} (wavelength unknown)'.format(self.name)
 
 
+# sharing
+class PlotDataManager(models.Manager):
+	# TODO: make this actually work (it can create, but it can't get)
+	def get_or_create_plotdata(self, data, layout):
+		to_hash = hash("{}{}".format(data,layout))
+		plotData = self.create(hash=to_hash, data=data, layout=layout)
+		return plotData
+
+class PlotData(models.Model):
+	id = models.AutoField(primary_key = True)
+	hash = models.IntegerField(unique = True)
+	data = models.TextField()
+	layout = models.TextField()
+
+	objects = PlotDataManager()
+
+	def __str__(self):
+		return str(self.hash)
+
+
+
+
+
+
+
+
+
+
 # a single point in a spectrum
 #class Point(models.Model):
 #	spec = models.ForeignKey(Spec)
@@ -193,8 +221,6 @@ class SpecConfig(models.Model):
 	# meta-ish functions
 	def __str__(self):
 		return 'Plot {} | Spec {}'.format(self.plot.plot_id, self.spec_id)
-
-
 
 
 

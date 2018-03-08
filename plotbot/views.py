@@ -76,9 +76,14 @@ def spectrum(request, spec_id):
 	context = {'spectrum':spec, 'spec_data':points}
 	return render(request, 'plotbot/single_spectrum.html', context)
 
+# saves the data & layout for a plotly plot, and returns the hash of that plot
+def save_plot(request):
+	post = request.POST
+	pd = PlotData.objects.get_or_create_plotdata(data=post['data'], layout=post['layout'])
+	pd.save()
+	return http.HttpResponse(pd.hash)
 
 # everything below this point has been depricated
-
 
 # args: opacity, line_width, ymax, title, color, legend_location, legend_name, xlabel, xmax, ylabel, xmin, ymin
 floats = ['opacity', 'line_width', 'ymax', 'ymin', 'xmax', 'xmin', 'fig_height', 'fig_width']

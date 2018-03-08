@@ -266,8 +266,14 @@ input[type=number]{
 	cursor: pointer;
 	margin:3px;
 }
+.preproc_selector:not(.selected_preproc):hover{
+	background-color: #e0e0e0;
+}
 .selected_preproc{
 	background: #fafafa;
+}
+.selected_preproc:hover{
+	background: #f6f6f6;
 }
 .preproc_name{
 	margin: 0;
