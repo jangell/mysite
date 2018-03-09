@@ -182,7 +182,7 @@ input[type=number]{
 	border-bottom: 1px solid #c0c0c0;
 	transition: background-color .2s ease;
 }
-.table_row:not(.selected_row):hover{
+.table_row:not(.selected_row):not(.head_row):hover{
 	cursor: pointer;
 	background-color:rgba(128,128,128,.15);
 }
@@ -360,8 +360,8 @@ input[type=number]{
 #loader_click{
 	cursor: pointer;
 }
-#loader_click: hover{
-	background-color: #d0d0e0;
+#loader_click:hover{
+	background-color: #d0d0d0;
 }
 #loader_text{
 	margin: 0px;
