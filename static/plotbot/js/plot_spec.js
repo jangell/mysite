@@ -564,6 +564,8 @@ class SpecConfig{
 		// div for spec tools
 		var el = this.template_element.clone().attr('id',this.getConfigId());
 
+		// set the default name
+		el.find('[target=label]').val(this.spec_name);
 		// append el to the spec_tools (and hide all others and show this)
 		this.target_element.append(el);
 		// bind all of the fields for this specconfig to the fields in el
@@ -658,7 +660,7 @@ class PlotConfig{
 
 	}
 
-	// returns the value of a field
+	// gets or sets the value of a field (depending on one argument or two)
 	valueOf(field, value){
 		if(value === undefined){
 			return this.fields[field].getValue();
