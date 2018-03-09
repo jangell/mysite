@@ -239,7 +239,7 @@
 
 					<div class="setting">
 						<label>Spec Name</label>
-						<input class="add_file_setting required wide_field" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required" readonly>
+						<input class="add_file_setting required wide_field" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required">
 					</div>
 
 					<div class="setting">
@@ -778,6 +778,7 @@ $('#add_from_file').click(function(){
 	}
 
 	// actually add the thing
+	// this is not functioning correctly
 	ph.addSpecFromFile(menu_name, file);
 
 	// clear the fields

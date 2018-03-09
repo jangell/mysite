@@ -272,6 +272,7 @@ input[type=number]{
 }
 .selected_preproc{
 	background: #fafafa;
+	cursor: default;
 }
 .preproc_name{
 	margin: 0;
