@@ -83,6 +83,12 @@ def save_plot(request):
 	pd.save()
 	return http.HttpResponse(pd.hash)
 
+# page with shared plot (and not much else)
+def share(request, hash):
+	pd = PlotData.objects.get(hash=hash)
+	context = {'pd': pd}
+	return render(request, 'plotbot/simple_share.html', context)
+
 # everything below this point has been depricated
 
 # args: opacity, line_width, ymax, title, color, legend_location, legend_name, xlabel, xmax, ylabel, xmin, ymin

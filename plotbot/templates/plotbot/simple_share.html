@@ -1,0 +1,67 @@
+{% extends "plotbot/layout.html" %}
+
+{% block head_bottom %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300|Open+Sans:300,400" rel="stylesheet">
+<style>
+#body_content{
+	background-color: #f8f8f8;
+}
+.explainer{
+	width: 90%;
+	margin: 10px auto;
+	padding: 0px 10px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	/*background-color: #f0f0f0;
+	border: 1px solid #d0d0d0;*/
+}
+.exp_title{
+	font-family: 'Open Sans', sans-serif;
+	font-weight: 400;
+	margin: 5px;
+}
+.exp_hr{
+	border-color: #d0d0d0;
+	width: 80%;
+	border-top: 0px;
+}
+.exp_text{
+	margin: 5px;
+	font-weight: 300;
+}
+.plot_target{
+	margin: 10px;
+	height: calc(100% - 10px);
+	width: calc(100% - 10px);
+	border: 1px solid #d0d0d0;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="explainer">
+	<h3 class="exp_title">Plot {{pd.hash}}</h3>
+	<hr class="exp_hr">
+	<p class="exp_text">
+		This is a shared interactive plot. Toggle a line by clicking on its label in the legend, or show only a single line by double clicking on its label. Save an image by clicking on the camera icon in the upper right corner of the plot. Select an area to crop and zoom by clicking and dragging around a box on the plot, and pan around the plot by clicking and dragging on either axis. Scale an axis by clicking and dragging near the end of the axis, or click and drag in a corner to scale both at once.
+	</p>
+</div>
+
+<div class="plot_target" id="plot_target"></div>
+
+
+<script>
+var plot_div = document.getElementById('plot_target');
+// render plot
+var data = {{pd.data | safe}};
+var layout = {{pd.layout | safe}};
+Plotly.newPlot(plot_div, data, layout, {showLink:false, displaylogo:false, editable:true, modeBarButtonsToRemove: ['sendDataToCloud']});
+
+$(window).on('resize',function(){
+	Plotly.Plots.resize(plot_div);
+});
+</script>
+{% endblock %}
