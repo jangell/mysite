@@ -83,6 +83,8 @@ class PlotDataManager(models.Manager):
 	# TODO: make this actually work (it can create, but it can't get)
 	def get_or_create_plotdata(self, data, layout):
 		to_hash = hash("{}{}".format(data,layout))
+		if self.filter(hash=to_hash).exists():
+			return self.get(hash=to_hash)
 		plotData = self.create(hash=to_hash, data=data, layout=layout)
 		return plotData
 
