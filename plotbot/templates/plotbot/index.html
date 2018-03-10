@@ -243,8 +243,8 @@
 					</div>
 
 					<div class="setting">
-						<button class="setting_button add_file_setting" id="add_from_file" disabled>Add</button>
-						<button class="setting_button add_file_setting" id="cancel_add" disabled>Cancel</button>
+						<button class="setting_button add_file_setting" id="add_from_file">Add</button>
+						<button class="setting_button add_file_setting" id="cancel_add">Cancel</button>
 					</div>
 
 				</div>
@@ -706,10 +706,6 @@ $('.disable_without_file').click(function(){
 // handle what happens when a file is added to the file input
 $('[target=local_file]').change(function(){
 	let files = document.querySelector('input[target=local_file]').files;
-	// remove readonly & disabled if there's a file chosen
-	$('.add_file_setting').attr('disabled', files.length === 0)
-
-	// cool stuff - try and autofill name, wavelength, and label
 
 	// check that file actually _is_ uploaded
 	if(!(files.length)){
@@ -718,6 +714,7 @@ $('[target=local_file]').change(function(){
 		return;
 	}
 
+	// cool stuff - try and autofill name, wavelength, and label
 	let file = files[0];
 	let fname = file.name;
 
@@ -725,11 +722,13 @@ $('[target=local_file]').change(function(){
 
 	// try and parse name & wavelength out of it
 	let parts = namestring.split('_');
+	// try to capture name and wavelength separately
 	let name = '';
 	let wav = '';
+	let foundName = false;
 
-	// first option: one of the parts is {wavelength}nm, everything before is name
-	for(let i = 0; i < parts.length; i++){
+	// first option: one of the parts is {wavelength}nm: everything before is name
+	for(let i = 0; i < parts.length && !foundName; i++){
 		if(parts[i].slice(-2,parts[i].length) === 'nm'){
 			// join all parts from 0 to i and convert to Title Case
 			let name_list = []
@@ -738,12 +737,26 @@ $('[target=local_file]').change(function(){
 			}
 			name = name_list.join(' ');
 			wav = parts[i];
-			foundStrings = true;
+			foundName = true;
+		}
+		// next option: one of the parts is {wavelength}: everything before is name
+		else if(!isNaN(parseInt(parts[i])) && parseInt(parts[i]) < 1000 && parseInt(parts[i]) > 200){
+			let name_list = [];
+			for(let j = 0; j < i; j++){
+				name_list.push(parts[j].charAt(0).toUpperCase() + parts[j].slice(1));
+			}
+			name = name_list.join(' ');
+			wav = parts[i];
+			foundName = true;
 		}
 	}
 
+
 	// TODO: next option: one of the parts is {wavelength} (only 532 or 785), everything before is name
 
+	if(name == ''){
+		name = 'New spectrum';
+	}
 	let to_str = name;
 	if(wav !== ''){
 		to_str += ' ('+wav+')';
@@ -751,8 +764,6 @@ $('[target=local_file]').change(function(){
 	$('[target=menu_name]').val(to_str);
 
 });
-
-
 
 //  handle what happens when the button gets hit
 $('#add_from_file').click(function(){
@@ -788,9 +799,6 @@ $('#add_from_file').click(function(){
 	// clear the fields
 	$('[target=local_file]').val('');
 	$('[target=menu_name]').val('');
-
-	// fire change event for file input
-	$('[target=local_file]').change();
 
 });
 

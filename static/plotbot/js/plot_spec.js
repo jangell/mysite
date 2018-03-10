@@ -850,18 +850,21 @@ class PlotHandler{
 					console.log('skipped line: '+data[i]);
 				}
 			}
-			// find the one that's going up or down by a consistent amount (assume it's the one where the point in the middle is closest to halfway between the start and end values. there's a very small chance this is wrong. TODO: fix this issue)
-			// span is the difference between the first and last values
-			let lista_span = lista[lista.length - 1] - lista[0]
-			let listb_span = listb[listb.length - 1] - listb[0]
-			// mid is the value in the middle
-			let lista_mid = lista[lista.length / 2]
-			let listb_mid = listb[listb.length / 2]
-			// gap is the difference between the mid and half the span
-			let lista_gap = Math.abs(lista_mid - (lista[0] + (lista_span/2)));
-			let listb_gap = Math.abs(listb_mid - (listb[0] + (listb_span/2)));
-			// the smaller gap is the wavenumbers
-			if(lista_gap < listb_gap){
+			
+			// find the domain (wavs) (should be the list with the smaller absolute value of second derivative)
+			let dera = [];
+			let derb = [];
+			for(let i = 0; i < lista.length-2; i++)
+				dera.push((lista[i+2] - (2*lista[i+1]) + lista[i]));	// do out the math - this takes the second derivative
+			for(let i = 0; i < listb.length-2; i++)
+				derb.push((listb[i+2]-(2*listb[i+1]) + listb[i]));
+			let dera_sum = dera.reduce((acc,cur) => acc + Math.abs(cur));
+			let derb_sum = derb.reduce((acc,cur) => acc + Math.abs(cur));
+
+			debugger;
+
+			// make sure the order is [wavs, counts]
+			if(dera_sum < derb_sum){
 				wavs = lista;
 				counts = listb;
 			}
@@ -869,12 +872,13 @@ class PlotHandler{
 				wavs = listb;
 				counts = lista;
 			}
+
 			// check if wavs (and therefore both) need reversing
 			if(wavs[1] < wavs[0]){
 				wavs.reverse();
 				counts.reverse();
 			}
-			data = [wavs,counts];
+			data = [wavs, counts];
 
 			_this.addSpec(spec_name, data);
 		}
