@@ -1058,13 +1058,15 @@ class PlotHandler{
 
 		// this never deletes the example annotation because it never binds to it
 		target.find('[target=anno_remove]').click(function(){
+			// remove annotation
 			let anno_ind = _this.getAnnotations().map(function(e){return e.id;}).indexOf(anno.id);
-			let anno_str = 'annotations['+anno_ind+']';
-			let anno_key = anno_str;
+			let anno_key = 'annotations['+anno_ind+']';
 			let update = {};
 			update[anno_key] = null;
 			Plotly.relayout(_this.getElement(), update);
+			// update markup
 			_this.refreshAnnotationMarkup();
+			// 'click' on correct annotation
 		});
 
 		return target;
@@ -1147,15 +1149,16 @@ class PlotHandler{
 			Plotly.relayout(_this.getElement(), update);
 		});
 
-		// this never deletes the example annotation because it never binds to it
 		target.find('[target=vl_remove]').click(function(){
+			// remove vertical line
 			let shp_ind = _this.getShapes().map(function(e){return e.id;}).indexOf(vl.id);
-			let shp_str = 'shapes['+shp_ind+']';
-			let shp_key = shp_str;
+			let shp_key = 'shapes['+shp_ind+']';
 			let update = {};
 			update[shp_key] = null;
 			Plotly.relayout(_this.getElement(), update);
+			// redraw annotation
 			_this.refreshAnnotationMarkup();													// refresh to get rid of this annotation
+			// select correct line
 		});
 
 		return target;
@@ -1163,8 +1166,9 @@ class PlotHandler{
 	}
 
 	refreshAnnotationMarkup(){
-		// get currently selected id
-		let selected_before = this.annotations_list_target.find('.selected_row').attr('id');
+		// get currently selected index
+		let selected_ind = this.annotations_list_target.find('.selected_row').index();
+		let orig_len = this.annotations_list_target.children().length;
 
 		// clear existing annotations markup
 		this.annotations_target.html('');
@@ -1173,7 +1177,6 @@ class PlotHandler{
 		// add new annotations markup
 		let annos = this.getElement().layout.annotations ? this.getElement().layout.annotations : [];
 		let shapes = this.getElement().layout.shapes ? this.getElement().layout.shapes : [];
-		let last_row = null;
 		let rows = [];
 		let configs = [];
 
@@ -1185,7 +1188,6 @@ class PlotHandler{
 
 			// create row and config markup
 			let row = $('<div>').addClass('table_row').attr('id', 'anno_row_'+annos[i].id).append($('<div>').addClass('anno_list_text').html(annos[i].text));
-			//last_row = row;
 			let config = this.bindAnnotation(annos[i], this.annotation_template.clone()).attr('id', 'anno_config_'+annos[i].id);
 			
 			// connect row to config
@@ -1212,7 +1214,6 @@ class PlotHandler{
 		for(let i = 0; i < shapes.length; i++){
 			// create row and config markup
 			let row = $('<div>').addClass('table_row').attr('id', 'anno_row_'+shapes[i].id).append($('<div>').addClass('anno_list_text').html(shapes[i].name));
-			//last_row = row;
 			let config = this.bindVL(shapes[i], this.vl_template.clone()).attr('id', 'anno_config_'+shapes[i].id);
 			
 			// connect row to config
@@ -1255,7 +1256,21 @@ class PlotHandler{
 			for(let i in configs){
 				this.annotations_target.append(configs[i]);
 			}
-			$('#'+selected_before).click();
+			// check if one annotation was removed
+			if(this.annotations_list_target.children().length == orig_len - 1){
+				selected_ind -= 1;
+			}
+			// or one was added - click it!
+			else if(this.annotations_list_target.children().length == orig_len + 1){
+				selected_ind = this.annotations_list_target.children().length - 1;
+			}
+			if(selected_ind >= 0){
+				this.annotations_list_target.children()[selected_ind].click();
+			}
+			else if(this.annotations_target.children().length){
+				this.annotations_list_target.children()[0].click();
+			}
+			debugger;
 		}
 	}
 
@@ -1372,11 +1387,11 @@ class PlotHandler{
 					// only refresh markup if text was changed
 					if(k.search(anno_text_regex) != -1){
 						_this.refreshAnnotationMarkup();
+						let anno_ind = k.split('annotations[')[1].split(']')[0]; // this gets the index of the annotation in the plot-held list
+						let id = _this.getAnnotations()[anno_ind].id;
+						let target_row = $('#anno_row_'+id);
+						target_row.click();
 					}
-					let anno_ind = k.split('annotations[')[1].split(']')[0]; // this gets the index of the annotation in the plot-held list
-					let id = _this.getAnnotations()[anno_ind].id;
-					let target_row = $('#anno_row_'+id);
-					target_row.click();
 				}
 				else if(k.indexOf('shapes[') != -1){
 					let shp_ind = k.split('shapes[')[1].split(']')[0];
@@ -1404,9 +1419,9 @@ class PlotHandler{
 							shp.name = 'Spike ('+pos+')';
 						}
 						_this.refreshAnnotationMarkup();
+						let target_row = $('#anno_row_'+id);
+						target_row.click();
 					}
-					let target_row = $('#anno_row_'+id);
-					target_row.click();
 				}
 			}
 

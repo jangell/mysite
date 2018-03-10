@@ -182,7 +182,7 @@ input[type=number]{
 	border-bottom: 1px solid #c0c0c0;
 	transition: background-color .2s ease;
 }
-.table_row:not(.selected_row):not(.head_row):hover{
+.table_row:not(.selected_row):not(.head_row):not(.unselectable):hover{
 	cursor: pointer;
 	background-color:rgba(128,128,128,.15);
 }
@@ -320,7 +320,7 @@ input[type=number]{
 .tools_list .head_row{
 	cursor: default;
 }
-.tools_list .table_row:not(.head_row){
+.tools_list .table_row:not(.head_row):not(.selected_row):not(.unselectable){
 	cursor: pointer;
 }
 .db_id{

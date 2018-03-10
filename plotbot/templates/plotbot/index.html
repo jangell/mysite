@@ -392,7 +392,7 @@
 							<div class="anno_list_text">Annotations</div>
 						</div>
 						<div class="scrollable" id="anno_list">
-							<div class="table_row">
+							<div class="table_row unselectable">
 								<div class="anno_list_text">No annotations</div>
 							</div>
 						</div>
@@ -412,7 +412,11 @@
 						<button id="share_plot">Save &amp; Get URL</button>
 					</div>
 					<div class="setting">
-						<h4 class="col_title"> <span id="share_url">Sharable URL</span><span id="copied_message"></span></h4>
+						<input id="url_copier">
+						<!--<h4 class="col_title"><span id="share_url">Sharable URL</span><span id="copied_message"></span></h4>-->
+					</div>
+					<div class="setting">
+						<h4 id="copied_message"></h4>
 					</div>
 				</div>
 				<div class="tools_col"></div>
@@ -1039,10 +1043,15 @@ function share_plot(){
 		success: function(response){
 			// update this url when the domain name changes
 			let share_url = 'http://www.jangell.org/plotbot/share/'+response;
-			$('#share_url').html(share_url);
-			$('#share_url').select();
-			document.execCommand('Copy');
-			$('#copied_message').html(' (copied to clipboard)');
+			$('#url_copier').val(share_url);
+			debugger;
+			let copier = document.getElementById('url_copier');
+			copier.select();
+			let copied = document.execCommand('copy');
+			if(copied)
+				$('#copied_message').html('Copied to clipboard');
+			else
+				$('#copied_message').html('Failed to copy - try copying manually');
 		}
 	})
 }
