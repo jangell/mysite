@@ -1270,7 +1270,6 @@ class PlotHandler{
 			else if(this.annotations_target.children().length){
 				this.annotations_list_target.children()[0].click();
 			}
-			debugger;
 		}
 	}
 

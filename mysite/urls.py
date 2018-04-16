@@ -20,12 +20,13 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^gg/', include('gg.urls')),                   # guerilla gardening
     url(r'^albumaday/',include('albumaday.urls')),      # album a day
-    url(r'^where/',include('checkin.urls')),
-    url(r'^plotbot/',include('plotbot.urls')),
+    url(r'^where/',include('checkin.urls')),            # travel checkin site
+    url(r'^plotbot/',include('plotbot.urls')),          # NASA plotbot
     url(r'^vamos_en_un_viaje/',include('trips.urls')),  # trips
     # default to home
-    url(r'^', include('home.urls')),
+    url(r'^', include('home.urls')),                    # personal homepage
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

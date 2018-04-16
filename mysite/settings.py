@@ -36,12 +36,14 @@ INSTALLED_APPS = [
     'checkin.apps.CheckinConfig',
     'trips.apps.TripsConfig',
     'plotbot.apps.PlotbotConfig',
+    'gg.apps.GgConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mapwidgets',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -63,7 +65,8 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR,'albumaday/templates/'),
             os.path.join(BASE_DIR,'home/templates/'),
-            os.path.join(BASE_DIR,'trips/templates/')
+            os.path.join(BASE_DIR,'trips/templates/'),
+            os.path.join(BASE_DIR,'gg/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
