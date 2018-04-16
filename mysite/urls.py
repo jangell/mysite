@@ -20,7 +20,7 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^gg/', include('gg.urls')),                   # guerilla gardening
+    url(r'^gg/', include('gg.urls', namespace='gg')),                   # guerilla gardening
     url(r'^albumaday/',include('albumaday.urls')),      # album a day
     url(r'^where/',include('checkin.urls')),            # travel checkin site
     url(r'^plotbot/',include('plotbot.urls')),          # NASA plotbot
