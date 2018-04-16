@@ -1,0 +1,27 @@
+{% extends "gg/base.html" %}
+
+{% block title %}Data list{% endblock %}
+
+{% block headbottom %}
+<style>
+p{
+	margin:5px;
+}
+.listitem{
+	padding: 10px;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+
+{% for planting in plantings %}
+<div class="listitem">
+	<p>{{planting.species}}</p>
+	<p>{{planting.description}}</p>
+	<p>{{planting.lat}}, {{planting.lon}}</p>
+	<p>{{planting.planting_day}}</p>
+</div>
+{% endfor %}
+
+{% endblock %}

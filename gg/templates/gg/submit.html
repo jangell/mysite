@@ -1,0 +1,185 @@
+{% extends "gg/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Submit new planting{% endblock %}
+
+{% block headbottom %}
+<!-- these scripts are to use the django admin calendar widget -->
+<script type="text/javascript" src="/admin/jsi18n/"></script>
+<script type="text/javascript" src="{% static 'admin/js/core.js' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+<!-- <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}" /> -->
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/widgets.css' %}" />
+
+<!-- openlayers -->
+<link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
+<script src="https://openlayers.org/en/v4.6.5/build/ol.js" type="text/javascript"></script>
+
+<style>
+#form_table{
+	border-collapse: collapse;
+	width: 80%;
+	margin: auto;
+	margin-top: 40px;
+}
+#form_submit{
+	display: block;
+	margin:auto;
+	font-family: Cabin, sans-serif;
+	font-size: 1.5rem;
+	background-color: #c0e0c0;
+	border: 1px solid #c0c0c0;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: all .3s;
+	padding: 5px 20px;
+}
+#form_submit:hover{
+	background-color: #a0c0a0;
+}
+#map{
+	height: 40vh;
+	width: 80%;
+	margin: auto;
+	border-radius: 5px;
+	overflow: hidden;
+	cursor: pointer;
+}
+#marker{
+	width:10px;
+	height:10px;
+	background-color:red;
+	border-radius: 5px;
+}
+.spacer{
+	height: 5vh;
+}
+#coordinates{
+	list-style: none;
+
+}
+
+/* django form styling */
+#form_table tr:not(:last-child){
+	border-bottom: 1px solid #d8d8d8;
+	margin: 20px;
+}
+#form_table th{
+	float: left;
+	font-size: 1.2rem;
+}
+#form_table td{
+	padding: 10px;
+	float: right;
+	min-width: 30%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	font-size: 1.2rem;
+}
+#form_table label{
+	font-weight: normal;
+}
+#form_table input{
+	flex: 1;
+}
+#form_table textarea{
+	flex: 1;
+}
+#form_table select{
+	margin: 0px 3px;
+}
+
+/* django AdminDateTime widget styling */
+.datetimeshortcuts a{
+	text-decoration: none;
+	color: #4b5f7f;
+	padding: 3px;
+	font-family: Open Sans, sans-serif;
+	font-size: .88rem;
+}
+</style>
+
+{{ form.media }}
+
+{% endblock %}
+
+{% block pagetitle %}Submit a new planting{% endblock %}
+{% block pagedesc %}
+To submit or register or whatever a new planting, click on where it is, as close as you can get, in the map, and then fill out the rest of the form.
+{% endblock %}
+
+{% block body %}
+<div class="map" id="map"></div>
+<div style="display:none;">
+	<div id="marker"></div>
+</div>
+<form>
+	{% csrf_token %}
+	<table id="form_table">
+		<tr>
+			<th>
+				<label for="id_coordinates">Coordinates</label>
+			</th>
+			<tr>
+				<ul id="coordiantes">
+					<li>
+					{{ form.latitude }}
+					</li>
+				</ul>
+			</tr>
+		</tr>
+		{{ form.as_table }}
+	</table>
+	<input id="form_submit" type=submit value="Submit">
+</form>
+<div class="spacer"></div>
+
+
+<script>
+var outdoors_layer = new ol.layer.Tile({
+	source: new ol.source.XYZ({
+		url: 'https://api.mapbox.com/styles/v1/jason-angell/cjg2552nr2cq92slut41cd4s4/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiamFzb24tYW5nZWxsIiwiYSI6Ii1qMHNUQzQifQ.BVj6iyfU1r7ttO79X676Ng'
+	})
+});
+var satellite_layer = new ol.layer.Tile({
+	source: new ol.source.XYZ({
+		url: 'https://api.mapbox.com/styles/v1/jason-angell/cjg256o3f095y2rqjxxkxjyql/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiamFzb24tYW5nZWxsIiwiYSI6Ii1qMHNUQzQifQ.BVj6iyfU1r7ttO79X676Ng'
+	})
+});
+var label_sat_layer = new ol.layer.Tile({
+	source: new ol.source.XYZ({
+		url: 'https://api.mapbox.com/styles/v1/jason-angell/cjg2578as03q22smnhzbfl6rm/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiamFzb24tYW5nZWxsIiwiYSI6Ii1qMHNUQzQifQ.BVj6iyfU1r7ttO79X676Ng'
+	})
+});
+
+var map = new ol.Map({
+	target: 'map',
+	layers: [label_sat_layer],	// TODO: layer switching
+	view: new ol.View({
+		center: ol.proj.fromLonLat([-0.31099, 51.50952]),
+		zoom: 14
+	})
+});
+var curPoint = null; // format: [lon, lat]
+
+var marker = new ol.Overlay({
+	positioning: 'center-center',
+  	element: document.getElementById('marker'),
+});
+
+map.addOverlay(marker);
+
+map.on('singleclick', function(evt){
+	marker.setPosition(evt.coordinate);
+	curPoint = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+	document.getElementById('id_latitude').value = curPoint[1];
+	document.getElementById('id_longitude').value = curPoint[0];
+	// place popup based on event coords
+});
+
+</script>
+{% endblock %}
