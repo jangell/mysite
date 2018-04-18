@@ -297,6 +297,21 @@
 					</div>
 				</div>
 
+				<div class="tools_col">
+					<div class="setting">
+						<h4 class="col_title">Add from Google Drive</h4>
+					</div>
+					<div class="setting">
+						<button class="lomg_button" id="signin_button">Sign in</button>
+					</div>
+					<div class="setting">
+						<button class="lomg_button" id="browse_button">Browse</button>
+					</div>
+					<div class="setting">
+						<button class="lomg_button" id="signout_button">Sign out</button>
+					</div>
+				</div>
+
 			</div>
 
 
@@ -997,7 +1012,102 @@ $(document).ready(function(){
 });
 
 // google drive integration time woot w00t
+// The Browser API key obtained from the Google API Console
+var developerKey = 'AIzaSyCZwz76p0oTq-PI63sDAWuCVY6rtjn4Aig';
 
+// The Client ID obtained from the Google API Console
+var clientId = '817832017737-gc6m10d4ct965tedqjael3i5o06nqdk7.apps.googleusercontent.com';
+
+// Replace with your own project number from console.developers.google.com
+// See 'Project number' under 'IAM & Admin' > 'Settings'
+var appId = '817832017737';
+
+// Scope to use to access user's Drive items.
+var scope = ['https://www.googleapis.com/auth/drive'];
+
+var pickerApiLoaded = false;
+var oauthToken;
+
+function loadGoogleLibs(){
+	gapi.load('auth');
+	gapi.load('picker', {'callback': onPickerApiLoad});
+}
+
+function onPickerApiLoad() {
+  pickerApiLoaded = true;
+}
+
+// opens a separate window to authorize a google account
+function authGoogleAccount() {
+	debugger;
+  window.gapi.auth.authorize(
+      {
+        'client_id': clientId,
+        'scope': scope,
+        'immediate': false
+      },
+      handleAuthResult);
+}
+
+// handles the google auth attempt
+function handleAuthResult(authResult) {
+  if (authResult && !authResult.error) {
+    oauthToken = authResult.access_token;
+
+    enableButtons();
+  }
+}
+
+function signOutOfGoogleAccount(){
+	alert('implement signout function brah!')
+	// sign out
+	// enable signin button
+	// disable signout and browse buttons
+}
+
+// opens a new google picker, centered at the root
+function openNewPicker(){
+	if (pickerApiLoaded && oauthToken) {
+		var view = new google.picker.DocsView();
+		view.setParent('0B3LD-8zOiOdzOE93ZlhMSGo3NE0');
+		view.setIncludeFolders(true);
+		view.setMimeTypes('chemical/x-galactic-spc,text/csv,text/plain');	// only allow csv
+		var picker = new google.picker.PickerBuilder()
+		    //.enableFeature(google.picker.Feature.NAV_HIDDEN)
+		    //.enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+		    .setAppId(appId)
+		    .setOAuthToken(oauthToken)
+		    .addView(view)
+		    .setCallback(handlePickerFile)
+		    .build();
+		picker.setVisible(true);
+	}
+}
+
+function handlePickerFile(data){
+	if (data.action == google.picker.Action.PICKED) {
+		debugger;
+        var fileId = data.docs[0].id;
+        alert('The user selected: ' + fileId);
+    }
+}
+
+function enableButtons(){
+	// assign buttons starting enabled-ness
+	$('#signin_button').prop('disabled', oauthToken!=undefined);
+	$('#browse_button').prop('disabled', oauthToken==undefined);
+	$('#signout_button').prop('disabled', oauthToken==undefined);
+}
+
+function startGoogleAPI(){
+	loadGoogleLibs();
+	enableButtons();
+}
+
+// attach buttons to functions
+$('#signin_button').click(function(){authGoogleAccount()});
+$('#browse_button').click(function(){openNewPicker()});
+$('#signout_button').click(function(){signOutOfGoogleAccount()});
 
 
 // sharing - load from data & layout
@@ -1061,6 +1171,7 @@ $(function() {
 
 
 </script>
+<script type="text/javascript" src="https://apis.google.com/js/api.js?onload=startGoogleAPI"></script>
 
 {% endblock %}
 

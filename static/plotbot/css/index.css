@@ -415,6 +415,10 @@ input[type=number]{
 }
 
 
+.lomg_button{
+	width: 90%;
+	margin: auto;
+}
 
 
 /* override plotly defaults */
