@@ -1,6 +1,35 @@
 {% extends 'gg/base.html' %}
 
 {% block title %}Guerilla Gardening London{% endblock %}
+{% block headbottom %}
+<style>
+.main_text{
+	width: 75%;
+	margin: auto;
+}
+</style>
+{% endblock %}
+
+{% block pagetitle %}Guerrilla Gardening London{% endblock %}
 {% block body %}
-Hey it's the homepage!
+<div class="main_text">
+	<p>
+		Welcome to Guerrilla Gardening London! This is a weird little project to see whether it's possible to covertly grow food in public spaces. It's still in progress, and probably will be indefinitely. I'll try not to break or delete the data, but everything else is liable to change, and no guarantees on the data either. I'll try and keep it all reliable and up-to-date.
+	</p>
+	<p>
+		The idea is to plant seeds in little corners of parks, traffic islands, tree plantings along the sidewalk, you name it, and to see if that can actually grow into edible food. There are a few aims, and they range from regaining agency over public space to creating a free source of fresh food, but a lot of it is just because I think it sounds really cool to secretly grow potatoes in the middle of Hyde Park, or radishes in a roundabout.
+	</p>
+	<p>
+		If that sounds like fun, get out there and plant something, or check on any plants already growing in your area! Most seed packets cost about a pound, and include instructions for planting season and harvest times. Make sure to hold onto the packet and remember where you planted them if you're going to add them to the site map.
+	</p>
+	<p>
+		You can add new plantings on the "Submit" page. "List" lists all of the plantings in the database, including ones that have already been harvested. The "Map" page shows a map of all the plantings, and one of the features still in progress is a way to filter it by date, for example, to only include plants that are currently ready to harvest. You're currently on the homepage. Lots of other features are planned, and we'll see what actually gets built. But the basics are up, more or less.
+	</p>
+	<p>
+		Happy gardening!
+	</p>
+	<p>
+		<span style="margin-left: 20px;">-- J</span>
+	</p>
+</div>
 {% endblock %}

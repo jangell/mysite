@@ -1,27 +1,64 @@
 {% extends "gg/base.html" %}
 
-{% block title %}Data list{% endblock %}
+{% block title %}Plantings List{% endblock %}
 
 {% block headbottom %}
 <style>
-p{
-	margin:5px;
-}
-.listitem{
+.plantings_list{
+	list-style-type: none;
+	padding: 0;
+	width: 90%;
+	margin: 20px auto;
 	padding: 10px;
+	background-color: #e8e8e8;
+	border-radius: 5px;
 }
+.plantings_list h4{
+	margin: 0;
+}
+.plantings_list p{
+	margin: 5px;
+}
+.plantings_list li{
+	display: flex;
+	flex-direction: row;
+	padding: 5px;
+	transition: .3s all;
+}
+.plantings_list li:hover{
+	background-color: #e0e0e0;
+}
+.col{
+	flex: 1;
+}
+.plantings_list li:not(:last-child){
+	border-bottom: 1px solid #d0d0d0;
+}
+
 </style>
 {% endblock %}
 
-{% block body %}
+{% block pagetitle %}Plantings List{% endblock %}
+{% block pagedesc %}
+This is a list of all plantings, including those which have not yet reached a harvest date or for which the harvest date has passed. The data can be filtered using the tools at the top of the list.
+{% endblock %}
 
-{% for planting in plantings %}
-<div class="listitem">
-	<p>{{planting.species}}</p>
-	<p>{{planting.description}}</p>
-	<p>{{planting.lat}}, {{planting.lon}}</p>
-	<p>{{planting.planting_day}}</p>
+{% block body %}
+<div class="list_block">
+	<ul class="plantings_list">
+	{% for planting in plantings %}
+	<li>
+		<div class="col">
+			<h4>{{planting.species}} at [{{planting.lat}}, {{planting.lon}}]</h4>
+			<p>{{planting.description}}</p>
+		</div>
+		<div class="col">
+			<p>Planted on {{planting.planting_day}}</p>
+			<p>Harvest is from {{planting.harvest_start}} to {{planting.harvest_end}}</p>
+		</div>
+	</li>
+	{% endfor %}
+	</ul>
 </div>
-{% endfor %}
 
 {% endblock %}

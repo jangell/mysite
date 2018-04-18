@@ -3,8 +3,136 @@
 {% block title %}Explore plantings{% endblock %}
 
 {% block headbottom %}
+<!-- openlayers -->
+<link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
+<script src="https://openlayers.org/en/v4.6.5/build/ol.js" type="text/javascript"></script>
+
+<!-- TODO: write addNewPlantMarker, write on-singleclick, write showPopup, write hidePopup, test showAll and showHarvestable -->
+
+<style>
+#map{
+	height: 60vh;
+	width: 90vw;
+	margin: auto;
+	margin-bottom: 15px;
+	border-radius: 5px;
+	overflow: hidden;
+	cursor: pointer;
+	background-color: #a0a0a0;
+}
+.buttons{
+	width: 90vw;
+	margin: auto;
+}
+.buttons button{
+	margin: 5px;
+}
+.marker{
+	width:10px;
+	height:10px;
+	background-color:#88ff99;
+	border: 1px solid black;
+	opacity: .8;
+	border-radius: 5px;
+}
+</style>
 {% endblock %}
 
 {% block body %}
-In progress: Data explorer
+<div class="map" id="map"></div>
+<div class="buttons">
+	<button id="show_harvest_button" onclick="showHarvestPlants()">Show Harvestable Plants</button>
+	<button id="show_all_button" onclick="showAllPlants()">Show All Plants</button>
+</div>
+<div style="display:none;">
+	<div id="marker" class="marker"></div>
+</div>
+
+<script>
+// add script to generate a new map marker
+function addNewPlantMarker(plant){
+	// generate a new marker at this point on the map
+	// lat: plant.lat
+	// lon: plant.lon
+	// id: plant.marker_id
+	// return the marker as an object that can be shown/hidden to add to the plant dictionary
+}
+
+// get all plantings
+var plants = [];
+{% for p in plantings %}
+// create a new dictionary for the plant
+cur_plant = {'id':'{{p.id}}', 'marker_id':'plant_marker_{{p.id}}', 'species': '{{p.species}}', 'desc':'{{p.description}}', 'lat':{{p.lat}}, 'lon':{{p.lon}}, 'planting_day':new Date('{{p.planting_day}}'), 'harvest_start':new Date('{{p.harvest_start}}'), 'harvest_end':new Date('{{p.harvest_end}}')};
+cur_plant['marker'] = addNewPlantMarker(cur_plant);
+plants.push(cur_plant);
+{% endfor %}
+
+
+// map stuff	
+var outdoors_layer = new ol.layer.Tile({
+	source: new ol.source.XYZ({
+		url: 'https://api.mapbox.com/styles/v1/jason-angell/cjg2552nr2cq92slut41cd4s4/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiamFzb24tYW5nZWxsIiwiYSI6Ii1qMHNUQzQifQ.BVj6iyfU1r7ttO79X676Ng'
+	})
+});
+var satellite_layer = new ol.layer.Tile({
+	source: new ol.source.XYZ({
+		url: 'https://api.mapbox.com/styles/v1/jason-angell/cjg256o3f095y2rqjxxkxjyql/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiamFzb24tYW5nZWxsIiwiYSI6Ii1qMHNUQzQifQ.BVj6iyfU1r7ttO79X676Ng'
+	})
+});
+var label_sat_layer = new ol.layer.Tile({
+	source: new ol.source.XYZ({
+		url: 'https://api.mapbox.com/styles/v1/jason-angell/cjg2578as03q22smnhzbfl6rm/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiamFzb24tYW5nZWxsIiwiYSI6Ii1qMHNUQzQifQ.BVj6iyfU1r7ttO79X676Ng'
+	})
+});
+
+var map = new ol.Map({
+	target: 'map',
+	layers: [label_sat_layer],	// TODO: layer switching
+	view: new ol.View({
+		center: ol.proj.fromLonLat([-0.31099, 51.50952]),
+		zoom: 14
+	})
+});
+var curPoint = null; // format: [lon, lat]
+
+var marker = new ol.Overlay({
+	positioning: 'center-center',
+  	element: document.getElementById('marker'),
+});
+
+// add popup that shows when a plant is clicked on
+map.on('singleclick', function(evt){
+	// if clicking on marker
+		// showPopup
+	// else
+		// hidePopup
+});
+
+// shows the popup with a particular plant's info at the plant's location
+function showPopup(plant){
+
+}
+
+// hides any showing popup
+function hidePopup(){
+
+}
+
+function showHarvestPlants(){
+	let today = new Date();
+	for(let i = 0; i < plants.length; i++){
+		let plant = plants[i];
+		if(plant.harvest_start <= today && plant.harvest_end >= today)
+			plant.marker_id.style.display = 'default';
+		else
+			plant.marker_id.style.display = 'none';
+	}
+}
+function showAllPlants(){
+	for(let i = 0; i < plants.length; i++){
+		document.getElementById(plants[i].marker_id).style.display = 'default';
+	}
+}
+
+</script>
 {% endblock %}

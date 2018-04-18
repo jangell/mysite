@@ -996,6 +996,35 @@ $(document).ready(function(){
 
 });
 
+// google drive integration time woot w00t
+
+
+
+// sharing - load from data & layout
+function share_plot(){
+	let plotData = {'data': JSON.stringify(ph.getDivData()), 'layout': JSON.stringify(ph.getDivLayout())};
+	$.post({
+		url: 'save_plot',
+		data: plotData,
+		success: function(response){
+			// update this url when the domain name changes
+			let share_url = 'http://www.jangell.org/plotbot/share/'+response;
+			$('#url_copier').val(share_url);
+			debugger;
+			let copier = document.getElementById('url_copier');
+			copier.select();
+			let copied = document.execCommand('copy');
+			if(copied)
+				$('#copied_message').html('Copied to clipboard');
+			else
+				$('#copied_message').html('Failed to copy - try copying manually');
+		}
+	})
+}
+
+$('#share_plot').click(function(){
+	share_plot();
+});
 
 // testing ground for new code
 
@@ -1030,32 +1059,6 @@ $(function() {
 
 });
 
-
-// sharing - load from data & layout
-function share_plot(){
-	let plotData = {'data': JSON.stringify(ph.getDivData()), 'layout': JSON.stringify(ph.getDivLayout())};
-	$.post({
-		url: 'save_plot',
-		data: plotData,
-		success: function(response){
-			// update this url when the domain name changes
-			let share_url = 'http://www.jangell.org/plotbot/share/'+response;
-			$('#url_copier').val(share_url);
-			debugger;
-			let copier = document.getElementById('url_copier');
-			copier.select();
-			let copied = document.execCommand('copy');
-			if(copied)
-				$('#copied_message').html('Copied to clipboard');
-			else
-				$('#copied_message').html('Failed to copy - try copying manually');
-		}
-	})
-}
-
-$('#share_plot').click(function(){
-	share_plot();
-});
 
 </script>
 

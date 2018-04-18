@@ -40,25 +40,29 @@
 	background-color: #a0c0a0;
 }
 #map{
-	height: 40vh;
+	height: 50vh;
 	width: 80%;
 	margin: auto;
 	border-radius: 5px;
 	overflow: hidden;
 	cursor: pointer;
+	background-color: #a0a0a0;
 }
 #marker{
 	width:10px;
 	height:10px;
-	background-color:red;
+	background-color:#88ff99;
+	border: 1px solid black;
+	opacity: .8;
 	border-radius: 5px;
 }
 .spacer{
 	height: 5vh;
 }
-#coordinates{
-	list-style: none;
-
+#coords_error{
+	color: red;
+	display: none;
+	text-align:center;
 }
 
 /* django form styling */
@@ -117,22 +121,16 @@ To submit or register or whatever a new planting, click on where it is, as close
 <div style="display:none;">
 	<div id="marker"></div>
 </div>
-<form>
+<form action="{% url 'gg:submit' %}" method="POST" onsubmit="return checkCoords()">
 	{% csrf_token %}
+		<div id="coords_error">
+		<h4>Click the location of the planting to submit</h4>
+	</div>
 	<table id="form_table">
-		<tr>
-			<th>
-				<label for="id_coordinates">Coordinates</label>
-			</th>
-			<tr>
-				<ul id="coordiantes">
-					<li>
-					{{ form.latitude }}
-					</li>
-				</ul>
-			</tr>
-		</tr>
 		{{ form.as_table }}
+		{% for hidden_field in form.hidden_fields %}
+		    {{ hidden_field.as_table }}
+		{% endfor %}
 	</table>
 	<input id="form_submit" type=submit value="Submit">
 </form>
@@ -140,6 +138,19 @@ To submit or register or whatever a new planting, click on where it is, as close
 
 
 <script>
+function checkCoords(){
+	if(document.getElementById('id_latitude').value && document.getElementById('id_longitude').value){
+		return true;
+	}
+	else{
+		// display error message and stop submit
+		document.getElementById('coords_error').style.display = 'block';
+		return false;
+	}
+}
+
+
+// map stuff	
 var outdoors_layer = new ol.layer.Tile({
 	source: new ol.source.XYZ({
 		url: 'https://api.mapbox.com/styles/v1/jason-angell/cjg2552nr2cq92slut41cd4s4/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiamFzb24tYW5nZWxsIiwiYSI6Ii1qMHNUQzQifQ.BVj6iyfU1r7ttO79X676Ng'
@@ -178,7 +189,8 @@ map.on('singleclick', function(evt){
 	curPoint = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
 	document.getElementById('id_latitude').value = curPoint[1];
 	document.getElementById('id_longitude').value = curPoint[0];
-	// place popup based on event coords
+	// hide the 'coordinates unselected' error if it is showing
+	document.getElementById('coords_error').style.display = 'none';
 });
 
 </script>

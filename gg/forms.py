@@ -14,17 +14,7 @@ class SubmitForm(forms.Form):
 			'description': forms.Textarea(attrs={'placeholder':'More info about the planting or tips for finding it'}),
 		}
 	'''
-
-	'''
-	location = forms.PointField(
-		required=True,
-		label="location",
-		widget=
-	)
-	'''
-
 	species = forms.CharField(
-		required=True,
 		label="Species name",
 		widget=forms.TextInput(attrs={'placeholder':'Ex. Runner beans', 'class':'form_input'})
 	)
@@ -34,28 +24,23 @@ class SubmitForm(forms.Form):
 		widget=forms.Textarea(attrs={'rows':4,'placeholder':'More info about the planting (ex. "halfway between the two oak trees", or "old seeds - might not germinate")'})
 	)
 	planting_day = forms.DateField(
-		required=True,
 		label="Planting date",
 		widget=AdminDateWidget,
 		initial=datetime.date.today
 	)
 	harvest_start = forms.DateField(
-		required=True,
 		label="Harvest start date",
 		widget=AdminDateWidget,
 	)
 	harvest_end = forms.DateField(
-		required=True,
 		label="Harvest end date",
 		widget=AdminDateWidget,
 	)
 	# invisible lat & lon fields that update automatically when the point is moved
 	latitude = forms.FloatField(
-		required=True,
 		widget=forms.HiddenInput()
 	)
 	longitude = forms.FloatField(
-		required=True,
 		widget=forms.HiddenInput()
 	)
 
