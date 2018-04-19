@@ -261,21 +261,21 @@
 					<!-- interactive list of all spectra -->
 					<div class="tools_list" id="db_list">
 						<div class="table_row head_row">
-							<div class="db_id">ID</div>
+							<!--<div class="db_id">ID</div>-->
 							<div class="db_name">Name</div>
 							<div class="db_source">Source</div>
 							<div class="db_wav">&lambda;</div>
 						</div>
 						<div class="scrollable">
 							<div class="table_row db_spec_row" id="template_db_spec_row">
-								<div class="db_id">{{spec.spec_id}}</div>
+								<!--<div class="db_id">{{spec.spec_id}}</div>-->
 								<div class="db_name">{{spec.name}}</div>
 								<div class="db_source">{{spec.source}}</div>
 								<div class="db_wav">{{spec.wavelength}}</div>
 							</div>
 						{% for spec in specs %}
 							<div class="table_row db_spec_row" spec_id={{spec.spec_id}}>
-								<div class="db_id">{{spec.spec_id}}</div>
+								<!--<div class="db_id">{{spec.spec_id}}</div>-->
 								<div class="db_name">{{spec.name}}</div>
 								<div class="db_source">{{spec.source}}</div>
 								<div class="db_wav">{{spec.wavelength}}</div>
@@ -1039,7 +1039,6 @@ function onPickerApiLoad() {
 
 // opens a separate window to authorize a google account
 function authGoogleAccount() {
-	debugger;
   window.gapi.auth.authorize(
       {
         'client_id': clientId,
@@ -1069,7 +1068,7 @@ function signOutOfGoogleAccount(){
 function openNewPicker(){
 	if (pickerApiLoaded && oauthToken) {
 		var view = new google.picker.DocsView();
-		view.setParent('0B3LD-8zOiOdzOE93ZlhMSGo3NE0');
+		view.setParent('1Qm3M_J8rK7Rz8vBlOelyVirEEdW8NXcL');
 		view.setIncludeFolders(true);
 		view.setMimeTypes('chemical/x-galactic-spc,text/csv,text/plain');	// only allow csv
 		var picker = new google.picker.PickerBuilder()
@@ -1089,6 +1088,7 @@ function handlePickerFile(data){
 		debugger;
         var fileId = data.docs[0].id;
         alert('The user selected: ' + fileId);
+        // use the file
     }
 }
 

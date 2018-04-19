@@ -87,6 +87,7 @@ html{
 	flex-direction:row;	-webkit-flex-direction: row;
 	/* this hides the toolset, which corresponds to a tab, until its tab is selected */
 	display:none;		-webkit-display: none;
+	overflow-x:scroll;
 }
 .showing_toolset{
 	display: flex;		-webkit-display: flex;
