@@ -823,12 +823,41 @@ class PlotHandler{
 
 	}
 
-	// add a spectrum from a file (for now, just .csv)
-	addSpecFromFile(spec_name, file){
-		// parse csv, including checking that the domain is in output[0] and ordered low to high
-		// parse the data in a filereader (it's async and it's reeeeal ugly)
+	// takes data, a length-2 array (either [wavs, counts] or [counts, wavs])
+	// returns the data in the order [wavs, counts] with wavs ordered smallest to largest
+	cleanDataOrder(data){
+		// find the domain (wavs) (should be the list with the smaller absolute value of second derivative)
+		let dera = [];
+		let derb = [];
+		for(let i = 0; i < lista.length-2; i++)
+			dera.push((lista[i+2] - (2*lista[i+1]) + lista[i]));	// do out the math - this takes the second derivative
+		for(let i = 0; i < listb.length-2; i++)
+			derb.push((listb[i+2]-(2*listb[i+1]) + listb[i]));
+		let dera_sum = dera.reduce((acc,cur) => acc + Math.abs(cur));
+		let derb_sum = derb.reduce((acc,cur) => acc + Math.abs(cur));
+
+		// make sure the order is [wavs, counts]
+		if(dera_sum < derb_sum){
+			wavs = lista;
+			counts = listb;
+		}
+		else{
+			wavs = listb;
+			counts = lista;
+		}
+
+		// check if wavs (and therefore both) need reversing
+		if(wavs[1] < wavs[0]){
+			wavs.reverse();
+			counts.reverse();
+		}
+		data = [wavs, counts];
+		return data;
+	}
+
+	// takes csv file and returns spectral data array of format [wavs, counts]
+	addSpecFromCSV(file){
 		let _this = this;
-		let wavs, counts;
 		let lista = [];
 		let listb = [];
 		let reader = new FileReader;
@@ -850,40 +879,37 @@ class PlotHandler{
 					console.log('skipped line: '+data[i]);
 				}
 			}
-			
-			// find the domain (wavs) (should be the list with the smaller absolute value of second derivative)
-			let dera = [];
-			let derb = [];
-			for(let i = 0; i < lista.length-2; i++)
-				dera.push((lista[i+2] - (2*lista[i+1]) + lista[i]));	// do out the math - this takes the second derivative
-			for(let i = 0; i < listb.length-2; i++)
-				derb.push((listb[i+2]-(2*listb[i+1]) + listb[i]));
-			let dera_sum = dera.reduce((acc,cur) => acc + Math.abs(cur));
-			let derb_sum = derb.reduce((acc,cur) => acc + Math.abs(cur));
 
-			debugger;
-
-			// make sure the order is [wavs, counts]
-			if(dera_sum < derb_sum){
-				wavs = lista;
-				counts = listb;
-			}
-			else{
-				wavs = listb;
-				counts = lista;
-			}
-
-			// check if wavs (and therefore both) need reversing
-			if(wavs[1] < wavs[0]){
-				wavs.reverse();
-				counts.reverse();
-			}
-			data = [wavs, counts];
+			data = this.cleanDataOrder(data);
 
 			_this.addSpec(spec_name, data);
 		}
 
 		reader.readAsText(file);
+	}
+
+	// takes spc file and returns spectral data array of format [wavs, counts]
+	addSpecFromSPC(file){
+		let _this = this;
+		let lista = [];
+		let listb = [];
+	}
+
+	// takes txt file and returns spectral data array of format [wavs, counts]
+	addSpecFromTXT(file){
+
+	}
+
+	// add a spectrum from a file
+	addSpecFromFile(spec_name, file){
+		// parse csv, including checking that the domain is in output[0] and ordered low to high
+		// parse the data in a filereader (it's async and it's reeeeal ugly)
+		if(file.name.endsWith('.csv'))
+			this.addSpecFromCSV(file);
+		else if(file.name.endsWith('.spc'))
+			this.addSpecFromSPC(file);
+
+		
 	}
 
 	removeSpecByRowId(row_id){
