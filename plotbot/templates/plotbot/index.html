@@ -234,7 +234,7 @@
 					-->
 					<div class="setting">
 						<label>File Input</label>
-						<input type=file accept=".csv" target="local_file">
+						<input type=file accept=".csv, .spc, .txt" target="local_file">
 					</div>
 
 					<div class="setting">
@@ -821,13 +821,20 @@ $('#add_from_file').click(function(){
 		return;
 	}
 
-	let file = files[0];
+	let file = files[0];		// TODO: multiselect! Shouldn't even be that hard, right? Except the whole form thing for file names and all that...
 	let fname = file.name;
 
 	// check that it's a csv type
-	if(fname.slice(-4,fname.length) !== '.csv'){
-		alert('File must be .csv');
-		$('[target=local_file]').val('');	// clear the file that was there
+	let ALLOWED_FILE_TYPES = ['.csv', '.spc', '.txt'];
+	let file_allowed = false;
+
+	for(let i = 0; i < ALLOWED_FILE_TYPES.length; i++)
+		if(file.name.endsWith(ALLOWED_FILE_TYPES[i]))
+			file_allowed = true;
+
+	if(!file_allowed){
+		alert('The only file types allowed are .csv, .spc, and .txt')
+		$('[target=local_file').val(''); // clear the file that was there
 		return;
 	}
 
@@ -1035,7 +1042,7 @@ $(document).ready(function(){
 
 	// development tool: autopopulate
 	for(let i = 0; i < startWith.length; i++){
-		//ph.addSpecByDbId(startWith[i]);	
+		ph.addSpecByDbId(startWith[i]);	
 	}
 
 
