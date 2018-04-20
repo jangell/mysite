@@ -150,6 +150,18 @@ function checkCoords(){
 }
 
 
+var fill = new ol.style.Fill({color: '#88ff99'});
+var stroke = new ol.style.Stroke({color: '#404040'});
+
+var pointStyle = new ol.style.Style({
+	image: new ol.style.RegularShape({
+		fill: fill,
+		stroke: stroke,
+		points: 50,
+		radius: 5,
+	})
+});
+
 // map stuff	
 var outdoors_layer = new ol.layer.Tile({
 	source: new ol.source.XYZ({
