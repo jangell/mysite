@@ -825,8 +825,11 @@ class PlotHandler{
 
 	// takes data, a length-2 array (either [wavs, counts] or [counts, wavs])
 	// returns the data in the order [wavs, counts] with wavs ordered smallest to largest
-	cleanDataOrder(data){
+	cleanDataOrdering(lists){
 		// find the domain (wavs) (should be the list with the smaller absolute value of second derivative)
+		let wavs, counts;
+		let lista = lists[0];
+		let listb = lists[1];
 		let dera = [];
 		let derb = [];
 		for(let i = 0; i < lista.length-2; i++)
@@ -851,12 +854,12 @@ class PlotHandler{
 			wavs.reverse();
 			counts.reverse();
 		}
-		data = [wavs, counts];
+		let data = [wavs, counts];
 		return data;
 	}
 
 	// takes csv file and returns spectral data array of format [wavs, counts]
-	addSpecFromCSV(file){
+	addSpecFromCSV(spec_name, file){
 		let _this = this;
 		let lista = [];
 		let listb = [];
@@ -879,10 +882,11 @@ class PlotHandler{
 					console.log('skipped line: '+data[i]);
 				}
 			}
+			debugger;
 
-			data = this.cleanDataOrder(data);
+			let output = _this.cleanDataOrdering([lista, listb]);
 
-			_this.addSpec(spec_name, data);
+			_this.addSpec(spec_name, output);
 		}
 
 		reader.readAsText(file);
@@ -905,9 +909,13 @@ class PlotHandler{
 		// parse csv, including checking that the domain is in output[0] and ordered low to high
 		// parse the data in a filereader (it's async and it's reeeeal ugly)
 		if(file.name.endsWith('.csv'))
-			this.addSpecFromCSV(file);
+			this.addSpecFromCSV(spec_name, file);
 		else if(file.name.endsWith('.spc'))
-			this.addSpecFromSPC(file);
+			this.addSpecFromSPC(spec_name, file);
+		else if(file.name.endsWith('.txt'))
+			this.addSpecFromTXT(spec_name, file);
+		else
+			alert('unable to add file - file type is not supported. only .csv, .spc, and .txt are supported');
 
 		
 	}

@@ -22,7 +22,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 SECRET_KEY = 'm1pjcu5+341796v+o738rkc!a)!_ml99=lhh!t2)%-efb_^$g^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost','127.0.0.1','www.jangell.org']
 
