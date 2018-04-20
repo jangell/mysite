@@ -1,7 +1,6 @@
 import datetime
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
-from mapwidgets.widgets import GooglePointFieldWidget, GoogleStaticOverlayMapWidget
 from .models import Planting
 
 class SubmitForm(forms.Form):
