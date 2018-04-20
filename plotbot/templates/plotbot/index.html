@@ -1119,12 +1119,59 @@ function openNewPicker(){
 	}
 }
 
+function str2ab(str) {
+  var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
+  var bufView = new Uint16Array(buf);
+  for (var i=0, strLen=str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
+
+function downloadFile(fileId) {
+	let downloadUrl = 'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media';
+	let xhr = new XMLHttpRequest();
+	xhr.open('GET', downloadUrl);
+	xhr.setRequestHeader('Authorization', 'Bearer ' + oauthToken);
+	xhr.onload = function() {
+		let content_type = xhr.getResponseHeader('content-type');
+
+		// csv file
+		if(content_type == 'text/csv'){
+
+		}
+		// text file
+		else if(content_type == 'text/plain'){
+			
+
+
+		}
+		// spc file
+		else if(content_type == 'chemical/x-galactic-spc'){
+			let buf = str2ab(xhr.responseText);
+			points = ph.getPointsFromSPCArrayBuffer(buf);
+			// enable add button
+			// define callback to addSpec(spec_name, points); when add is clicked using label input
+			ph.addSpec('New spec', points);
+		}
+
+	};
+	xhr.onerror = function() {
+		console.log("didn't work");
+	};
+	xhr.send();
+}
+
+function sayFile(fileContents){
+	// debugger;
+}
+
 function handlePickerFile(data){
 	if (data.action == google.picker.Action.PICKED) {
-		debugger;
-        var fileId = data.docs[0].id;
-        alert('The user selected: ' + fileId);
-        // use the file
+
+		let fileId = data.docs[0].id;
+        downloadFile(fileId, sayFile);
+
     }
 }
 

@@ -85,9 +85,36 @@ var label_sat_layer = new ol.layer.Tile({
 	})
 });
 
+
+var fill = new ol.style.Fill({color: 'green'});
+var pointStyle = new ol.style.Style({
+	image: new ol.style.RegularShape({
+		fill: fill,
+		points: 50,
+		radius: 5,
+	})
+});
+
+plant_points = [];
+for(let i = 0; i < plants.length; i++){
+	let cur_feat = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([plants[i].lon, plants[i].lat])));
+	cur_feat.setStyle(pointStyle);
+	plant_points.push(cur_feat);
+}
+
+
+var feature_layer = new ol.layer.Vector({
+	source: new ol.source.Vector({
+		features: plant_points
+	})
+});
+
 var map = new ol.Map({
 	target: 'map',
-	layers: [label_sat_layer],	// TODO: layer switching
+	layers: [
+		label_sat_layer,		// TODO: layer switching
+		feature_layer,
+	],
 	view: new ol.View({
 		center: ol.proj.fromLonLat([-0.31099, 51.50952]),
 		zoom: 14
