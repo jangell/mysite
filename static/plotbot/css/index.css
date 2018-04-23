@@ -263,12 +263,14 @@ input[type=number]{
 	border-radius:3px;
 	cursor: pointer;
 	margin:3px;
+	background: linear-gradient(#e0e0e0, #d0d0d0);
+	transition: background .3s ease;
 }
 .preproc_selector:not(.selected_preproc):hover{
-	background-color: #e0e0e0;
+	background: linear-gradient(#c0c0c0, #d0d0d0);
 }
 .selected_preproc{
-	background: #fafafa;
+	background: linear-gradient(#e0e0e0, #f0f0f0);
 	cursor: default;
 }
 .preproc_name{
