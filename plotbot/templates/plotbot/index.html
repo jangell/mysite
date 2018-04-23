@@ -307,7 +307,7 @@
 						<label>Spec Name</label>
 						<input class="drive_setting" target="drive_menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required" disabled>
 					</div>
-					<div class="setting" style="border-bottom: 1px solid #b0b0b0; padding-bottom: 5px;">
+					<div class="setting">
 						<button class="setting_button drive_setting" id="add_from_drive" disabled>Add</button>
 						<button class="setting_button drive_setting" id="cancel_add_from_drive" disabled>Cancel</button>
 					</div>
@@ -1044,7 +1044,7 @@ $(document).ready(function(){
 	// development tool: autopopulate
 	// comment out before push
 	for(let i = 0; i < startWith.length; i++){
-		//ph.addSpecByDbId(startWith[i]);	
+		ph.addSpecByDbId(startWith[i]);	
 	}
 
 
