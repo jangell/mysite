@@ -860,11 +860,12 @@ class PlotHandler{
 
 	// gets the points from a set of text containing the data of a csv spec file
 	getPointsFromCSVData(data){
+		let lines = data.split(/\r|\n/); // this regex is to make sure we don't run into the windows vs mac newline issue
 		let lista = [];
 		let listb = [];
-		for(let i = 0; i < data.length; i++){
+		for(let i = 0; i < lines.length; i++){
 			try{
-				let points = data[i].split(',');
+				let points = lines[i].split(',');
 				let to_a = parseFloat(points[0]);
 				let to_b = parseFloat(points[1]);
 				if(to_a && to_b){
@@ -877,7 +878,7 @@ class PlotHandler{
 				console.log('skipped line: '+data[i]);
 			}
 		}
-		return [lista, listb]
+		return this.cleanDataOrdering([lista, listb]);
 	}
 
 	// takes csv file and returns spectral data array of format [wavs, counts]
@@ -888,16 +889,18 @@ class PlotHandler{
 		let reader = new FileReader;
 		reader.onload = function(){
 			// parse into lists
-			let data = reader.result.split(/\r|\n/); // this regex is to make sure we don't run into the windows vs mac newline issue
-			let points = _this.getPointsFromCSVData(data);
-			let output = _this.cleanDataOrdering(points);
-			_this.addSpec(spec_name, output);
+			let points = _this.getPointsFromCSVData(reader.result);
+			debugger;
+			_this.addSpec(spec_name, points);
 		}
 		reader.readAsText(file);
 	}
 
 	// gets the points from an ArrayBuffer containing the data of an spc spec file
+	// file spec: http://labview360.com/forum/forum_uploads/files/authorid3/2005-05-24_163650/spcfileFormat.pdf
+	// assume only one subfile
 	getPointsFromSPCArrayBuffer(ab){
+		debugger;
 		let dv = new DataView(ab);
 		let le = true;			// little-endianness (this is necessary or all the bytes are backwards and everything breaks)
 		// guess at endian-ness based on the number of points (assume spec has between 1 and 100000 points)
@@ -944,7 +947,7 @@ class PlotHandler{
 			listb.push(dv.getInt32(file_loc, true) * Math.pow(2, spc['exp']) / Math.pow(2,32));
 			file_loc += point_byte_size;
 		}
-		return [lista, listb];
+		return this.cleanDataOrdering([lista, listb]);
 	}
 
 	// takes spc file and returns spectral data array of format [wavs, counts]
@@ -954,25 +957,21 @@ class PlotHandler{
 		let listb = [];
 		let reader = new FileReader;
 		reader.onload = function(){
-			// assume only one subfile
-			// parse in blocks as defined by http://labview360.com/forum/forum_uploads/files/authorid3/2005-05-24_163650/spcfileFormat.pdf
-			// 512 byte header
-			let data = reader.result;		// ArrayBuffer
-			let points = _this.getPointsFromSPCArrayBuffer(data);
-			let output = _this.cleanDataOrdering(points);
-			_this.addSpec(spec_name, output);
+			let points = _this.getPointsFromSPCArrayBuffer(reader.result);
+			_this.addSpec(spec_name, points);
 		}
 		reader.readAsArrayBuffer(file);
 	}
 
 	// gets the points from a set of text containing the data of a txt spec file
 	getPointsFromTXTData(data){
+		let lines = data.split(/\r|\n/); // this regex is to make sure we don't run into the windows vs mac newline issue
 		let lista = [];
 		let listb = [];
-		for(let i = 0; i < data.length; i++){
-			if(data[i].length && data[i][0] != '#'){
+		for(let i = 0; i < lines.length; i++){
+			if(lines[i].length && lines[i][0] != '#'){
 				try{
-					let points = data[i].split(',');
+					let points = lines[i].split(',');
 					let to_a = parseFloat(points[0]);
 					let to_b = parseFloat(points[1]);
 					if(to_a && to_b){
@@ -986,7 +985,7 @@ class PlotHandler{
 				}
 			}
 		}
-		return [lista, listb];
+		return this.cleanDataOrdering([lista, listb]);
 	}
 
 	// takes txt file and returns spectral data array of format [wavs, counts]
@@ -998,10 +997,8 @@ class PlotHandler{
 
 		reader.onload = function(){
 			// parse into lists
-			let data = reader.result.split(/\r|\n/); // this regex is to make sure we don't run into the windows vs mac newline issue
-			let points = _this.getPointsFromTXTData(data);
-			let output = _this.cleanDataOrdering(points);
-			_this.addSpec(spec_name, output);
+			let points = _this.getPointsFromTXTData(reader.result);
+			_this.addSpec(spec_name, points);
 		}
 
 		reader.readAsText(file);
