@@ -127,10 +127,6 @@ html{
 input[type=number]{
 	width:5em;
 }
-.wide_field{
-	width:14.4rem;
-}
-
 .col_title{
 	margin: 0 auto; /* 0 for top & bottom, auto for sides */
 	font-family: 'Roboto', sans-serif;

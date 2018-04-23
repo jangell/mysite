@@ -890,7 +890,6 @@ class PlotHandler{
 		reader.onload = function(){
 			// parse into lists
 			let points = _this.getPointsFromCSVData(reader.result);
-			debugger;
 			_this.addSpec(spec_name, points);
 		}
 		reader.readAsText(file);
@@ -900,7 +899,6 @@ class PlotHandler{
 	// file spec: http://labview360.com/forum/forum_uploads/files/authorid3/2005-05-24_163650/spcfileFormat.pdf
 	// assume only one subfile
 	getPointsFromSPCArrayBuffer(ab){
-		debugger;
 		let dv = new DataView(ab);
 		let le = true;			// little-endianness (this is necessary or all the bytes are backwards and everything breaks)
 		// guess at endian-ness based on the number of points (assume spec has between 1 and 100000 points)

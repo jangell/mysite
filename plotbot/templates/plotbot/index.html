@@ -233,13 +233,12 @@
 					TODO: add-by-url
 					-->
 					<div class="setting">
-						<label>File Input</label>
 						<input type=file accept=".csv, .spc, .txt" target="local_file">
 					</div>
 
 					<div class="setting">
 						<label>Spec Name</label>
-						<input class="add_file_setting required wide_field" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required">
+						<input class="add_file_setting required" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required">
 					</div>
 
 					<div class="setting">
@@ -302,13 +301,15 @@
 						<h4 class="col_title">Add from Google Drive</h4>
 					</div>
 					<div class="setting">
-						<button class="lomg_button" id="signin_button">Sign in</button>
+						<button class="lomg_button" id="drive_button">Browse Drive</button>
 					</div>
 					<div class="setting">
-						<button class="lomg_button" id="browse_button">Browse</button>
+						<label>Spec Name</label>
+						<input class="drive_setting" target="drive_menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required" disabled>
 					</div>
 					<div class="setting">
-						<button class="lomg_button" id="signout_button">Sign out</button>
+						<button class="setting_button drive_setting" id="add_from_drive" disabled>Add</button>
+						<button class="setting_button drive_setting" id="cancel_add_from_drive" disabled>Cancel</button>
 					</div>
 				</div>
 
@@ -1086,19 +1087,17 @@ function authGoogleAccount() {
       handleAuthResult);
 }
 
-// handles the google auth attempt
+// handles the google auth attempt and opens a new picker
 function handleAuthResult(authResult) {
   if (authResult && !authResult.error) {
     oauthToken = authResult.access_token;
-
-    enableButtons();
+    openNewPicker();
   }
 }
 
+// handles a google account signout by deleting oauthToken - currently not tied to any page element and doesn't function correctly
 function signOutOfGoogleAccount(){
-	//alert('implement signout function brah!')
 	oauthToken = undefined;
-	enableButtons();
 }
 
 // opens a new google picker, centered at the root
@@ -1120,19 +1119,10 @@ function openNewPicker(){
 	}
 }
 
-function str2ab(str) {
-  var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
-  var bufView = new Uint16Array(buf);
-  for (var i=0, strLen=str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
-}
-
 // this array will store the points parsed from a google drive file
 var fromURLPoints = null;
 
-function downloadFile(fileId) {
+function transferFile(fileId, fileName) {
 	let downloadUrl = 'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media';
 	let xhr = new XMLHttpRequest();
 	xhr.responseType = "arraybuffer";	// need arraybuffer for spc - can convert back to string for txt or csv
@@ -1146,29 +1136,22 @@ function downloadFile(fileId) {
 			// convert from arraybuffer to string using utf-8 encoding
 			let text = String.fromCharCode.apply(null, new Uint8Array(xhr.response));
 			fromURLPoints = ph.getPointsFromCSVData(text);
-			ph.addSpec('New .csv spec', fromURLPoints);
-			fromURLPoints = null;
 		}
 		// text file
 		else if(content_type == 'text/plain'){
 			// convert from arraybuffer to string using utf-8 encoding
 			let text = String.fromCharCode.apply(null, new Uint8Array(xhr.response));
 			fromURLPoints = ph.getPointsFromTXTData(text);
-			ph.addSpec('New .txt spec', fromURLPoints);
-			fromURLPoints = null;
 		}
 		// spc file
 		else if(content_type == 'chemical/x-galactic-spc'){
-			//let buf = str2ab(xhr.responseText);
-			// this encodes in utf-8, then converts it to an arraybuffer from a uint8buffer with the .buffer thing
-			debugger;
 			fromURLPoints = ph.getPointsFromSPCArrayBuffer(xhr.response);
-			// enable add button
-			// define callback to addSpec(spec_name, points); when add is clicked using label input
-			ph.addSpec('New spec', fromURLPoints);
-			fromURLPoints = null;
 		}
-		// if points were successfully parsed, try to parse a spec name and activate the add button
+		// if points were successfully parsed, try to parse a spec name and activate the drive add/cancel buttons and menu input
+		$('.drive_setting').prop('disabled', false);
+		// set menu_name to a best-guess name based on fileName
+		let name_try = fileName.split('.')[0].replace('_', ' ');
+		$('[target=drive_menu_name]').val(name_try);
 	};
 	xhr.onerror = function() {
 		console.log("didn't work");
@@ -1176,35 +1159,51 @@ function downloadFile(fileId) {
 	xhr.send();
 }
 
-function sayFile(fileContents){
-	// debugger;
-}
-
 function handlePickerFile(data){
 	if (data.action == google.picker.Action.PICKED) {
-
 		let fileId = data.docs[0].id;
-        downloadFile(fileId, sayFile);
-
+		let fileName = data.docs[0].name;
+        transferFile(fileId, fileName);
     }
-}
-
-function enableButtons(){
-	// assign buttons starting enabled-ness
-	$('#signin_button').prop('disabled', oauthToken!=undefined);
-	$('#browse_button').prop('disabled', oauthToken==undefined);
-	$('#signout_button').prop('disabled', oauthToken==undefined);
 }
 
 function startGoogleAPI(){
 	loadGoogleLibs();
-	enableButtons();
+}
+
+function handleDriveButtonClick(){
+	if(oauthToken != undefined)
+		openNewPicker();
+	else
+		authGoogleAccount();	// callback should be to open a new clicker
 }
 
 // attach buttons to functions
-$('#signin_button').click(function(){authGoogleAccount()});
+$('#drive_button').click(function(){handleDriveButtonClick()});
 $('#browse_button').click(function(){openNewPicker()});
 $('#signout_button').click(function(){signOutOfGoogleAccount()});
+
+// function to add drive file with points & menu name
+function drive_add(){
+	let menu_name = $('[target=drive_menu_name]').val();
+	if(menu_name == ''){
+		alert('Google Drive spectrum must have a menu name');
+		return;
+	}
+	else if(fromURLPoints == [] || fromURLPoints == null || fromURLPoints == undefined){
+		alert('No points found - cannot create a spectrum without valid data');
+		return;
+	}
+	ph.addSpec(menu_name, fromURLPoints);
+	drive_cancel();		// reset all buttons and vals
+}
+
+// function to cancel adding drive file
+function drive_cancel(){
+	$('[target=drive_menu_name]').val('');		// reset menu name field
+	$('.drive_setting').prop('disabled', true);	// disable add/cancel and menu name
+	fromURLPoints = [];							// reset fromURLPoints
+}
 
 
 // sharing - load from data & layout
@@ -1217,7 +1216,6 @@ function share_plot(){
 			// update this url when the domain name changes
 			let share_url = 'http://www.jangell.org/plotbot/share/'+response;
 			$('#url_copier').val(share_url);
-			debugger;
 			let copier = document.getElementById('url_copier');
 			copier.select();
 			let copied = document.execCommand('copy');
