@@ -1319,7 +1319,10 @@ class PlotHandler{
 		for(let i = 0; i < annos.length; i++){
 
 			// create row and config markup
-			let row = $('<div>').addClass('table_row').attr('id', 'anno_row_'+annos[i].id).append($('<div>').addClass('anno_list_text').html(annos[i].text));
+			let to_label = 'Blank annotation';	// "+1" so we don't get Annotation #0, which would be technically correct but look a bit wonky
+			if(annos[i].text)
+				to_label = annos[i].text;
+			let row = $('<div>').addClass('table_row').attr('id', 'anno_row_'+annos[i].id).append($('<div>').addClass('anno_list_text').html(to_label));
 			let config = this.bindAnnotation(annos[i], this.annotation_template.clone()).attr('id', 'anno_config_'+annos[i].id);
 			
 			// connect row to config
@@ -1502,7 +1505,6 @@ class PlotHandler{
 				let new_name = eventdata[0]['name'];
 				sc.fields['label'].setValue(new_name);
 			}
-			//debugger;
 		});
 
 		plot_div.on('plotly_relayout', function(eventdata){
