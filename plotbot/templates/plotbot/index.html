@@ -301,13 +301,13 @@
 						<h4 class="col_title">Add from Google Drive</h4>
 					</div>
 					<div class="setting">
-						<button class="lomg_button" id="drive_button">Browse Drive</button>
+						<button class="lomg_button" id="drive_button">Browse Google Drive</button>
 					</div>
 					<div class="setting">
 						<label>Spec Name</label>
 						<input class="drive_setting" target="drive_menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required" disabled>
 					</div>
-					<div class="setting">
+					<div class="setting" style="border-bottom: 1px solid #b0b0b0; padding-bottom: 5px;">
 						<button class="setting_button drive_setting" id="add_from_drive" disabled>Add</button>
 						<button class="setting_button drive_setting" id="cancel_add_from_drive" disabled>Cancel</button>
 					</div>
@@ -1204,6 +1204,8 @@ function driveCancel(){
 $('#drive_button').click(function(){handleDriveButtonClick()});
 $('#add_from_drive').click(function(){driveAdd()});
 $('#cancel_add_from_drive').click(function(){driveCancel()});
+
+
 
 // sharing - load from data & layout
 function share_plot(){
