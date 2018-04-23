@@ -1150,7 +1150,7 @@ function transferFile(fileId, fileName) {
 		// if points were successfully parsed, try to parse a spec name and activate the drive add/cancel buttons and menu input
 		$('.drive_setting').prop('disabled', false);
 		// set menu_name to a best-guess name based on fileName
-		let name_try = fileName.split('.')[0].replace('_', ' ');
+		let name_try = fileName.split('.')[0].replace(/_/g, ' ');
 		$('[target=drive_menu_name]').val(name_try);
 	};
 	xhr.onerror = function() {
@@ -1178,13 +1178,8 @@ function handleDriveButtonClick(){
 		authGoogleAccount();	// callback should be to open a new clicker
 }
 
-// attach buttons to functions
-$('#drive_button').click(function(){handleDriveButtonClick()});
-$('#browse_button').click(function(){openNewPicker()});
-$('#signout_button').click(function(){signOutOfGoogleAccount()});
-
 // function to add drive file with points & menu name
-function drive_add(){
+function driveAdd(){
 	let menu_name = $('[target=drive_menu_name]').val();
 	if(menu_name == ''){
 		alert('Google Drive spectrum must have a menu name');
@@ -1195,16 +1190,20 @@ function drive_add(){
 		return;
 	}
 	ph.addSpec(menu_name, fromURLPoints);
-	drive_cancel();		// reset all buttons and vals
+	driveCancel();		// reset all buttons and vals
 }
 
 // function to cancel adding drive file
-function drive_cancel(){
+function driveCancel(){
 	$('[target=drive_menu_name]').val('');		// reset menu name field
 	$('.drive_setting').prop('disabled', true);	// disable add/cancel and menu name
 	fromURLPoints = [];							// reset fromURLPoints
 }
 
+// attach buttons to functions
+$('#drive_button').click(function(){handleDriveButtonClick()});
+$('#add_from_drive').click(function(){driveAdd()});
+$('#cancel_add_from_drive').click(function(){driveCancel()});
 
 // sharing - load from data & layout
 function share_plot(){
