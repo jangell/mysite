@@ -223,7 +223,7 @@
 
 			<div class="toolset" id="add_tools">
 				<!-- add from local file -->
-				<div class="tools_col">
+				<div class="tools_col" style="overflow-y: scroll;">
 
 					<div class="setting">
 						<h4 class="col_title">Add from file</h4>
@@ -233,13 +233,15 @@
 					TODO: add-by-url
 					-->
 					<div class="setting">
-						<input type=file accept=".csv, .spc, .txt" target="local_file">
+						<input type=file accept=".csv, .spc, .txt" target="local_file" multiple>
 					</div>
 
-					<div class="setting">
-						<label>Spec Name</label>
-						<input class="add_file_setting required" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="Required">
-					</div>
+					<span id="add_file_fields">
+						<div class="setting">
+							<!--<label>Spec Name</label>-->
+							<input class="add_file_setting required" target="menu_name" title="This is the name to be displayed in the spectra list on the right" placeholder="File label">
+						</div>
+					</span>
 
 					<div class="setting">
 						<button class="setting_button add_file_setting" id="add_from_file">Add</button>
@@ -748,7 +750,16 @@ $('.disable_without_file').click(function(){
 	}
 });
 
+var fileLabelElement = $('[target=menu_name]').closest('.setting');
 
+// tries to return the x-th menu name setting. returns true if successful, or false if not
+function removeFileLabel(x){
+	if($('[target=menu_name]').length > x){
+		$($('[target=menu_name]')[0]).closest('.setting').remove();
+		return true;
+	}
+	return false;
+}
 
 // handle what happens when a file is added to the file input
 $('[target=local_file]').change(function(){
@@ -761,72 +772,68 @@ $('[target=local_file]').change(function(){
 		return;
 	}
 
+	// if there are multiple files, add multiple label fields
+	// but first, clear all extras
+	$('[target=menu_name]').closest('.setting').remove();
+
+	for(let n = 0; n < files.length; n++)
+		$('#add_file_fields').append(fileLabelElement.clone());
+
 	// cool stuff - try and autofill name, wavelength, and label
-	let file = files[0];
-	let fname = file.name;
+	for(let n = 0; n < files.length; n++){
+		let file = files[n];
+		let fname = file.name;
 
-	let namestring = fname.slice(0,-4); // name without extension
+		let namestring = fname.slice(0,-4); // name without extension
 
-	// try and parse name & wavelength out of it
-	let parts = namestring.split('_');
-	// try to capture name and wavelength separately
-	let name = '';
-	let wav = '';
-	let foundName = false;
+		// try and parse name & wavelength out of it
+		let parts = namestring.split('_');
+		// try to capture name and wavelength separately
+		let name = namestring.replace(/_/g, ' ');
+		let wav = '';
+		let foundName = false;
 
-	// first option: one of the parts is {wavelength}nm: everything before is name
-	for(let i = 0; i < parts.length && !foundName; i++){
-		if(parts[i].slice(-2,parts[i].length) === 'nm'){
-			// join all parts from 0 to i and convert to Title Case
-			let name_list = []
-			for(let j = 0; j < i; j++){
-				name_list.push(parts[j].charAt(0).toUpperCase() + parts[j].slice(1));
+		/*
+		// first option: one of the parts is {wavelength}nm: everything before is name
+		for(let i = 0; i < parts.length && !foundName; i++){
+			if(parts[i].slice(-2,parts[i].length) === 'nm'){
+				// join all parts from 0 to i and convert to Title Case
+				let name_list = []
+				for(let j = 0; j < i; j++){
+					name_list.push(parts[j].charAt(0).toUpperCase() + parts[j].slice(1));
+				}
+				name = name_list.join(' ');
+				wav = parts[i];
+				foundName = true;
 			}
-			name = name_list.join(' ');
-			wav = parts[i];
-			foundName = true;
-		}
-		// next option: one of the parts is {wavelength}: everything before is name
-		else if(!isNaN(parseInt(parts[i])) && parseInt(parts[i]) < 1000 && parseInt(parts[i]) > 200){
-			let name_list = [];
-			for(let j = 0; j < i; j++){
-				name_list.push(parts[j].charAt(0).toUpperCase() + parts[j].slice(1));
+			// next option: one of the parts is {wavelength}: everything before is name
+			else if(!isNaN(parseInt(parts[i])) && parseInt(parts[i]) < 1000 && parseInt(parts[i]) > 200){
+				let name_list = [];
+				for(let j = 0; j < i; j++){
+					name_list.push(parts[j].charAt(0).toUpperCase() + parts[j].slice(1));
+				}
+				name = name_list.join(' ');
+				wav = parts[i];
+				foundName = true;
 			}
-			name = name_list.join(' ');
-			wav = parts[i];
-			foundName = true;
 		}
+		*/
+
+		if(name == ''){
+			name = 'New spectrum';
+		}
+		let to_str = name;
+		if(wav !== ''){
+			to_str += ' ('+wav+')';
+		}
+		$($('[target=menu_name]')[n]).val(to_str);
 	}
-
-
-	// TODO: next option: one of the parts is {wavelength} (only 532 or 785), everything before is name
-
-	if(name == ''){
-		name = 'New spectrum';
-	}
-	let to_str = name;
-	if(wav !== ''){
-		to_str += ' ('+wav+')';
-	}
-	$('[target=menu_name]').val(to_str);
-
 });
 
-//  handle what happens when the button gets hit
-$('#add_from_file').click(function(){
-	let files = document.querySelector('input[target=local_file]').files;
-	
-	// check that file actually _is_ uploaded
-	if(!(files.length)){
-		alert('No file uploaded');
-		return;
-	}
-
-	let file = files[0];		// TODO: multiselect! Shouldn't even be that hard, right? Except the whole form thing for file names and all that...
-	let fname = file.name;
-
-	// check that it's a csv type
-	let ALLOWED_FILE_TYPES = ['.csv', '.spc', '.txt'];
+var ALLOWED_FILE_TYPES = ['.csv', '.spc', '.txt'];
+// adds a single file to PlotHandler ph
+function addSingleFile(menu_name, file){
+	// check that it's an allowed type
 	let file_allowed = false;
 
 	for(let i = 0; i < ALLOWED_FILE_TYPES.length; i++)
@@ -836,23 +843,56 @@ $('#add_from_file').click(function(){
 	if(!file_allowed){
 		alert('The only file types allowed are .csv, .spc, and .txt')
 		$('[target=local_file').val(''); // clear the file that was there
-		return;
+		return -1;	// this return is necessary to clear the field
 	}
 
-	let menu_name = $('[target=menu_name]').val();
-	if(menu_name === ''){
-		alert('Name is a required field. Without it, the spectrum has nothing to identify it in the list.');
-		$('[target=menu_name]').focus();
-		return;
-	}
-
-	// actually add the thing
-	// this is not functioning correctly
 	ph.addSpecFromFile(menu_name, file);
+	return 1;
+}
 
-	// clear the fields
-	$('[target=local_file]').val('');
-	$('[target=menu_name]').val('');
+//  handle what happens when the button gets hit
+$('#add_from_file').click(function(){
+	let files = document.querySelector('input[target=local_file]').files;
+
+	// check that file actually _is_ uploaded
+	if(!(files.length)){
+		alert('No file uploaded');
+		return;
+	}
+	else if(files.length == 1){
+		// check that menu name exists
+		let menu_name = $('[target=menu_name]').val();
+		if(menu_name === ''){
+			alert('Name is a required field. Without it, the spectrum has nothing to identify it in the list.');
+			$('[target=menu_name]').focus();
+		}
+		else{
+			addSingleFile(menu_name, files[0]);
+			$('[target=local_file]').val('');
+			$('[target=menu_name]').val('');
+		}
+	}
+	// add n file-add blocks
+	else{
+		for(let i = 0; i < files.length; i++){
+
+			let menu_name = $($('[target=menu_name]')[i]).val();
+			// check that menu name exists
+			debugger;
+			if(menu_name === ''){
+				alert('Name is a required field. Without it, the spectrum has nothing to identify it in the list.');
+				$('[target=menu_name]').focus();
+				return 0;	// this return should leave the fields intact but focus on target=menu_name
+			}
+			addSingleFile(menu_name, files[i]);
+		}
+		// remove the multiple label fields
+		$('[target=menu_name]').closest('.setting').remove();
+		// re-add just the one
+		$('#add_file_fields').append(fileLabelElement.clone());
+		// get rid of files
+		$('[target=local_file]').val('');
+	}
 
 });
 
@@ -862,6 +902,10 @@ $('#cancel_add').click(function(){
 	$('[target=menu_name]').val('');
 	// fire change event for file input
 	$('[target=local_file]').change();
+	// remove the multiple label fields
+	$('[target=menu_name]').closest('.setting').remove();
+	// re-add just the one
+	$('#add_file_fields').append(fileLabelElement.clone());
 });
 
 // ***************************** add from database *********************************
@@ -1044,7 +1088,7 @@ $(document).ready(function(){
 	// development tool: autopopulate
 	// comment out before push
 	for(let i = 0; i < startWith.length; i++){
-		//ph.addSpecByDbId(startWith[i]);	
+		ph.addSpecByDbId(startWith[i]);	
 	}
 
 

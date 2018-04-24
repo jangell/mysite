@@ -438,7 +438,6 @@ class VertLine{
 // SpecConfig (reminder: classes are not hoisted in js)
 class SpecConfig{
 	constructor(spec_id, spec_name, spec_data, preprocs){
-		// TODO: add type checking here!!!
 		this.spec_id = spec_id; // unique identifier to keep track of which spectra are which when we modify things later on
 		this.spec_name = spec_name;
 		this.spec_data = spec_data;
@@ -1312,10 +1311,6 @@ class PlotHandler{
 		let rows = [];
 		let configs = [];
 
-		// this isn't great, because it lists *all* the annotations and then *all* the shapes, instead of going by add order
-		// TODO: change this to order by id
-		
-
 		for(let i = 0; i < annos.length; i++){
 
 			// create row and config markup
@@ -1593,8 +1588,6 @@ class PlotHandler{
 		});
 	}
 
-	// adds an event listener to all .tool changes to update the plot
-	// TODO: move this to a single on function (see script in index.html)
 	addToolListeners(){
 		var _this = this;
 		$('.tool').change(function(){
