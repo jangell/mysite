@@ -27,12 +27,59 @@
 .buttons button{
 	margin: 5px;
 }
-.marker{
-	width:10px;
-	height:10px;
-	background-color:#88ff99;
-	border: 1px solid black;
-	opacity: .8;
+/* popup style */
+.ol-popup {
+	position: absolute;
+	background-color: rgba(255, 255, 255, .85);
+	-webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+	filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+	padding: 15px;
+	border-radius: 10px;
+	bottom: 12px;
+	left: -50px;
+}
+.ol-popup:after, .ol-popup:before {
+	top: 100%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+.ol-popup:after {
+	border-top-color: rgba(255, 255, 255, .9);
+	border-width: 10px;
+	left: 48px;
+	margin-left: -10px;
+}
+.ol-popup:before {
+	border-width: 11px;
+	left: 48px;
+	margin-left: -11px;
+}
+.ol-popup-closer {
+	text-decoration: none;
+	position: absolute;
+	top: 2px;
+	right: 8px;
+}
+.ol-popup-closer:after {
+	content: "";
+	text-decoration: none;
+	color: #808080;
+	cursor: pointer;
+}
+
+.plant_bar{
+	min-width: 150px;
+	padding: 0px;
+	margin: 5px;
+	font-size: 1.2rem;
+	font-family: Cabin, sans-serif;
+	font-weight: normal;
+	text-align: center;
+	border: 1px solid rgba(100, 100, 100, .5);
 	border-radius: 5px;
 }
 </style>
@@ -40,6 +87,10 @@
 
 {% block body %}
 <div class="map" id="map"></div>
+<div id="popup" class="ol-popup">
+      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+      <div id="popup-content"></div>
+</div>
 <div class="buttons">
 	<button id="show_harvest_button" onclick="showHarvestPlants()">Show Harvestable Plants</button>
 	<button id="show_all_button" onclick="showAllPlants()">Show All Plants</button>
@@ -49,6 +100,37 @@
 </div>
 
 <script>
+
+/**
+* Elements that make up the popup.
+*/
+var container = document.getElementById('popup');
+var content = document.getElementById('popup-content');
+var closer = document.getElementById('popup-closer');
+
+
+/**
+* Create an overlay to anchor the popup to the map.
+*/
+var overlay = new ol.Overlay({
+	element: container,
+	autoPan: true,
+	autoPanAnimation: {
+		duration: 250
+	}
+});
+
+
+/**
+* Add a click handler to hide the popup.
+* @return {boolean} Don't follow the href.
+*/
+closer.onclick = function() {
+	overlay.setPosition(undefined);
+	closer.blur();
+	return false;
+};
+
 // add script to generate a new map marker
 function addNewPlantMarker(plant){
 	// generate a new marker at this point on the map
@@ -103,7 +185,10 @@ var pointStyle = new ol.style.Style({
 
 plant_points = [];
 for(let i = 0; i < plants.length; i++){
-	let cur_feat = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([plants[i].lon, plants[i].lat])));
+	let cur_feat = new ol.Feature({
+		geometry: new ol.geom.Point(ol.proj.fromLonLat([plants[i].lon, plants[i].lat])),
+		id: plants[i].id
+	});
 	cur_feat.setStyle(pointStyle);
 	plant_points.push(cur_feat);
 }
@@ -121,6 +206,9 @@ var map = new ol.Map({
 		outdoors_layer,		// TODO: layer switching
 		feature_layer,
 	],
+	overlays: [
+		overlay,
+	],
 	view: new ol.View({
 		center: ol.proj.fromLonLat([{{location.lon}}, {{location.lat}}]),
 		zoom: 12
@@ -132,24 +220,6 @@ var marker = new ol.Overlay({
 	positioning: 'center-center',
   	element: document.getElementById('marker'),
 });
-
-// add popup that shows when a plant is clicked on
-map.on('singleclick', function(evt){
-	// if clicking on marker
-		// showPopup
-	// else
-		// hidePopup
-});
-
-// shows the popup with a particular plant's info at the plant's location
-function showPopup(plant){
-
-}
-
-// hides any showing popup
-function hidePopup(){
-
-}
 
 function showHarvestPlants(){
 	let today = new Date();
@@ -166,6 +236,56 @@ function showAllPlants(){
 		document.getElementById(plants[i].marker_id).style.display = 'default';
 	}
 }
+
+function getPlantById(id){
+	for(let i = 0; i < plants.length; i++)
+		if(plants[i].id == id)
+			return plants[i];
+	return undefined;
+}
+
+map.on('pointermove', function(evt){
+	let show = false;
+	map.forEachFeatureAtPixel(evt.pixel,function(feature,layer){
+		show = true;
+		let coords = feature.getGeometry().getCoordinates();
+		let id = feature.get('id');
+		let plant = getPlantById(id);
+		let pd = plant.planting_day.getTime();
+		let today = new Date().getTime();
+		let hs = plant.harvest_start.getTime();
+		let lower, upper;
+		if(today < hs){
+			let perc = 100.*(today-pd)/(hs-pd);
+			let fade = 4;	// percent of the bar to fade
+			if(perc > 100-fade/2)
+				perc = 100;
+			if(perc < fade/2)
+				perc = fade/2;
+			lower = perc-fade/2;
+			upper = perc+fade/2, 100;
+		}
+		else{
+			lower = 100;
+			upper = 100;
+		}
+		debugger;
+		let bar_style = 'background: linear-gradient(to right, rgba(0, 200, 50, .5) '+lower+'%, rgba(0, 200, 50, .05) '+upper+'%);';
+		content.innerHTML = '<h5 class="plant_bar" style="'+bar_style+'">'+plant.species+'</h5>';
+		overlay.setPosition(coords);
+	});
+	if(!show){
+		overlay.setPosition(null);
+	}
+});
+
+// add popup that shows when a plant is clicked on
+map.on('click', function(evt){
+	// if clicking on marker
+		// showPopup
+	// else
+		// hidePopup
+});
 
 </script>
 {% endblock %}

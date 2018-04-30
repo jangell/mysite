@@ -48,14 +48,6 @@
 	cursor: pointer;
 	background-color: #a0a0a0;
 }
-#marker{
-	width:10px;
-	height:10px;
-	background-color:#88ff99;
-	border: 1px solid black;
-	opacity: .8;
-	border-radius: 5px;
-}
 .spacer{
 	height: 5vh;
 }
@@ -118,9 +110,6 @@ To submit or register or whatever a new planting, click on where it is, as close
 
 {% block body %}
 <div class="map" id="map"></div>
-<div style="display:none;">
-	<div id="marker"></div>
-</div>
 <form action="{% url 'gg:submit' %}" method="POST" onsubmit="return checkCoords()">
 	{% csrf_token %}
 		<div id="coords_error">
