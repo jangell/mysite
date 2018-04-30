@@ -179,12 +179,14 @@ var label_sat_layer = new ol.layer.Tile({
 	})
 });
 
+
+
 var map = new ol.Map({
 	target: 'map',
-	layers: [label_sat_layer],	// TODO: layer switching
+	layers: [outdoors_layer],	// TODO: layer switching
 	view: new ol.View({
-		center: ol.proj.fromLonLat([-0.31099, 51.50952]),
-		zoom: 14
+		center: ol.proj.fromLonLat([{{location.lon}}, {{location.lat}}]),
+		zoom: 12
 	})
 });
 var curPoint = null; // format: [lon, lat]
