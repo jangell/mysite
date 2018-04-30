@@ -86,15 +86,18 @@ var label_sat_layer = new ol.layer.Tile({
 });
 
 
-var fill = new ol.style.Fill({color: '#88ff99'});
-var stroke = new ol.style.Stroke({color: '#404040'});
+var fill = new ol.style.Fill({color: '#28e224'});
+var stroke = new ol.style.Stroke({
+	color: '#9b5c30',
+	width: 1.5,
+});
 
 var pointStyle = new ol.style.Style({
 	image: new ol.style.RegularShape({
 		fill: fill,
 		stroke: stroke,
 		points: 50,
-		radius: 5,
+		radius: 10,
 	})
 });
 
@@ -115,12 +118,12 @@ var feature_layer = new ol.layer.Vector({
 var map = new ol.Map({
 	target: 'map',
 	layers: [
-		label_sat_layer,		// TODO: layer switching
+		outdoors_layer,		// TODO: layer switching
 		feature_layer,
 	],
 	view: new ol.View({
 		center: ol.proj.fromLonLat([{{location.lon}}, {{location.lat}}]),
-		zoom: 14
+		zoom: 12
 	})
 });
 var curPoint = null; // format: [lon, lat]

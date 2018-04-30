@@ -1,3 +1,5 @@
+{% load static %}
+
 <html>
 
 <head>
@@ -62,6 +64,9 @@ body{
 	padding: 0;
 	margin: 0;
 }
+#footer_logo{
+	height:40px;
+}
 </style>
 {% block headbottom %}{% endblock %}
 </head>
@@ -80,7 +85,7 @@ body{
 		{% block body %}{% endblock %}
 	</div>
 	<div class="footer_bar">
-		<h3 class="footer_text">hi</h3>
+		<img id="footer_logo" src="{% static 'home/transparent_logo.png' %}"/>
 	</div>
 </body>
 

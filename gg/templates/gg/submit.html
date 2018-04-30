@@ -179,11 +179,31 @@ var label_sat_layer = new ol.layer.Tile({
 	})
 });
 
+var fill = new ol.style.Fill({color: '#28e224'});
+var stroke = new ol.style.Stroke({
+	color: '#9b5c30',
+	width: 1.5,
+});
 
+var pointStyle = new ol.style.Style({
+	image: new ol.style.RegularShape({
+		fill: fill,
+		stroke: stroke,
+		points: 50,
+		radius: 10,
+	})
+});
+
+var point_layer = new ol.layer.Vector({
+	source: new ol.source.Vector(),
+});
 
 var map = new ol.Map({
 	target: 'map',
-	layers: [outdoors_layer],	// TODO: layer switching
+	layers: [
+		outdoors_layer,
+		point_layer,
+	],	// TODO: layer switching
 	view: new ol.View({
 		center: ol.proj.fromLonLat([{{location.lon}}, {{location.lat}}]),
 		zoom: 12
@@ -196,11 +216,17 @@ var marker = new ol.Overlay({
   	element: document.getElementById('marker'),
 });
 
-map.addOverlay(marker);
+//map.addOverlay(marker);
 
 map.on('singleclick', function(evt){
-	marker.setPosition(evt.coordinate);
+	// remove all features in point_layer
+	point_layer.getSource().clear();
+	// add point to point_layer at evt
+	point_layer.getSource().addFeature(new ol.Feature(new ol.geom.Point(evt.coordinate)));
+	point_layer.getSource().getFeatures()[0].setStyle(pointStyle);
+
 	curPoint = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+	// set the hidden coordinate fields in the form
 	document.getElementById('id_latitude').value = curPoint[1];
 	document.getElementById('id_longitude').value = curPoint[0];
 	// hide the 'coordinates unselected' error if it is showing

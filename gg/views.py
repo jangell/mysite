@@ -25,7 +25,7 @@ def getLatLon(request):
 		return {'lat':loc[0],'lon':loc[1]}
 	# if it doesn't work just use London
 	except Exception as e:
-		return {'lat':51.5074, 'lon':0.1278}
+		return {'lat':51.5074, 'lon':-0.1278}
 
 def home(request):
 	return render(request, 'gg/home.html')
