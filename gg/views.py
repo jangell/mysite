@@ -23,6 +23,8 @@ def get_client_ip(request):
 def getLonLat(request):
 	g = GeoIP2()
 	try:
+		ip = get_client_ip(request)
+		logger.info(ip)
 		coords = g.lon_lat(get_client_ip(request))
 	except Exception as e:
 		coords = g.lon_lat('185.86.151.11') # this just happens to be London, which we'll use as a default
