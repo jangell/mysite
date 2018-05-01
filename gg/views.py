@@ -3,9 +3,12 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render, redirect
 from django.contrib.gis.geoip2 import GeoIP2
+import logging
 
 from models import Planting
 from forms import SubmitForm
+
+logger = logging.getLogger(__name__)
 
 # get client ip from a request
 def get_client_ip(request):
@@ -14,6 +17,7 @@ def get_client_ip(request):
         ip = x_forwarded_for.split(',')[0]
     else:
         ip = request.META.get('REMOTE_ADDR')
+    print ip
     return ip
 
 # gets the lat and lon from an ip address using the geoip2 library
@@ -21,11 +25,16 @@ def getLatLon(request):
 	try:
 		g = GeoIP2()
 		ip = get_client_ip(request)
+		logger.debug('ip is %s', ip)
 		loc = g.city(ip)
-		return {'lat':loc[0],'lon':loc[1]}
-	# if it doesn't work just use London
+		logger.debug('location is %s', str(loc))
+		coords = {'lat':loc[0],'lon':loc[1]}
+		logger.debug('coords are %f, %f', coords['lat'], coords['lon'])
+	# if it doesn't work just use London center
 	except Exception as e:
-		return {'lat':51.5074, 'lon':-0.1278}
+		coords = {'lat':51.5074, 'lon':-0.1278}
+	print coords
+	return coords
 
 def home(request):
 	return render(request, 'gg/home.html')
