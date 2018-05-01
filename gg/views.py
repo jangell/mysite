@@ -56,7 +56,7 @@ def submit(request):
 		else:
 			print 'invalid form entered'
 			print form.errors
-	context = {'form': form_class,'location':getLatLon(request)}
+	context = {'form': form_class,'location':getLonLat(request)}
 	return render(request, 'gg/submit.html', context)
 
 def explore(request):
