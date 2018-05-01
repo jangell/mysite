@@ -17,26 +17,16 @@ def get_client_ip(request):
         ip = x_forwarded_for.split(',')[0]
     else:
         ip = request.META.get('REMOTE_ADDR')
-    print ip
     return ip
 
 # gets the lat and lon from an ip address using the geoip2 library
-def getLatLon(request):
+def getLonLat(request):
+	g = GeoIP2()
 	try:
-		g = GeoIP2()
-		ip = get_client_ip(request)
-		print 'ip is {}'.format(ip)
-		loc = g.city(ip)
-		print 'location is {}'.format(loc)
-		coords = {'lat':loc[0],'lon':loc[1]}
-		print 'coords are {}, {}'.format(coords['lat'], coords['lon'])
-	# if it doesn't work just use London center
+		coords = g.lon_lat(get_client_ip(request))
 	except Exception as e:
-		print 'exception:'
-		print e
-		coords = {'lat':51.5074, 'lon':-0.1278}
-	print coords
-	return coords
+		coords = g.lon_lat('185.86.151.11') # this just happens to be London, which we'll use as a default
+	return {'lon':coords[0], 'lat':coords[1]}
 
 def home(request):
 	return render(request, 'gg/home.html')
@@ -69,5 +59,5 @@ def submit(request):
 
 def explore(request):
 	pp = Planting.objects.all()
-	context = {'plantings': pp, 'location':getLatLon(request)}
+	context = {'plantings': pp, 'location':getLonLat(request)}
 	return render(request, 'gg/explore.html', context)
