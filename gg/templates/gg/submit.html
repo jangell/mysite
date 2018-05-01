@@ -187,6 +187,8 @@ var point_layer = new ol.layer.Vector({
 	source: new ol.source.Vector(),
 });
 
+var user_loc = {'lat':{{location.lat}}, 'lon':{{location.lon}}};
+
 var map = new ol.Map({
 	target: 'map',
 	layers: [
@@ -194,7 +196,7 @@ var map = new ol.Map({
 		point_layer,
 	],	// TODO: layer switching
 	view: new ol.View({
-		center: ol.proj.fromLonLat([{{location.lon}}, {{location.lat}}]),
+		center: ol.proj.fromLonLat([user_loc.lon, user_loc.lat]),
 		zoom: 12
 	})
 });

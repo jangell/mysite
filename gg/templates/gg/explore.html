@@ -201,6 +201,8 @@ var feature_layer = new ol.layer.Vector({
 	})
 });
 
+var user_loc = {'lat':{{location.lat}}, 'lon':{{location.lon}}};
+
 var map = new ol.Map({
 	target: 'map',
 	layers: [
@@ -211,7 +213,7 @@ var map = new ol.Map({
 		overlay,
 	],
 	view: new ol.View({
-		center: ol.proj.fromLonLat([{{location.lon}}, {{location.lat}}]),
+		center: ol.proj.fromLonLat([user_loc.lon, user_loc.lat]),
 		zoom: 12
 	})
 });
@@ -270,7 +272,6 @@ map.on('pointermove', function(evt){
 			lower = 100;
 			upper = 100;
 		}
-		debugger;
 		let bar_style = 'background: linear-gradient(to right, rgba(0, 200, 50, .5) '+lower+'%, rgba(0, 200, 50, .05) '+upper+'%);';
 		content.innerHTML = '<h5 class="plant_bar" style="'+bar_style+'">'+plant.species+'</h5>';
 		overlay.setPosition(coords);
