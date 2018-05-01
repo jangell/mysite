@@ -25,13 +25,15 @@ def getLatLon(request):
 	try:
 		g = GeoIP2()
 		ip = get_client_ip(request)
-		logger.debug('ip is %s', ip)
+		print 'ip is {}'.format(ip)
 		loc = g.city(ip)
-		logger.debug('location is %s', str(loc))
+		print 'location is {}'.format(loc)
 		coords = {'lat':loc[0],'lon':loc[1]}
-		logger.debug('coords are %f, %f', coords['lat'], coords['lon'])
+		print 'coords are {}, {}'.format(coords['lat'], coords['lon'])
 	# if it doesn't work just use London center
 	except Exception as e:
+		print 'exception:'
+		print e
 		coords = {'lat':51.5074, 'lon':-0.1278}
 	print coords
 	return coords
