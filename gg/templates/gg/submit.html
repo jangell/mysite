@@ -243,7 +243,6 @@ map.on('singleclick', function(evt){
 $('#bmap_sel').on('change', function(){
 	let opt = $(this).find('option:selected').attr('name');
 	map.getLayers().clear();
-	map.addLayer(point_layer);
 	if(opt == 'map_layer'){
 		map.addLayer(outdoors_layer);
 	}
@@ -253,6 +252,7 @@ $('#bmap_sel').on('change', function(){
 	else if(opt == 'sat_label_layer'){
 		map.addLayer(label_sat_layer);
 	}
+	map.addLayer(point_layer);
 });
 
 </script>

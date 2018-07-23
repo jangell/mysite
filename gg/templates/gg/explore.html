@@ -10,10 +10,13 @@
 <!-- TODO: write addNewPlantMarker, write on-singleclick, write showPopup, write hidePopup, test showAll and showHarvestable -->
 
 <style>
-#map{
-	height: 60vh;
+.content_wrapper{
 	width: 90vw;
 	margin: auto;
+}
+#map{
+	height: 60vh;
+	width: 100%;
 	margin-bottom: 15px;
 	border-radius: 5px;
 	overflow: hidden;
@@ -83,21 +86,35 @@
 	border-radius: 5px;
 	white-space: nowrap;
 }
+
+.bmap_sel_wrapper{
+	padding: 5px;
+}
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="map" id="map"></div>
-<div id="popup" class="ol-popup">
-      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-      <div id="popup-content"></div>
-</div>
-<div class="buttons">
-	<button id="show_harvest_button" onclick="showHarvestPlants()">Show Harvestable Plants</button>
-	<button id="show_all_button" onclick="showAllPlants()">Show All Plants</button>
-</div>
-<div style="display:none;">
-	<div id="marker" class="marker"></div>
+<div class="content_wrapper">
+	<div id="bmap_wrapper" class="bmap_sel_wrapper">
+		<label for="bmap_sel">Change basemap: </label>
+		<select id="bmap_sel">
+			<option name="map_layer" selected>Map</option>
+			<option name="sat_layer">Satellite</option>
+			<option name="sat_label_layer">Satellite + Labels</option>
+		</select>
+	</div>
+	<div class="map" id="map"></div>
+	<div id="popup" class="ol-popup">
+	      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+	      <div id="popup-content"></div>
+	</div>
+	<div class="buttons">
+		<button id="show_harvest_button" onclick="showHarvestPlants()">Show Harvestable Plants</button>
+		<button id="show_all_button" onclick="showAllPlants()">Show All Plants</button>
+	</div>
+	<div style="display:none;">
+		<div id="marker" class="marker"></div>
+	</div>
 </div>
 
 <script>
@@ -287,6 +304,21 @@ map.on('click', function(evt){
 		// showPopup
 	// else
 		// hidePopup
+});
+
+$('#bmap_sel').on('change', function(){
+	let opt = $(this).find('option:selected').attr('name');
+	map.getLayers().clear();
+	if(opt == 'map_layer'){
+		map.addLayer(outdoors_layer);
+	}
+	else if(opt == 'sat_layer'){
+		map.addLayer(satellite_layer);
+	}
+	else if(opt == 'sat_label_layer'){
+		map.addLayer(label_sat_layer);
+	}
+	map.addLayer(feature_layer);
 });
 
 </script>
