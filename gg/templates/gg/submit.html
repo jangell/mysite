@@ -19,8 +19,8 @@
 
 <style>
 #form_table{
+	width: 100%;
 	border-collapse: collapse;
-	width: 80%;
 	margin: auto;
 	margin-top: 40px;
 }
@@ -39,14 +39,20 @@
 #form_submit:hover{
 	background-color: #a0c0a0;
 }
+.content_wrapper{
+	width: 80vw;
+	margin: auto;
+}
 #map{
 	height: 50vh;
-	width: 80%;
 	margin: auto;
 	border-radius: 5px;
 	overflow: hidden;
 	cursor: pointer;
 	background-color: #a0a0a0;
+}
+.bmap_sel_wrapper{
+	padding: 5px;
 }
 .spacer{
 	height: 5vh;
@@ -109,22 +115,31 @@ To submit or register or whatever a new planting, click on where it is, as close
 {% endblock %}
 
 {% block body %}
-<div class="map" id="map"></div>
-<form action="{% url 'gg:submit' %}" method="POST" onsubmit="return checkCoords()">
-	{% csrf_token %}
-		<div id="coords_error">
-		<h4>Click the location of the planting to submit</h4>
+<div class="content_wrapper">
+	<div id="bmap_wrapper" class="bmap_sel_wrapper">
+		<label for="bmap_sel">Change basemap: </label>
+		<select id="bmap_sel">
+			<option name="map_layer">Map</option>
+			<option name="sat_layer">Satellite</option>
+			<option name="sat_label_layer" selected>Satellite + Labels</option>
+		</select>
 	</div>
-	<table id="form_table">
-		{{ form.as_table }}
-		{% for hidden_field in form.hidden_fields %}
-		    {{ hidden_field.as_table }}
-		{% endfor %}
-	</table>
-	<input id="form_submit" type=submit value="Submit">
-</form>
-<div class="spacer"></div>
-
+	<div class="map" id="map"></div>
+	<form action="{% url 'gg:submit' %}" method="POST" onsubmit="return checkCoords()">
+		{% csrf_token %}
+			<div id="coords_error">
+			<h4>Click the location of the planting to submit</h4>
+		</div>
+		<table id="form_table">
+			{{ form.as_table }}
+			{% for hidden_field in form.hidden_fields %}
+			    {{ hidden_field.as_table }}
+			{% endfor %}
+		</table>
+		<input id="form_submit" type=submit value="Submit">
+	</form>
+	<div class="spacer"></div>
+</div>
 
 <script>
 function checkCoords(){
@@ -223,6 +238,21 @@ map.on('singleclick', function(evt){
 	document.getElementById('id_longitude').value = curPoint[0];
 	// hide the 'coordinates unselected' error if it is showing
 	document.getElementById('coords_error').style.display = 'none';
+});
+
+$('#bmap_sel').on('change', function(){
+	let opt = $(this).find('option:selected').attr('name');
+	map.getLayers().clear();
+	map.addLayer(point_layer);
+	if(opt == 'map_layer'){
+		map.addLayer(outdoors_layer);
+	}
+	else if(opt == 'sat_layer'){
+		map.addLayer(satellite_layer);
+	}
+	else if(opt == 'sat_label_layer'){
+		map.addLayer(label_sat_layer);
+	}
 });
 
 </script>
