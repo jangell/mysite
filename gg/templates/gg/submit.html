@@ -192,7 +192,8 @@ var user_loc = {'lon':{{location.lon}}, 'lat':{{location.lat}}};
 var map = new ol.Map({
 	target: 'map',
 	layers: [
-		outdoors_layer,
+		// outdoors_layer,
+		label_sat_layer,
 		point_layer,
 	],	// TODO: layer switching
 	view: new ol.View({
