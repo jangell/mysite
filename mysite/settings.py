@@ -131,6 +131,8 @@ USE_L10N = True
 
 USE_TZ = True
 
+SECURE_SSL_REDIRECT = True
+
 # analytics
 #PIWIK_DOMAIN_PATH = 'piwik.jangell.org/'
 #PIWIK_SITE_ID = '1'
