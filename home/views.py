@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.http import HttpResponse
 from django.shortcuts import render
 from .models import *
 
@@ -10,4 +11,4 @@ def index(request):
 	return render(request,'home/index.html',context)
 
 def hook_test(request):
-	return "hello! you've arrived at a hook test!"
+	return HttpResponse("arr! that's me hook!", content_type="text/plain")
