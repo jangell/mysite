@@ -8,3 +8,6 @@ from .models import *
 def index(request):
 	context = {'portfolio':PortfolioItem.objects.all(),'skills':Skill.objects.all(),'interests':Interest.objects.all()}
 	return render(request,'home/index.html',context)
+
+def hook_test(request):
+	return "hello! you've arrived at a hook test!"
